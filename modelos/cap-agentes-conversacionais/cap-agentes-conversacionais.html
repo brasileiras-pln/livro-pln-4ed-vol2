@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aline Paes">
+<meta name="author" content="Cláudia Freitas">
+
+<title>7&nbsp; ChatGPT, MariTalk e outros agentes de conversação – Processamento de Linguagem Natural</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 1em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../shared/referencias/referencias.html" rel="next">
+<link href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-8676d8d0f01772f2903466dda9733bcf.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Sem resultados",
+    "search-matching-documents-text": "Resultados encontrados",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<!-- Google tag (gtag.js) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-111J572WMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-111J572WMR');
+</script>
+
+
+<link rel="stylesheet" href="../../shared/bpln.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-agentes-conversacionais/cap-agentes-conversacionais.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ChatGPT, MariTalk e outros agentes de conversação</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../../index.html" class="sidebar-logo-link">
+      <img src="../../shared/logos/bpln.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Processamento de Linguagem Natural</a> 
+        <div class="sidebar-tools-main">
+    <a href="../../Livro_PLN_BPLN_4ed_vol2.pdf" title="Baixar PDF" class="quarto-navigation-tool px-1" aria-label="Baixar PDF"><i class="bi bi-file-pdf"></i></a>
+    <div class="dropdown">
+      <a href="" title="Compartilhar" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Compartilhar"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sobre o Volume 2</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Modelos de Linguagem</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Modelos de linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-dados/cap-modelos-dados.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-rag/cap-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-agentes-conversacionais/cap-agentes-conversacionais.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ChatGPT, MariTalk e outros agentes de conversação</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../shared/referencias/referencias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Referências</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../autores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>Sobre as/os autoras/es</strong></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Conteúdo</h2>
+   
+  <ul>
+  <li><a href="#introdução" id="toc-introdução" class="nav-link active" data-scroll-target="#introdução"><span class="header-section-number">7.1</span> Introdução</a></li>
+  <li><a href="#jogos-de-linguagem" id="toc-jogos-de-linguagem" class="nav-link" data-scroll-target="#jogos-de-linguagem"><span class="header-section-number">7.2</span> Jogos de Linguagem</a></li>
+  <li><a href="#jogos-que-os-agentes-parecem-jogar-bem" id="toc-jogos-que-os-agentes-parecem-jogar-bem" class="nav-link" data-scroll-target="#jogos-que-os-agentes-parecem-jogar-bem"><span class="header-section-number">7.3</span> Jogos que os agentes parecem jogar bem</a>
+  <ul class="collapse">
+  <li><a href="#sumarização" id="toc-sumarização" class="nav-link" data-scroll-target="#sumarização"><span class="header-section-number">7.3.1</span> Sumarização</a></li>
+  <li><a href="#criação-de-história" id="toc-criação-de-história" class="nav-link" data-scroll-target="#criação-de-história"><span class="header-section-number">7.3.2</span> Criação de história</a></li>
+  <li><a href="#tradução-automática" id="toc-tradução-automática" class="nav-link" data-scroll-target="#tradução-automática"><span class="header-section-number">7.3.3</span> Tradução automática</a></li>
+  <li><a href="#escrever-e-mails" id="toc-escrever-e-mails" class="nav-link" data-scroll-target="#escrever-e-mails"><span class="header-section-number">7.3.4</span> Escrever e-mails</a></li>
+  </ul></li>
+  <li><a href="#jogos-que-os-agentes-melhoraram" id="toc-jogos-que-os-agentes-melhoraram" class="nav-link" data-scroll-target="#jogos-que-os-agentes-melhoraram"><span class="header-section-number">7.4</span> Jogos que os agentes melhoraram</a>
+  <ul class="collapse">
+  <li><a href="#simplificação-textual" id="toc-simplificação-textual" class="nav-link" data-scroll-target="#simplificação-textual"><span class="header-section-number">7.4.1</span> Simplificação textual</a></li>
+  </ul></li>
+  <li><a href="#jogos-que-os-agentes-parecem-jogar-mal" id="toc-jogos-que-os-agentes-parecem-jogar-mal" class="nav-link" data-scroll-target="#jogos-que-os-agentes-parecem-jogar-mal"><span class="header-section-number">7.5</span> Jogos que os agentes parecem jogar mal</a>
+  <ul class="collapse">
+  <li><a href="#perguntas-sobre-conteúdo-pouco-popular-na-internet" id="toc-perguntas-sobre-conteúdo-pouco-popular-na-internet" class="nav-link" data-scroll-target="#perguntas-sobre-conteúdo-pouco-popular-na-internet"><span class="header-section-number">7.5.1</span> Perguntas sobre conteúdo pouco popular na internet</a></li>
+  <li><a href="#conte-uma-piada" id="toc-conte-uma-piada" class="nav-link" data-scroll-target="#conte-uma-piada"><span class="header-section-number">7.5.2</span> Conte uma piada</a></li>
+  <li><a href="#inferências-e-raciocínio" id="toc-inferências-e-raciocínio" class="nav-link" data-scroll-target="#inferências-e-raciocínio"><span class="header-section-number">7.5.3</span> Inferências e raciocínio</a></li>
+  </ul></li>
+  <li><a href="#quando-o-jogo-é-perigoso" id="toc-quando-o-jogo-é-perigoso" class="nav-link" data-scroll-target="#quando-o-jogo-é-perigoso"><span class="header-section-number">7.6</span> Quando o jogo é perigoso</a></li>
+  <li><a href="#conclusões-provisórias" id="toc-conclusões-provisórias" class="nav-link" data-scroll-target="#conclusões-provisórias"><span class="header-section-number">7.7</span> Conclusões provisórias</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-agentes-conversacionais/cap-agentes-conversacionais.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ChatGPT, MariTalk e outros agentes de conversação</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-cap-agentes-conversacionais" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ChatGPT, MariTalk e outros agentes de conversação</span></span></h1>
+<p class="subtitle lead">Um retrato de 2023</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading"></div>
+    <div class="quarto-title-meta-contents">
+             <p>Aline Paes </p>
+             <p>Cláudia Freitas </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Publicado em:</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">26/09/2023</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Atualizado em:</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">13/04/2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+
+</div>
+<div>
+<div class="callout-body-container callout-body">
+<p>Este capítulo também está disponível em <a href="cap-agentes-conversacionais.pdf">PDF</a>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-target=".callout-cite-contents" aria-label="Toggle callout" data-bs-toggle="collapse" aria-controls="callout-cite" aria-expanded="false">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Como citar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end">
+<i class="callout-toggle"></i>
+</div>
+</div>
+<div class="callout-cite-contents callout-collapse collapse" id="callout-cite">
+<div class="callout-body-container callout-body">
+<div class="sourceCode" id="cb1"><pre class="sourceCode latex code-with-copy"><code class="sourceCode latex"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>@InCollection{BPLN_livro_cap-agentes-conversacionais:2026,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    author    = {Paes, Aline and Freitas, Cláudia},</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    title     = {ChatGPT, MariTalk e outros agentes de conversação: Um retrato de 2023},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    booktitle = {Processamento de Linguagem Natural: Conceitos, Técnicas e Aplicações em Português},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    publisher = {BPLN},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    year      = {2026},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    editor    = {Caseli, H. M. and Nunes, M. G. V.},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    type      = {Book Chapter},</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    chapter   = {7},</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    edition   = {4},</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    volume    = {2},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    isbn      = {XXXXXXXXXXXXXXXX},</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    url       = {https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-agentes-conversacionais/cap-agentes-conversacionais.html},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Mais recursos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><a href="https://www.youtube.com/watch?v=RdSSfFtefLA&amp;t=7s&amp;ab_channel=BrasileirasemPLN">Vídeo 1</a> e <a href="https://www.youtube.com/watch?v=F8yxBbx8woU&amp;t=1s&amp;ab_channel=BrasileirasemPLN">Vídeo 2</a></p>
+</div>
+</div>
+<section id="introdução" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="introdução"><span class="header-section-number">7.1</span> Introdução</h2>
+<p>ChatGPT<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> e Maritalk<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> (e similares, como Bard<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, Vicuna<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, Claude<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, entre tantos outros) são exemplos de aplicações de agentes de conversação (<em>chatbots</em>) baseados em modelos de linguagem gerativos (ou generativos). Mas o que significa isso?<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p>
+<p>Alguns autores, como Jurafsky e Martin <span class="citation" data-cites="jurafsky2023">(<a href="../../shared/referencias/referencias.html#ref-jurafsky2023" role="doc-biblioref">Jurafsky; Martin, 2023</a>)</span>, usam o termo “agente de conversação” para definir qualquer sistema de diálogo que se comunique com usuários usando a linguagem humana e os dividem em duas classes: agentes orientados a tarefas, em que o diálogo é para resolver um problema específico, como agendar uma viagem ou resolver um problema bancário, enquanto <em>chatbots</em> seriam agentes de conversação que tentam simular diálogos humanos, mais voltados para entretenimento. Ferramentas como ChatGPT se enquadram mais no segundo caso, entretanto também podem ser embutidos em outras ferramentas aumentadas para atuar como no primeiro caso. Neste capítulo, os termos “<em>chatbots</em>” e “agentes de conversação” serão usados de forma intercambiável.</p>
+<p>Agentes de conversação não são novidade – ELIZA, criada em 1966 pelo cientista da computação Joseph Weizenbaum, era um agente de conversação que replicava o comportamento de um psicoterapeuta. ELIZA era simples, baseada em <em>templates</em> (padrões de conversa pré-construídos), mas conseguia manter longas conversas buscando por determinadas palavras-chave nas falas (escritas por texto) de uma pessoa. Se uma palavra-chave fosse encontrada, uma regra seria aplicada para transformar sua entrada e criar a resposta. Na <a href="#fig-cap-agentes-conversacionais-Eliza" class="quarto-xref">Figura&nbsp;<span>7.1</span></a>, transcrevemos quatro interações com a ELIZA (retiradas de <span class="citation" data-cites="Jackson_Moulinier2002">(<a href="../../shared/referencias/referencias.html#ref-Jackson_Moulinier2002" role="doc-biblioref">Jackson; Moulinier, 2002</a>)</span>).</p>
+<div id="fig-cap-agentes-conversacionais-Eliza" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-Eliza-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.1: Exemplo de interações com a agente de conversação ELIZA, criada em 1966.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-Eliza-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/ELIZA.png" class="img-fluid figure-img" style="width:75.0%">
+</div>
+</figure>
+</div>
+<p>Nos trechos, temos exemplos de padrões pré-fabricados que retomam elementos da pessoa que fala, como “Por que você diz [...]”, “Te agrada pensar que [...]”, “O que te faz pensar que [...]”, e “Por quanto tempo você não tem [...]”. Vemos também que, no último trecho, esta retomada falha, pois “por quanto tempo você não tem estado” é algo que não faz sentido, embora seja gramaticalmente correto. Se ao invés de “não, não estou”, a pessoa tivesse dito “não, não comi”, a resposta de ELIZA seria “Por quanto tempo você não tem comido?”, e a conversa poderia continuar. ELIZA também foi programada para fazer uso de palavras genéricas, como “interessante”, para quando não há pistas sobre como continuar a conversa. A palavra “alergia” não é elemento capaz de evocar novas interações, e o mesmo acontece com “manchas vermelhas”.</p>
+<p>De 1966 para cá muita coisa mudou, e podemos começar perguntando ao ChatGPT o que é um GPT, que é parte importante do seu nome. O trecho abaixo foi traduzido de uma interação que não é nossa, feita originalmente em inglês – mas os grifos são nossos<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>.</p>
+<div id="def-cap-agentes-conversacionais-quadro1" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 7.1</strong></span> Exemplo de interação com o ChatGPT, em 2023</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<blockquote class="blockquote">
+<p>P: Resumidamente, o que é um GPT?</p>
+<p>R: É um tipo de algoritmo de aprendizado profundo projetado para gerar textos semelhantes aos produzidos por humanos. […] Uma vez treinados, os modelos GPT podem ser usados para gerar um novo texto que seja coerente e <strong>siga os padrões e estilos dos dados de treinamento originais</strong>.</p>
+<p>P: Seria correto, então, dizer que os modelos GPT, como você, usam uma abordagem probabilística para <strong>gerar textos que se parecem com outros textos que já foram escritos</strong>?</p>
+<p>R: Sim, essa é uma afirmação correta. […] Quando recebe um <em>prompt</em>, o modelo gera texto prevendo a palavra ou frase mais provável de aparecer com base nos padrões que aprendeu com os dados de treinamento.</p>
+<p>P: Quando peço que você gere um novo texto, você mesmo tem as ideias ou apenas reembala trabalhos escritos anteriormente?</p>
+<p>R: […] Eu não tenho as ideias sozinho. Em vez disso, eu gero texto com base em padrões e relacionamentos em meus dados de treinamento. Isto significa que <strong>estou essencialmente reembalando trabalhos escritos anteriormente</strong>, com base no que acredito ser a continuação mais provável do texto de entrada fornecido.</p>
+<p>P: Existe algum filtro de correção aplicado à saída?</p>
+<p>R: Como modelo de linguagem de IA, <strong>não tenho um filtro integrado para determinar a correção da minha saída</strong>.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<p>O que podemos tirar daí?</p>
+<p>Como dissemos, ChatGPT e similares são agentes de conversação baseados em modelos de linguagem gerativos. Como visto no <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-linguagem/cap-modelos-linguagem.html#sec-cap-modelos-linguagem" target="_blank" title="Volume 2">Modelos de linguagem</a></span>, este nome se refere a algoritmos que são bons em encadear palavras de maneira fluente, mas são <strong>baseados em previsões e probabilidade</strong>. São geradores de texto otimizados para parecerem plausíveis. Outro ponto importante mencionado na explicação fornecida pela própria ferramenta é que não há criatividade propriamente, apenas uma reembalagem do que já foi dito. Por fim, vemos que não há qualquer garantia de que os textos gerados contenham informação correta (e nem há responsabilidade sobre isso).</p>
+<p>Uma consequência da forma pela qual essas ferramentas são feitas (baseadas em previsão) é que nem sempre a previsão está condizente com a realidade, o que tem sido chamado de <strong>alucinação</strong>. Este fenômeno acontece quando um modelo de linguagem gera um texto que pode estar correto gramaticalmente, ter fluência e alguma coerência semântica, mas que não reflete a realidade e, portanto, não faz sentido <span class="citation" data-cites="10.1145/3571730">(<a href="../../shared/referencias/referencias.html#ref-10.1145/3571730" role="doc-biblioref">Ji et al., 2023</a>)</span>. O termo é emprestado da psicologia, que o define como “uma percepção, experimentada por uma pessoa acordada, na ausência de um estímulo apropriado do mundo extracorpóreo” <span class="citation" data-cites="blom2010dictionary">(<a href="../../shared/referencias/referencias.html#ref-blom2010dictionary" role="doc-biblioref">Blom, 2010</a>)</span>, ou seja, algo que parece real, mas não é.</p>
+<!--
+Por exemplo, na @fig-cap-agentes-conversacionais-batalha-andix apresentamos um caso de alucinação oriundo da MariTalk, em que são devolvidos personagens de um livro que não existe (até onde sabemos) e que foi atribuído ao escritor Eduardo Spohr[^cap-agentes-conversacionais-7].
+
+
+![Exemplo de alucinação oriunda de um agente de conversação. O livro não foi escrito pelo autor mencionado, embora a resposta use alguns elementos de outros livros deste autor.](media/batalha-andix.png){#fig-cap-agentes-conversacionais-batalha-andix width=105%}
+-->
+<p>Embora algumas destas ferramentas possam ser aumentadas com técnicas de recuperação de informação <!--(ver capítulos -@sec-cap-fala e -@sec-cap-ir) --> (ver <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-rag/cap-rag.html#sec-cap-rag" target="_blank" title="Volume 2">Geração Aumentada por Recuperação (RAG)</a></span>) , este não é o caso dos modelos mais básicos atuais, sem acesso externo. Por outro lado, chatbots comerciais e os embutidos nos navegadores são estendidos com mecanismos de busca e ferramentas de recuperação de informação externa. De todo modo, a maioria dessas ferramentas não funciona da mesma forma que uma máquina de busca ou um banco de dados, ou mesmo um repositório de perguntas e respostas. Entretanto, as respostas retornadas por elas mostram fluência e podem fazer algum sentido – embora não possamos desconsiderar o fenômeno cognitivo da apofenia <span class="citation" data-cites="fyfe2008apophenia">(<a href="../../shared/referencias/referencias.html#ref-fyfe2008apophenia" role="doc-biblioref">Fyfe et al., 2008</a>)</span> <a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>, que diz respeito à identificação de padrões ou associações em conjuntos de dados aleatórios<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>. E este é o perigo: as alucinações, não à toa, frequentemente não parecem alucinações, e soam como verdades. Já vimos, por exemplo, que, ao pedir uma lista de referências bibliográficas sobre um determinado assunto, são geradas referências completas, com indicação de autoria, título, revista, volume, ano, que simplesmente não existem. Isto acontece porque os textos são gerados levando em conta a probabilidade daquilo ser uma resposta correta, isto é, as respostas são elaboradas de maneira a se parecerem o máximo possível com uma resposta correta. Pode ser difícil distinguir as respostas – ou, mais precisamente, as sequências de palavras – que estão ancoradas na realidade daquelas que apenas parecem estar ancoradas na realidade. Assim, uma das limitações deste tipo de ferramenta é a incapacidade de dizer “não sei”.</p>
+<p>O desenvolvimento de maneiras de evitar as alucinações é uma das preocupações desde 2023. Algumas estratégias têm sido discutidas livremente e também investigadas na academia e na indústria. Do ponto de vista do usuário final, aquela pessoa que vai abrir o ChatGPT no navegador e interagir com ele por meio de textos, uma das alternativas é a engenharia de <em>prompts</em><a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>. Neste caso, o usuário pode tentar continuar a conversa com a ferramenta, calibrando e alinhando as respostas anteriores com novas perguntas. Outra possibilidade é usar a ferramenta por meio da sua API (<em>Application Programming Interface</em>), ou seja, quando o ChatGPT é invocado e controlado por meio de código, ao invés de ser usado diretamente no navegador. Neste caso, é possível controlar o parâmetro de temperatura, usado para calibrar a distribuição de probabilidade, de modo que o <em>chatbot</em> se atenha mais ao que foi aprendido anteriormente, ou gere respostas um pouco menos prováveis, ou mais “criativas”. Outra possibilidade é acoplar bases de conhecimento externas ao processo de geração de texto <span class="citation" data-cites="DBLP:conf/nips/LewisPPPKGKLYR020">(<a href="../../shared/referencias/referencias.html#ref-DBLP:conf/nips/LewisPPPKGKLYR020" role="doc-biblioref">Lewis et al., 2020</a>)</span> ou interagir com o <em>chatbot</em> por meio de perguntas que demandem alguma tentativa de simulação de raciocínio, ou embutir o modelo de habilidades de explicação das suas respostas, um processo chamado de <em>chain-of-thought</em> <span class="citation" data-cites="DBLP:conf/nips/KojimaGRMI22">(<a href="../../shared/referencias/referencias.html#ref-DBLP:conf/nips/KojimaGRMI22" role="doc-biblioref">Kojima et al., 2022</a>)</span>. Entretanto, até agora, nenhuma das opções mencionadas conseguiu remover por completo as alucinações dos <em>chatbots</em> baseados em modelos de linguagem <span class="citation" data-cites="10.1162/COLI.a.16">(<a href="../../shared/referencias/referencias.html#ref-10.1162/COLI.a.16" role="doc-biblioref">Zhang et al., 2025</a>)</span>.</p>
+<div id="fig-cap-agentes-conversacionais-passo-a-passo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-passo-a-passo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.2: Resposta do ChatGPT, em 2023, para o seguinte <em>prompt</em> “O que é pior pra carregar: 1kg de tijolos ou 2kg de penas de ganso? Explique passo a passo.”
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-passo-a-passo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/passo-a-passo.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+</figure>
+</div>
+<p>No contexto empresarial, <span class="citation" data-cites="HANNIGAN2024">Hannigan et al. (<a href="../../shared/referencias/referencias.html#ref-HANNIGAN2024" role="doc-biblioref">2024</a>)</span> sugerem levar em conta duas dimensões para orientar o uso de chatbots com o objetivo de mitigar a utilização humana de conteúdo falso gerado por LLMs (que os autores chamam de “botshit”):</p>
+<ul>
+<li><p>Importância da veracidade das respostas (qual é a importância da veracidade da resposta do chatbot para a tarefa?)</p></li>
+<li><p>Verificabilidade da veracidade das respostas (quão fácil é verificar a veracidade da resposta do chatbot?)</p></li>
+</ul>
+<p>Quanto à importância da veracidade, diferentes tipos de trabalho podem ter expectativas distintas. Quando a gravidade do risco de usar conteúdo de chatbot é muito alta (em situações com baixa ou nenhuma tolerância a falhas, como manutenção de equipamentos, bem-estar de pacientes e segurança dos funcionários) a veracidade da resposta do chatbot é crucial. Ainda conforme <span class="citation" data-cites="HANNIGAN2024">Hannigan et al. (<a href="../../shared/referencias/referencias.html#ref-HANNIGAN2024" role="doc-biblioref">2024</a>)</span>, nesses casos os riscos relacionados ao “botshit” refletem o conceito de responsabilização algorítmica nas organizações. Por outro lado, quando a gravidade do risco é baixa, como na busca por ideias ou sugestões (“brainstorming” ou “botstorming”), a veracidade da resposta do chatbot é irrelevante.</p>
+<p>Quanto ao segundo ponto, <span class="citation" data-cites="HANNIGAN2024">Hannigan et al. (<a href="../../shared/referencias/referencias.html#ref-HANNIGAN2024" role="doc-biblioref">2024</a>)</span> comparam o conteúdo ilusório fácil de verificar a “um trem desgovernado que pode ser ouvido a quilômetros de distância”. Nesse caso, a escolha pela utilização de um chatbot deve levar em consideração o quão simples ou complexo, barato ou caro, rápido ou lento é revisar, descobrir e evitar que o conteúdo equivocado de uma resposta do chatbot seja usado e transformado em “botshit”. As respostas serão fáceis de verificar se existir um conjunto relativamente estável e acessível de afirmações verdadeiras em torno do conteúdo da resposta. Por exemplo, um <em>prompt</em> solicitando a definição de uma palavra pode ser facilmente verificável usando um dicionário.</p>
+<!--
+Queiramos ou não, gostemos ou não, agentes de conversação estão aí. Foi a resolução deste tipo de tarefa de linguagem que desejamos/imaginamos (tanto a comunidade de PLN/IA quanto pessoas usuárias de tecnologia) quando pensamos nas tarefas do PLN? Difícil dizer. Mas reconhecemos que um livro de PLN escrito em 2023 precisava falar disso. E que, apesar das críticas (nossas e de muito mais gente), boa parte das pessoas usa e vai usar ferramentas como ChatGPT. Então pensamos neste capítulo como uma apresentação, mas também um alerta. Algo como "*Vai usar? tudo bem, mas saiba que\...*".
+
+Assim, começamos por listar os benefícios (ou benefícios aparentes) que estas ferramentas nos oferecem. Antes, porém, vamos pensar um pouco sobre **linguagem**. Afinal, encadear palavras em um texto -- ou prever a próxima palavra dadas as palavras anteriores -- é equivalente a "linguagem"?
+-->
+</section>
+<section id="jogos-de-linguagem" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="jogos-de-linguagem"><span class="header-section-number">7.2</span> Jogos de Linguagem</h2>
+<p>Existem algumas maneiras de entender “linguagem”, e uma delas defende que aquilo que chamamos de linguagem é um conjunto de práticas relacionadas, assim como os <em>jogos</em>, que incluem diferentes práticas/atividades, apesar de serem chamados “jogos” (jogos de cartas, jogos de bola, de tabuleiro, de esconder, de adivinhação, paciência (que se joga sozinho), frescobol (em que não há vencedor) etc). No livro Investigações Filosóficas (1953), o filósofo da linguagem L. Wittgenstein lista alguns exemplos de jogos de linguagem, e os reconhecemos como “tarefas do PLN”:</p>
+<ul>
+<li>descrever um objeto,</li>
+<li>produzir um objeto segundo uma descrição (desenho),</li>
+<li>contar uma anedota, <!--
+-   analisar sintaticamente uma frase,
+-   dar a definição de uma palavra,
+--></li>
+<li>traduzir um texto,</li>
+<li>inventar uma história,</li>
+<li>dar um comando, e agir segundo comandos,</li>
+<li>relatar um acontecimento,</li>
+<li>conjecturar sobre o acontecimento,</li>
+<li>expor uma hipótese e prová-la,</li>
+<li>resolver um exemplo de cálculo aplicado,</li>
+<li>desenhar um objeto a partir de uma instrução verbal,</li>
+<li>apresentar resultados de um experimento por meio de tabelas e diagramas, <!--
+-   produzir inferências,
+--></li>
+<li>pedir, agradecer, maldizer, saudar, orar.</li>
+</ul>
+<p>Podemos juntar à lista mais alguns jogos “jogados no PLN”: - encontrar informações em um texto para responder certas perguntas, - analisar sintaticamente uma frase, - dar a definição de uma palavra, - produzir inferências, - explicar suas próprias decisões, - prever a próxima palavra em uma frase.</p>
+<p>Desse ângulo, podemos imaginar que os modelos de linguagem de que dispomos e que servem de base para agentes de conversação, como ChatGPT e Maritalk, são muito bons em algumas dessas práticas – ou “jogos de linguagem” –, mas não em todas. Ou seja, são modelos que jogam mais ou menos bem alguns jogos, como “inventar uma história”, “resumir”, “escrever um email”, “traduzir”, “prever a próxima palavra” etc., mas não jogam tão bem outros, como “fazer cálculos” ou “fornecer explicações”.</p>
+<p>Este desempenho tem a ver com a forma como os modelos foram construídos, baseada em previsão: nem todos os jogos de linguagem, ou nem todas as atividades linguísticas em que participamos, se resumem a um jogo de previsões, embora um bom desempenho no jogo das previsões leve a um bom resultado em uma série de outros jogos. Do mesmo modo, correr bem ajuda a jogar pique-bandeira, polícia e ladrão, pique-esconde, futebol, e uma série de outros jogos. Mas não necessariamente ajuda a jogar paciência ou jogo da velha. Agentes de conversação se beneficiam especialmente de bom desempenho na previsão de palavras.</p>
+<p>Uma das razões pelas quais estes agentes de conversação se tornaram tão populares é que, com eles, qualquer pessoa pode interagir com as máquinas usando sua própria língua<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>, e não em uma linguagem de programação. Com isso, qualquer pessoa pode pedir que máquinas executem certas tarefas, que podem ir desde a criação de um programa de computador (códigos) até sugestões de receitas a partir de uma lista de ingredientes que temos na geladeira. Mas não há garantia de que funcionem, ou de que a receita ficará boa.</p>
+<p>Embora as saídas dos agentes de conversação possam muitas vezes nos surpreender, ainda é difícil afirmar que eles resolvem tarefas de PLN muito bem, ou que o desempenho deles supera o desempenho humano em alguma tarefa. A geração de textos, tarefa-base de tais agentes, ainda é de difícil avaliação, tanto automática como humana. As métricas automáticas, como ROUGE<a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a> <span class="citation" data-cites="lin-2004-rouge">(<a href="../../shared/referencias/referencias.html#ref-lin-2004-rouge" role="doc-biblioref">Lin, 2004</a>)</span>, BLEU<a href="#fn13" class="footnote-ref" id="fnref13" role="doc-noteref"><sup>13</sup></a> <span class="citation" data-cites="Papineni2002">(<a href="../../shared/referencias/referencias.html#ref-Papineni2002" role="doc-biblioref">Papineni et al., 2002</a>)</span>, BERTscore<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a> <span class="citation" data-cites="Zhang2020">(<a href="../../shared/referencias/referencias.html#ref-Zhang2020" role="doc-biblioref">Zhang et al., 2020</a>)</span>, METEOR<a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a> <span class="citation" data-cites="banerjee-meteor-2005">(<a href="../../shared/referencias/referencias.html#ref-banerjee-meteor-2005" role="doc-biblioref">Banerjee; Lavie, 2005</a>)</span>, entre outras, ainda apresentam diversas limitações <span class="citation" data-cites="DBLP:journals/csur/SaiMK23">(<a href="../../shared/referencias/referencias.html#ref-DBLP:journals/csur/SaiMK23" role="doc-biblioref">Sai et al., 2023</a>)</span>. Especialistas humanos, por sua vez, podem conseguir avaliar muito bem as respostas, mas esta ainda é uma tarefa cansativa e propensa a ruídos. Por outro lado, não é trivial criar conjuntos de dados que explorem todas as características que gostaríamos de avaliar em um sistema de geração de textos, o que inclui não apenas aspectos gramaticais e semânticos, mas também criatividade, fluência, interesse e prazer despertado no leitor, dentre tantos outros.</p>
+<p>Nas seções seguintes, mostraremos tarefas (ou jogos) que os agentes parecem jogar bem e tarefas que os agentes jogam mal. Os exemplos serão obtidos em sua maioria do ChatGPT<a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a>, o agente de conversação mais popular até o momento. Também incluímos, em alguns casos, exemplos de outros dois agentes: a MariTalk<a href="#fn17" class="footnote-ref" id="fnref17" role="doc-noteref"><sup>17</sup></a>, uma agente de conversação construída a partir do modelo de linguagem Sabiá&nbsp;<span class="citation" data-cites="pires2023sabia">(<a href="../../shared/referencias/referencias.html#ref-pires2023sabia" role="doc-biblioref">Pires et al., 2023</a>)</span>, treinado de forma continuada a partir do GPT com textos em português. <!--, e o BARD[^cap-agentes-conversacionais-3], ferramenta treinada pela Google a partir do modelo de linguagem LaMDA [@51115],aumentado com recuperação de informação para incluir a devolução das fontes em alguns casos. --></p>
+<p>Além dos agentes de conversação cujo objetivo principal é a interação por meio de diálogo, também existem inúmeras ferramentas baseadas em modelos de linguagem para propósito específico, como auxiliar em revisões da literatura<a href="#fn18" class="footnote-ref" id="fnref18" role="doc-noteref"><sup>18</sup></a>, auxiliar na escrita de código<a href="#fn19" class="footnote-ref" id="fnref19" role="doc-noteref"><sup>19</sup></a>, escrita de e-mails<a href="#fn20" class="footnote-ref" id="fnref20" role="doc-noteref"><sup>20</sup></a>, revisão de texto<a href="#fn21" class="footnote-ref" id="fnref21" role="doc-noteref"><sup>21</sup></a>, entre outras. Não trataremos destes casos aqui.</p>
+</section>
+<section id="jogos-que-os-agentes-parecem-jogar-bem" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="jogos-que-os-agentes-parecem-jogar-bem"><span class="header-section-number">7.3</span> Jogos que os agentes parecem jogar bem</h2>
+<!--
+Embora as saídas dos agentes de conversação possam muitas vezes nos surpreender, ainda é difícil afirmar que eles resolvem tarefas de PLN muito bem, ou que o desempenho deles supera o desempenho humano em alguma tarefa. A geração de textos, tarefa-base de tais agentes, ainda é de difícil avaliação, tanto automática como humana. As métricas automáticas, como ROUGE[^cap-agentes-conversacionais-18] [@lin-2004-rouge], BLEU[^cap-agentes-conversacionais-19] [@Papineni2002], BERTscore[^cap-agentes-conversacionais-20] [@Zhang2020], METEOR[^cap-agentes-conversacionais-21] [@banerjee-meteor-2005], entre outras, ainda apresentam diversas limitações [@DBLP:journals/csur/SaiMK23]. Especialistas humanos, por sua vez, podem conseguir avaliar muito bem as respostas, mas esta ainda é uma tarefa cansativa e propensa a ruídos. Por outro lado, não é trivial criar conjuntos de dados que explorem todas as características que gostaríamos de avaliar em um sistema de geração de textos, o que inclui não apenas aspectos gramaticais e semânticos, mas também criatividade, fluência, interesse e prazer despertado no leitor, dentre tantos outros.
+
+Ainda assim, podemos mencionar alguns exemplos de casos em que as respostas dos agentes de conversação aguçam as nossas expectativas. As próximas seções mostram alguns destes casos.
+
+Além dos agentes de conversação cujo objetivo principal é a interação por meio de diálogo, também existem inúmeras ferramentas baseadas em modelos de linguagem para propósito específico, como auxiliar em revisões da literatura[^cap-agentes-conversacionais-22], auxiliar na escrita de código[^cap-agentes-conversacionais-23], escrita de e-mails[^cap-agentes-conversacionais-24], revisão de texto[^cap-agentes-conversacionais-25], entre outras. Não trataremos destes casos aqui.
+-->
+<section id="sumarização" class="level3" data-number="7.3.1">
+<h3 data-number="7.3.1" class="anchored" data-anchor-id="sumarização"><span class="header-section-number">7.3.1</span> Sumarização</h3>
+<p>Gerar resumos é uma tarefa em PLN chamada de <strong>sumarização textual</strong>, que consiste em gerar um texto mais curto que o original e que ainda seja fluente e fiel ao texto-fonte. A sumarização pode ser abstrativa ou extrativa. A sumarização abstrativa consiste em gerar um resumo com as próprias palavras do escritor, enquanto a sumarização extrativa consiste em extrair sentenças inteiras do texto que, quando juntas, formem um resumo. Os <em>chatbots</em> têm mostrado em vários exemplos que conseguem resumir bem os textos. Entretanto, se o texto for muito longo, a maioria dos agentes mais populares esbarra em um problema computacional: ainda é difícil para modelos baseados em Transformers&nbsp;<span class="citation" data-cites="aVaswani17 DBLP:journals/corr/abs-2305-01625">(<a href="../../shared/referencias/referencias.html#ref-DBLP:journals/corr/abs-2305-01625" role="doc-biblioref">Bertsch et al., 2023</a>; <a href="../../shared/referencias/referencias.html#ref-aVaswani17" role="doc-biblioref">Vaswani et al., 2017</a>)</span><a href="#fn22" class="footnote-ref" id="fnref22" role="doc-noteref"><sup>22</sup></a> receber como entrada textos muito longos (veja mais no <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-linguagem/cap-modelos-linguagem.html#sec-cap-modelos-linguagem" target="_blank" title="Volume 2">Modelos de linguagem</a></span>). Por exemplo, ao pedirmos que o ChatGPT resumisse o texto sobre Estoicismo<a href="#fn23" class="footnote-ref" id="fnref23" role="doc-noteref"><sup>23</sup></a> com o <em>prompt</em></p>
+<ul>
+<li>P. Resuma o texto que segue, de forma extrativa, em até 200 palavras</li>
+</ul>
+<p>a resposta era que o texto era muito longo. Entretanto, ao usar o mesmo <em>prompt</em>, copiando e colando a página da Wikipedia sobre Estoicismo<a href="#fn24" class="footnote-ref" id="fnref24" role="doc-noteref"><sup>24</sup></a>, obtivemos a resposta na <a href="#fig-cap-agentes-conversacionais-resumo-wiki-chatgpt" class="quarto-xref">Figura&nbsp;<span>7.3</span></a>. Embora seja de fato um resumo extrativo, podemos observar que a primeira parte do texto foi a que mais recebeu atenção. Outro fator que pode ter contribuído para a preferência ao início do texto é o pedido que o texto final esteja contido em 200 palavras, uma motivação para que a resposta não ficasse enorme<a href="#fn25" class="footnote-ref" id="fnref25" role="doc-noteref"><sup>25</sup></a>.</p>
+<div id="fig-cap-agentes-conversacionais-resumo-wiki-chatgpt" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-resumo-wiki-chatgpt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.3: Resposta do ChatGPT, em 2023, ao ser deparado com o seguinte <em>prompt</em> “Resuma o texto que segue, de forma extrativa:”, seguido pela cópia do texto da Wikipedia (<a href="https://pt.wikipedia.org/wiki/Estoicismo" class="uri">https://pt.wikipedia.org/wiki/Estoicismo</a>) sobre Estoicismo.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-resumo-wiki-chatgpt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/resumo-wikipedia.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+</figure>
+</div>
+<p></p>
+</section>
+<section id="criação-de-história" class="level3" data-number="7.3.2">
+<h3 data-number="7.3.2" class="anchored" data-anchor-id="criação-de-história"><span class="header-section-number">7.3.2</span> Criação de história</h3>
+<p>Pedimos ao ChatGPT e a MariTalk para escrever uma história da Carochinha<a href="#fn26" class="footnote-ref" id="fnref26" role="doc-noteref"><sup>26</sup></a>, com o seguinte <em>prompt</em></p>
+<ul>
+<li>P. Crie uma história da Carochinha original.</li>
+</ul>
+<p>As Figuras&nbsp;<a href="#fig-cap-agentes-conversacionais-carochinha-chatgpt" class="quarto-xref"><span>7.4</span></a> e&nbsp;<a href="#fig-cap-agentes-conversacionais-carochinha-mari" class="quarto-xref"><span>7.5</span></a> trazem a saída para cada <em>chatbot</em>, respectivamente.</p>
+<div id="fig-cap-agentes-conversacionais-carochinha-chatgpt" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-carochinha-chatgpt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.4: Resposta do ChatGPT, em 2023, ao ser deparado com o seguinte <em>prompt</em> “Crie uma história da Carochinha original”.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-carochinha-chatgpt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/carochinha.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<div id="fig-cap-agentes-conversacionais-carochinha-mari" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-carochinha-mari-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.5: Resposta da MariTalk, em 2023, ao ser deparada com o seguinte <em>prompt</em> “Crie uma história da Carochinha original”.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-carochinha-mari-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/carochinha-mari.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>Podemos observar que as histórias têm coerência e parecem mesmo com histórias populares da carochinha, mantendo o nível para o público infantil. Mas também podemos observar que as histórias trazem temas repetitivos (ou seja, falta criatividade ou acontecimentos inesperados e surpreendentes).</p>
+<p>Por isso, alteramos o <em>prompt</em> um pouco, acrescentando um pedido para que a história fosse surpreendente:</p>
+<ul>
+<li>P. Escreva uma história da Carochinha surpreendente.</li>
+</ul>
+<p>A história que segue no <a href="#def-cap-agentes-conversacionais-carochinha" class="quarto-xref">Quadro&nbsp;<span>7.2</span></a> contém mais elementos que as anteriores, mas não chamaríamos de “surpreendente”. E, como estamos aqui fazendo uma avaliação, é curioso que logo a primeira frase apresente um erro gramatical: “Era uma vez (...) vivia uma carochinha chamada Clara.” Guiada pelo padrão “Era uma vez”, típico desse tipo de texto, a ferramenta não percebeu que não basta a fórmula “Era uma vez”, mas que era uma vez “alguma coisa”, e não “era uma vez” uma ação. Ou seja, o correto seria “Era uma vez, numa floresta, uma menina chamada...” e não “Era uma vez, numa floresta, vivia uma menina chamada...” De um ponto de vista narrativo, parece haver um salto no início do 5o parágrafo: se tudo ia bem, e Clara aprendia na jornada, por que ela estava prestes a desistir? Ainda assim, é uma história interessante, que poderia ser contada para uma criança.</p>
+<p></p>
+<div id="def-cap-agentes-conversacionais-carochinha" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 7.2</strong></span> História da Carochinha devolvida pelo ChatGPT, em 2023, como resposta ao <em>prompt</em>: “Escreva uma história da Carochinha surpreendente”</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<p>Título: A Inesperada Jornada da Carochinha</p>
+<p>Era uma vez, numa floresta encantada, onde animais falavam e aventuras aconteciam, vivia uma carochinha chamada Clara. Ela era conhecida por sua gentileza e curiosidade insaciável. Clara vivia numa pequena toca no pé de uma árvore e passava seus dias explorando os arredores, fazendo novos amigos e ouvindo histórias incríveis. Certo dia, enquanto explorava a margem de um riacho, Clara conheceu um sábio sapo chamado Samuel. Ele era famoso por sua sabedoria e conhecimento sobre os segredos mais profundos da floresta. Clara e Samuel logo se tornaram amigos e passavam horas conversando sobre os mistérios do mundo ao seu redor.</p>
+<p>Um dia, Samuel contou a Clara sobre um antigo artefato mágico chamado “Espelho dos Desejos”, que supostamente tinha o poder de realizar um desejo para quem o encontrasse. Clara ficou fascinada pela ideia e decidiu embarcar em uma jornada para encontrar esse espelho lendário.</p>
+<p>Com a mochila nas costas e um mapa rudimentar nas mãos, Clara começou sua jornada emocionante. Ela atravessou rios, subiu montanhas e explorou florestas profundas, sempre encontrando novos amigos e enfrentando desafios inesperados. Em cada etapa da jornada, ela aprendia lições valiosas sobre amizade, coragem e perseverança. Um dia, quando estava prestes a desistir da busca pelo Espelho dos Desejos, Clara conheceu uma coruja sábia chamada Olívia. Ela ouviu a história de Clara e decidiu ajudá-la. Olívia revelou que o espelho estava escondido no coração da Floresta Proibida, um lugar perigoso e cheio de enigmas.</p>
+<p>Juntas, Clara e Olívia enfrentaram os desafios da Floresta Proibida. Resolveram quebra-cabeças mágicos, enfrentaram criaturas assustadoras e superaram obstáculos aparentemente impossíveis. A cada passo, sua amizade crescia mais forte e sua determinação se intensificava.</p>
+<p>Finalmente, depois de superar todos os obstáculos, Clara e Olívia encontraram o Espelho dos Desejos. Mas antes que Clara pudesse fazer seu desejo, ela olhou para o espelho e percebeu algo importante: sua jornada a havia transformado. Ela já não desejava uma única coisa, pois havia descoberto que a verdadeira magia estava nas amizades que havia feito e nas experiências que havia vivido. Clara sorriu para o espelho e disse: “Meu único desejo é que a magia da amizade e da aventura continue a brilhar em todos os cantos deste mundo.”’ O espelho brilhou intensamente e uma onda de energia mágica se espalhou pela floresta. As plantas ganharam cores mais vibrantes, os animais irradiavam alegria e a harmonia encheu o ar.</p>
+<p>Com seu desejo realizado, Clara voltou para sua toca na árvore, carregando consigo as lembranças de sua jornada incrível. Ela percebeu que, mesmo nas situações mais inesperadas, a vida poderia ser cheia de surpresas maravilhosas, se você estiver disposto a explorar, aprender e compartilhar momentos especiais com os outros. E assim, a história da carochinha Clara e sua jornada inesperada se tornou uma lenda contada por gerações, inspirando todos a valorizarem a amizade e a magia das descobertas.</p>
+</div>
+</div>
+</div>
+</div>
+<p>Em 2025 repetimos o <em>prompt</em> com o ChatGPT (<a href="#fig-cap-agentes-conversacionais-carochinha_ChatGPT_2025" class="quarto-xref">Figura&nbsp;<span>7.6</span></a>) e a Maritalk (<a href="#fig-cap-agentes-conversacionais-carochinha_Maritalk_2025" class="quarto-xref">Figura&nbsp;<span>7.7</span></a>), <!--(@def-cap-agentes-conversacionais-carochinha_Maritalk_2025),--> e ainda que “surpreendente” seja de difícil avaliação, nos parece que a geração atendeu melhor ao comando, com personagens inusitados como um esquilo cartógrafo e um sapo inventor.</p>
+<div id="fig-cap-agentes-conversacionais-carochinha_ChatGPT_2025" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-carochinha_ChatGPT_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.6: História da Carochinha devolvida pelo ChatGPT, em 2025, como resposta ao <em>prompt</em>: “Escreva uma história da Carochinha surpreendente”
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-carochinha_ChatGPT_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/ChatGPT_Carochinha_2025.jpg" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<div id="fig-cap-agentes-conversacionais-carochinha_Maritalk_2025" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-carochinha_Maritalk_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.7: História da Carochinha devolvida pela Maritalk, em 2025, como resposta ao <em>prompt</em>: “Escreva uma história da Carochinha surpreendente”
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-carochinha_Maritalk_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/MariTalk_Carochinha_2025.jpg" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p> <!--
+:::: {#def-cap-agentes-conversacionais-carochinha_Maritalk_2025}
+  História da Carochinha devolvida pela Maritalk, em 2025, como resposta ao *prompt*: "Escreva uma história da Carochinha surpreendente"
+
+::: {.callout-note icon=false}
+`\footnotesize`{=latex}
+  
+  Era uma vez, numa aldeia distante, uma carochinha que não era como as outras. Ela era curiosa, inteligente e adorava resolver mistérios. Certo dia, a Carochinha encontrou uma moeda de ouro brilhante enquanto limpava sua casinha. Ao invés de usar a moeda para comprar algo, ela decidiu investigar sua origem.
+  
+  A Carochinha partiu em uma aventura, seguindo o rastro de migalhas douradas que levavam a uma floresta encantada. Lá, ela encontrou um sapo que, ao contrário do que se poderia esperar, não era um príncipe disfarçado, mas sim um engenhoso inventor de gadgets mágicos. O sapo lhe contou que a moeda era parte de um tesouro escondido por um dragão bondoso, que usava o ouro para financiar invenções que ajudavam os animais da floresta.
+
+  Determinada a ajudar o dragão e o sapo inventor, a Carochinha decidiu encontrar o tesouro completo. Ela usou sua astúcia para decifrar enigmas antigos e, com a ajuda de seus novos amigos da floresta – uma raposa bibliotecária e um esquilo cartógrafo –, ela descobriu a localização do tesouro.
+
+  Ao chegar na caverna do tesouro, a Carochinha se deparou com o dragão, que estava prestes a ser enganado por um bando de lobos trapaceiros que queriam roubar o ouro para construir uma torre de gelo egoísta. A Carochinha, com sua inteligência, elaborou um plano para expor os lobos. Ela usou um dos gadgets do sapo inventor, um projetor de ilusões, para fazer com que o tesouro parecesse desaparecer.
+
+  Os lobos, confusos e acreditando que o tesouro havia sumido, fugiram da caverna, deixando o dragão em paz. A Carochinha, então, revelou o truque ao dragão e ao sapo, que ficaram maravilhados com sua engenhosidade. Como recompensa, o dragão permitiu que a Carochinha escolhesse qualquer gadget da coleção do sapo.
+
+  A Carochinha escolheu um par de óculos que permitiam ver soluções para problemas complexos. Com eles, ela voltou para sua aldeia, onde começou a ajudar todos os moradores a resolver seus dilemas, desde encontrar objetos perdidos até planejar festivais. A Carochinha se tornou uma heroína improvável, conhecida não apenas por sua limpeza, mas por sua capacidade de desvendar mistérios e trazer inovação à sua comunidade.
+
+  E assim, a Carochinha viveu feliz para sempre, usando sua inteligência e os gadgets mágicos para ajudar os outros, provando que até mesmo as criaturas mais pequenas podem ter grandes aventuras e fazer uma enorme diferença no mundo.
+
+:::
+::::
+--></p>
+</section>
+<section id="tradução-automática" class="level3" data-number="7.3.3">
+<h3 data-number="7.3.3" class="anchored" data-anchor-id="tradução-automática"><span class="header-section-number">7.3.3</span> Tradução automática</h3>
+<p>Outra tarefa bem desempenhada pelos <em>chatbots</em> é a tradução automática, ao menos para pares de línguas que tenham muitos recursos disponíveis para treinamento. Abordar línguas com poucos recursos de avaliação e treinamento é uma tarefa de interesse da comunidade de PLN, mas também um desafio para o treinamento dos modelos de linguagem. Os <em>chatbots</em> até devolvem alguma resposta para línguas com poucos recursos/ mais raras, mas seria difícil avaliarmos a correção e fluência da tradução. É bom relembrar que a tradução é considerada como uma das habilidades emergentes dos modelos de linguagem de larga escala, ou seja, é uma tarefa com a qual eles conseguem lidar mesmo que não tenham sido explicitamente treinados.</p>
+<p>A <a href="#fig-cap-agentes-conversacionais-gonzaguinha" class="quarto-xref">Figura&nbsp;<span>7.8</span></a> apresenta a tradução devolvida pelo ChatGPT para as quatro primeiras estrofes da canção “O Que é, o Que é?” e o <em>prompt</em> “Traduza o seguinte texto para inglês e para francês:”. Tanto a tradução para inglês como para francês estão corretas. Mas esta não é uma tradução muito difícil de ser feita, as palavras contidas são simples e a Internet pode estar repleta de tentativas como essa.</p>
+<div id="fig-cap-agentes-conversacionais-gonzaguinha" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-gonzaguinha-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.8: Resposta do ChatGPT, em 2023, para um <em>prompt</em> de tradução de uma música.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-gonzaguinha-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 5.0%;justify-content: flex-start;">
+<p>&nbsp;</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 43.0%;justify-content: center;">
+<p><img src="media/gonzaguinha-traducao-en.png" class="img-fluid figure-img"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 47.0%;justify-content: center;">
+<p><img src="media/gonzaguinha-traducao-fr.png" class="img-fluid figure-img"></p>
+</div>
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 5.0%;justify-content: flex-start;">
+<p>&nbsp;</p>
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>Para testar alguns casos em que os <em>chatbots</em> poderiam ter problemas na tradução, escolhemos algumas sentenças do copus DELA<a href="#fn27" class="footnote-ref" id="fnref27" role="doc-noteref"><sup>27</sup></a>, descritas no artigo&nbsp;<span class="citation" data-cites="castilho-etal-2021-dela">(<a href="../../shared/referencias/referencias.html#ref-castilho-etal-2021-dela" role="doc-biblioref">Castilho et al., 2021</a>)</span> como problemáticas quando traduzidas fora do contexto. As Figuras&nbsp;<a href="#fig-cap-agentes-conversacionais-dela-chatgpt" class="quarto-xref"><span>7.9</span></a> e <a href="#fig-cap-agentes-conversacionais-dela-mari" class="quarto-xref"><span>7.10</span></a> mostram as traduções das sentenças pelos <em>chatbots</em> ChatGPT e MariTalk, respectivamente. Propositalmente, as traduções foram feitas para sentenças isoladas, também fora de contexto, para observamos o que estes dois agentes fariam em casos de ambiguidade ou outros problemas listados no artigo.</p>
+<div id="fig-cap-agentes-conversacionais-dela-chatgpt" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-dela-chatgpt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.9: Resposta do ChatGPT, em 2023, para algumas sentenças cujas traduções podem ser problemáticas, quando fora de contexto.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-dela-chatgpt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/traducao-chatgpt-dela.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<div id="fig-cap-agentes-conversacionais-dela-mari" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-dela-mari-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.10: Resposta da MariTalk, em 2023, para algumas sentenças cujas traduções podem ser problemáticas, quando fora de contexto.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-dela-mari-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/traducao-mari-dela.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>No primeiro caso, um exemplo do artigo referente à falta de flexão de gênero na língua inglesa, ambos os <em>chatbots</em> assumiram o default para masculino (“hospedados”), embora a resposta da MariTalk não inclua o pronome “eles”, o que é comum na língua portuguesa, mas não é correto na língua inglesa. Este não é um erro, já que ambas as flexões claramente estariam corretas com apenas a sentença de entrada. Mas, em caso de dúvida, a resposta poderia alternar entre os gêneros feminino e masculino.</p>
+<p>No segundo exemplo, embora a expressão “<em>I LOST IT</em>” também possa ser interpretada como alguém perdendo alguma coisa, ambos os <em>chatbots</em> traduziram como “Eu perdi a cabeça”, querendo dizer que a pessoa perdeu o controle. O contexto da sentença direciona para esta tradução, corretamente. Os <em>chatbots</em> também não tiveram problema para resolver a elipse da próxima sentença. No último caso, a tradução do ChatGPT para “parque eólico” é mais específica de domínio do que a tradução da MariTalk, para uma palavra mais genérica, conforme discutido no artigo&nbsp;<span class="citation" data-cites="castilho-etal-2021-dela">(<a href="../../shared/referencias/referencias.html#ref-castilho-etal-2021-dela" role="doc-biblioref">Castilho et al., 2021</a>)</span> no que se refere a problemas associados à terminologia.</p>
+<div id="fig-cap-agentes-conversacionais-continua_traducoes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-continua_traducoes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.11: Continuação da iteração com o ChatGPT, em 2023, para a tradução da sentença “<em>I knew I didn’t have a drinking problem – but I had a problem with drinking.</em>” para o português.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-continua_traducoes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/mais_traducoes.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>Um exemplo interessante é a tradução da seguinte sentença em inglês para o português:</p>
+<ul>
+<li><em>I knew I didn’t have a drinking problem – but I had a problem with drinking.</em></li>
+</ul>
+<p>A MariTalk traduziu para “Eu sabia que eu não tinha um problema de beber – mas eu tinha um problema com beber.”, enquanto o ChatGPT retornou “Eu sabia que não tinha um problema com álcool – mas tinha um problema com o consumo de bebidas.”. Uma tradução mais coerente seria “Eu sabia que meu problema não era alcoolismo; era com a bebida.”<a href="#fn28" class="footnote-ref" id="fnref28" role="doc-noteref"><sup>28</sup></a>, o que não foi retornado por nenhum desses dois agentes na primeira iteração. Nós tentamos outras traduções em algumas outras iterações com o ChatGPT e o resultado pode ser visto na <a href="#fig-cap-agentes-conversacionais-continua_traducoes" class="quarto-xref">Figura&nbsp;<span>7.11</span></a>. Podemos perceber que as próximas traduções estão indo em uma direção semântica mais similar ao esperado.</p>
+<p></p>
+</section>
+<section id="escrever-e-mails" class="level3" data-number="7.3.4">
+<h3 data-number="7.3.4" class="anchored" data-anchor-id="escrever-e-mails"><span class="header-section-number">7.3.4</span> Escrever e-mails</h3>
+<p>A última tarefa que comentaremos aqui é a escrita de e-mails, que, com a ajuda dos <em>chatbots</em>, pode economizar um bom tempo. Entretanto, é sempre bom reforçar que dada a natureza probabilística da geração dos textos pelos <em>chatbots</em>, é essencial revisar o e-mail antes de enviá-lo, ainda mais em situações formais ou de comunicação com pessoas fora do círculo de relacionamento. A <a href="#fig-cap-agentes-conversacionais-email" class="quarto-xref">Figura&nbsp;<span>7.12</span></a> traz um exemplo de escrita de e-mail que está em um tom educado, amigável e formal, porém um tanto quanto verboso.</p>
+<div id="fig-cap-agentes-conversacionais-email" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-email-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.12: Resposta do ChatGPT, em 2023, ao ser deparado com o seguinte <em>prompt</em> “Escreva um e-mail informando educadamente que eu não poderei estar presente em uma reunião”.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-email-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/email.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>Ele também pode ajudar a aliviar ou recrudescer o tom de uma mensagem, como mostramos na <a href="#fig-cap-agentes-conversacionais-email2" class="quarto-xref">Figura&nbsp;<span>7.13</span></a>. É um tom realmente ríspido, porém incisivo e direto ao ponto da insatisfação. Mas ao menos a pessoa não teria que ficar o dia inteiro pensando em como responder em uma situação indesejada.</p>
+<div id="fig-cap-agentes-conversacionais-email2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-email2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.13: Reescrita, em 2023, do e-mail da <a href="#fig-cap-agentes-conversacionais-email" class="quarto-xref">Figura&nbsp;<span>7.12</span></a> em um tom mais ríspido.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-email2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/email_duro.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p></p>
+</section>
+</section>
+<section id="jogos-que-os-agentes-melhoraram" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="jogos-que-os-agentes-melhoraram"><span class="header-section-number">7.4</span> Jogos que os agentes melhoraram</h2>
+<section id="simplificação-textual" class="level3" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="simplificação-textual"><span class="header-section-number">7.4.1</span> Simplificação textual</h3>
+<p>A tarefa (ou jogo) de simplificação textual envolve tornar textos mais simples e acessíveis. Como é possível imaginar, não é uma atividade óbvia, uma vez que o que é simples para uma pessoa pode não ser para outra. Além disso, a atividade de simplificação frequentemente precisa ir além do texto original, buscando informações que estão fora do texto para justamente produzir um texto compreensível para o público pretendido. Em 2023, indicamos que este era um jogo ainda não dominado. Em 2025 refizemos os <em>prompts</em>, e consideramos os resultados positivos (<a href="#fig-cap-agentes-conversacionais-simplific_ChatGPT_2025" class="quarto-xref">Figura&nbsp;<span>7.15</span></a>). No pedido original, pedimos ao ChatGPT que simplificasse um texto, e usamos como alvo da simplificação uma matéria de jornal – a princípio, algo que já é simples – mas da seção Economia (no <a href="#def-cap-agentes-conversacionais-quadro-originalEconomia" class="quarto-xref">Quadro&nbsp;<span>7.3</span></a>).</p>
+<!--
+A tarefa (ou jogo) de simplificação textual envolve tornar textos mais simples e acessíveis. Como é possível imaginar, não é uma atividade óbvia, uma vez que o que é simples para uma pessoa pode não ser para outra. Além disso, a atividade de simplificação frequentemente precisa ir além do texto original, buscando informações que estão fora do texto para justamente produzir um texto compreensível para o público pretendido. No exemplo, pedimos ao ChatGPT que simplificasse um texto, e usamos como alvo da simplificação uma matéria de jornal -- a princípio, algo que já é simples -- mas da seção Economia (no @def-cap-agentes-conversacionais-quadro-originalEconomia).
+-->
+<div id="def-cap-agentes-conversacionais-quadro-originalEconomia" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 7.3</strong></span> Texto original sobre economia</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<p>‘Quanto mais independente, mais eficaz’, diz Campos Neto sobre autonomia do Banco Central</p>
+<p>Presidente do Banco Central, que vem sendo alvo de críticas de Lula, afirmou que autonomia da instituição diminui o custo dos juros. Ele defendeu a separação da política governamental da política monetária.</p>
+<p>Presidente do Banco Central defende a autonomia da instituição</p>
+<p>O presidente do Banco Central, Roberto Campos Neto, disse nesta terça-feira (7), em palestra nos Estados Unidos, que a autonomia da instituição serve para separar as diretrizes monetárias da esfera política.</p>
+<p>Campos Neto vem sendo criticado nos últimos dias pelo presidente da República, Luiz Inácio Lula da Silva, que afirma que a taxa de juros básicos da economia deveria ser reduzida.</p>
+<p>Em sua última reunião, na semana passada, o Comitê de Política Monetária (Copom) do Banco Central manteve a Selic em 13,75% ao ano. Diferentemente de seus outros mandatos, agora Lula não pode trocar o presidente do BC. A autonomia do BC, defendida pelo governo Jair Bolsonaro, foi aprovada pelo Congresso em 2021.</p>
+<p>“A principal razão no caso da autonomia do Banco Central é desconectar o ciclo da política monetária do ciclo político porque eles têm planos e interesses diferentes. E quanto mais independente você for, mais eficaz você é e menos o país pagará em termos de custo de ineficiência na política monetária”, afirmou Campos Neto.</p>
+<p>Críticas de Lula</p>
+<p>Na segunda-feira (6), em discurso durante evento no Banco Nacional de Desenvolvimento Econômico e Social (BNDES), Lula criticou a Selic a 13,75% e disse que o país tem uma “cultura” de juros altos que “não combina com a necessidade de crescimento” do país.</p>
+<p>“É só ver a carta do Copom para a gente saber que é uma vergonha esse aumento de juros e a explicação que eles deram para a sociedade brasileira”, disse Lula na ocasião.</p>
+<p>Nesta terça, ele voltou ao assunto em entrevista a veículos de mídia alternativa.</p>
+<p>“Não é possível que a gente queira que este país volta a crescer com taxa de 13,75%. Nós não temos inflação de demanda. É só isso. É isso que eu acho que esse cidadão [Campos Neto], indicado pelo Senado, tenha possibilidade de maturar, de pensar e de saber como vai cuidar deste país. Ele tem muita responsabilidade”, afirmou o presidente.</p>
+</div>
+</div>
+</div>
+</div>
+<!--
+Ao usar o *prompt* "Simplifique o texto abaixo", a resposta foi um resumo de um parágrafo[^cap-agentes-conversacionais-32]. Como o pedido não era para produzir um resumo, mas uma simplificação, continuamos a interação. Mesmo com a indicação explícita no pedido de que o texto deveria ser uma simplificação, e não um resumo, a resposta continuou um resumo (@fig-cap-agentes-conversacionais-simplific_GPT1t).
+-->
+<p>Ao usar o <em>prompt</em> “Simplifique o texto abaixo”, a resposta foi um resumo de um parágrafo<a href="#fn29" class="footnote-ref" id="fnref29" role="doc-noteref"><sup>29</sup></a>. Como o pedido não era para produzir um resumo, continuamos a interação, e especificamos no <em>prompt</em> o público-alvo da simplificação (<a href="#fig-cap-agentes-conversacionais-simplific_GPT2" class="quarto-xref">Figura&nbsp;<span>7.14</span></a>), o que alterou o texto gerado. No entanto, as explicações fornecidas ainda deixavam a desejar. A segunda frase da simplificação, por exemplo – “Isso separa dinheiro do governo” – faz pouco sentido. “Isso” o quê? Na terceira frase, de que “dinheiro emprestado” se está falando? A última frase é igualmente sem sentido. Ao que parece, o encadeamento de palavras/frases, nesse caso, não foi muito bem sucedido, produzindo um texto sem coerência. Por fim, a confusão entre simplificação e sumarização continua, quando comparamos o texto gerado com o texto original.</p>
+<!--
+![Resposta do ChatGPT para o segundo pedido de simplificação do texto.](media/simplific_GPT_1.png){#fig-cap-agentes-conversacionais-simplific_GPT1t}
+
+
+Para tentar mudar o rumo das respostas, especificamos no *prompt* para quem deveria ser feita a simplificação (@fig-cap-agentes-conversacionais-simplific_GPT2), o que finalmente alterou o texto gerado. No entanto, as explicações fornecidas ainda deixam muito a desejar. Certamente não é errado explicar o "Banco Central" como "um banco importante", mas a explicação não é suficiente. A segunda frase da simplificação -- "Isso separa dinheiro do governo" -- faz pouco sentido. "Isso" o quê? Na terceira frase, de que "dinheiro emprestado" se está falando? A última frase é igualmente sem sentido. Ao que parece, o encadeamento de palavras/frases, nesse caso, não foi muito bem sucedido, produzindo um texto sem coerência. Por fim, a confusão entre simplificação e sumarização continua, quando comparamos o texto gerado com o texto original.
+-->
+<div id="fig-cap-agentes-conversacionais-simplific_GPT2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-simplific_GPT2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.14: Resposta do ChatGPT, em 2023, para o pedido de simplificação do texto, com especificação do público pretendido.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-simplific_GPT2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/simplific_GPT_2.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>Em 2025, pedimos uma simplificação do mesmo texto, mas usamos um <em>prompt</em> mais detalhado (<a href="#def-cap-agentes-conversacionais-prompt2025" class="quarto-xref">Quadro&nbsp;<span>7.4</span></a>). Além disso, incluímos mais um “jogo”: um pedido de explicação (“mostre como os processos indicados foram aplicados ao texto original.”). O resultado está nas figuras <a href="#fig-cap-agentes-conversacionais-simplific_ChatGPT_2025" class="quarto-xref"><span>7.15</span></a> (geração) e <a href="#fig-cap-agentes-conversacionais-explicacao_2025" class="quarto-xref"><span>7.16</span></a> (explicação das alterações).</p>
+<div id="def-cap-agentes-conversacionais-prompt2025" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 7.4</strong></span> <em>Prompt</em> usado em 2025 para gerar uma versão simplificada do texto.</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<p>Simplifique o texto que está entre &lt; &gt; para leitores do ensino médio que foram recentemente alfabetizados. No processo de simplificação, leve em conta as 12 características para produzir textos simples listadas a seguir. Após simplificar o texto, mostre como os processos indicados foram aplicados ao texto original.<br>
+Características para produzir um texto simples:<br>
+</p>
+<ol type="1">
+<li>Usar frases na ordem direta (sujeito, verbo, objeto, advérbio)</li>
+<li>Usar frases curtas</li>
+<li>Indicar o tópico frasal no início do parágrafo</li>
+<li>Acrescentar exemplos, quando necessário</li>
+<li>Usar anáforas apenas se estiverem próximas no texto</li>
+<li>Evitar omissão de sujeito e de objeto</li>
+<li>Usar intertítulos para facilitar a compreensão</li>
+<li>Usar marcadores textuais e conectivos que salientam o conteúdo e as relações entre as partes</li>
+<li>Apresentar o conteúdo em ordem cronológica</li>
+<li>Usar palavras simples</li>
+<li>Evitar palavras abstratas e abstrações</li>
+<li>Adicionar explicações quando for necessário</li>
+</ol>
+<p>Texto original que será simplificado:<br>
+&lt;ORIGINAL&gt;</p>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+<p></p>
+<div id="fig-cap-agentes-conversacionais-simplific_ChatGPT_2025" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-simplific_ChatGPT_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.15: Resposta do ChatGPT gerada em 2025.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-simplific_ChatGPT_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/ChatGPT_BC_2025.jpg" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<div id="fig-cap-agentes-conversacionais-explicacao_2025" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-explicacao_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.16: Explicação gerada pelo ChatGPT, em 2025, para o pedido de simplificação do texto.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-explicacao_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/ChatGPT_expl_2025.jpg" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p></p>
+<p>O texto gerado não é um resumo, mas uma boa simplificação. Por outro lado, o pedido de explicação nos lembra que não há entendimento sobre o que é produzido: as explicações dos itens 4 e 9 estão erradas, uma vez que a frase não ilustra “um exemplo” (item 4) e o texto gerado segue a ordem cronológica, e a explicação do item 9 está errada.</p>
+</section>
+</section>
+<section id="jogos-que-os-agentes-parecem-jogar-mal" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="jogos-que-os-agentes-parecem-jogar-mal"><span class="header-section-number">7.5</span> Jogos que os agentes parecem jogar mal</h2>
+<p>As tarefas discutidas anteriormente são exemplos que os <em>chatbots</em> parecem resolver bem. Entretanto, aqueles são apenas exemplos gerados de forma espontânea, sem muito rigor ou metodologia na definição dos <em>prompts</em>. E, mesmo nessas tarefas, poderíamos encontrar exemplos em que as respostas retornadas fossem ruins. Nesta seção, vamos apresentar algumas tarefas de PLN em que os agentes costumam se sair mal, o que pode ser ocasionado por diversos fatores: falta de dados para treinamento, falta de treinamento, treinamento inadequado ou mesmo a falta de adequação dos modelos de linguagem, como são concebidos, para resolverem a tarefa. Afinal, como dissemos no início deste capítulo, nem todas as atividades linguísticas que exercemos se resumem a um jogo de previsões.</p>
+<section id="perguntas-sobre-conteúdo-pouco-popular-na-internet" class="level3" data-number="7.5.1">
+<h3 data-number="7.5.1" class="anchored" data-anchor-id="perguntas-sobre-conteúdo-pouco-popular-na-internet"><span class="header-section-number">7.5.1</span> Perguntas sobre conteúdo pouco popular na internet</h3>
+<p>Uma das características dos agentes de conversação é refletirem o conteúdo visto no treinamento. Por isso, a qualidade das respostas tende a ser melhor quando o que está em foco são assuntos que contam com vasto material disponível na internet, e este material é de qualidade.</p>
+<p>“A Bolsa Amarela” é um livro infanto-juvenil brasileiro publicado em 1976. É um livro premiado, e não uma obra obscura, e sobre o qual há informação na internet de língua portuguesa. Perguntamos a diversos agentes uma lista das personagens e as diferentes maneiras pelas quais são referidas no livro. ChatGPT e MariTalk deram as respostas apresentadas nas Figuras <a href="#fig-cap-agentes-conversacionais-Bolsa_ChatGPT" class="quarto-xref"><span>7.17</span></a> e <a href="#fig-cap-agentes-conversacionais-Bolsa_MariTalk" class="quarto-xref"><span>7.18</span></a>, respectivamente.</p>
+<div id="fig-cap-agentes-conversacionais-Bolsa_ChatGPT" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-Bolsa_ChatGPT-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.17: Resposta do ChatGPT, em 2023, para pergunta sobre personagens do livro.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-Bolsa_ChatGPT-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/A_bolsa_amarela_ChatGPT.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+</figure>
+</div>
+<div id="fig-cap-agentes-conversacionais-Bolsa_MariTalk" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-Bolsa_MariTalk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.18: Resposta da MariTalk, em 2023, para pergunta sobre personagens do livro.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-Bolsa_MariTalk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/A_bolsa_amarela_MariTalk.png" class="img-fluid figure-img" style="width:60.0%">
+</div>
+</figure>
+</div>
+<!--
+::: {.content-visible when-format="html"}
+![Resposta da MariTalk, em 2023, para pergunta sobre personagens do livro.](media/A_bolsa_amarela_MariTalk.png){#fig-cap-agentes-conversacionais-Bolsa_MariTalk}
+:::
+-->
+<p>É curioso perceber que ChatGPT e MariTalk começam indicando a sinopse do livro, o que não foi pedido. Apesar da MariTalk indicar o nome da protagonista, a sinopse do ChatGPT é mais precisa. Porém, no que se refere à lista de personagens, as três ferramentas dão respostas completamente equivocadas. O único elemento correto das respostas – tanto do ChatGPT quanto da MariTalk – é que a protagonista se chama Raquel. Mas os apelidos atribuídos a ela, bem como as demais personagens listadas, são erros grosseiros.</p>
+<p>Em 2025, repetimos a pergunta para ChatGPT e Maritalk (Figuras <a href="#fig-cap-agentes-conversacionais-Bolsa_ChatGPT_2025" class="quarto-xref"><span>7.19</span></a> e <a href="#fig-cap-agentes-conversacionais-Bolsa_MariTalk_2025" class="quarto-xref"><span>7.20</span></a>). As respostas continuam erradas.</p>
+<div id="fig-cap-agentes-conversacionais-Bolsa_ChatGPT_2025" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-Bolsa_ChatGPT_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.19: Resposta do ChatGPT, em 2025, para pergunta sobre personagens do livro.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-Bolsa_ChatGPT_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/ChatGPT_Bolsa_2025.jpg" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<div id="fig-cap-agentes-conversacionais-Bolsa_MariTalk_2025" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-Bolsa_MariTalk_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.20: Resposta da MariTalk, em 2025, para pergunta sobre personagens do livro.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-Bolsa_MariTalk_2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/MariTalk_Bolsa_2025.jpg" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p></p>
+<!--
+O *prompt* "Indique todos os personagens do livro A Bolsa Amarela, da Lygia Bojunga Nunes, e as diferentes maneiras de que sao chamados no livro." também foi apresentado ao BARD. Como a resposta ficou grande para caber bem em uma figura, transcrevemos a resposta no @def-cap-agentes-conversacionais-Bolsa_BARD[^cap-agentes-conversacionais-42].
+
+`\FloatBarrier`{=latex}
+
+:::: {#def-cap-agentes-conversacionais-Bolsa_BARD}
+  Resposta do BARD para pergunta sobre personagens do livro.
+
+::: {.callout-note icon=false}
+`\footnotesize`{=latex}
+  
+  Os personagens do livro A Bolsa Amarela, da Lygia Bojunga Nunes, são:
+
+ A menina narradora, que é chamada de "eu" ou "a menina" no livro. Ela é uma menina de 12 anos que está passando por um período de transição, em que está se tornando adulta. Ela tem três grandes vontades que esconde numa bolsa amarela: a vontade de crescer, a de ser garoto e a de se tornar escritora.
+ 
+ A mãe, que é chamada de "mãe" ou "dona Maria" no livro. Ela é uma mulher amorosa e compreensiva, mas também é um pouco tradicional e conservadora. Ela deseja que a filha seja uma menina "normal", e não entende as vontades da menina.
+ 
+ O pai, que é chamado de "pai" ou "senhor José" no livro. Ele é um homem mais sério e distante, mas também é amoroso e preocupado com a filha. Ele tenta entender as vontades da menina, mas às vezes tem dificuldades.
+ 
+ O irmão, que é chamado de "irmão" ou "Juca" no livro. Ele é um menino de 10 anos, que é muito diferente da irmã. Ele é extrovertido, brincalhão e não tem medo de expressar suas vontades.
+ 
+ A avó, que é chamada de "vó" ou "donana" no livro. Ela é uma mulher sábia e amorosa, que entende as vontades da menina. Ela é uma grande incentivadora da menina, e a apoia em suas aspirações.
+ 
+ O amigo imaginário, que é chamado de "amigo" ou "amigo secreto" no livro. Ele é uma figura misteriosa que aparece para a menina em momentos de necessidade. Ele é um grande amigo da menina, e a ajuda a entender seus sentimentos e a enfrentar seus desafios.
+ 
+ Além desses personagens principais, o livro também apresenta outros personagens secundários, como:
+
+ A professora, que é chamada de "professora" ou "dona Maria" no livro. Ela é uma mulher bondosa e atenciosa, que incentiva a menina a aprender e a explorar suas habilidades.
+ 
+ A amiga da escola, que é chamada de "amiga" ou "Lúcia" no livro. Ela é uma menina simpática e extrovertida, que é uma grande amiga da menina.
+ 
+ O menino da escola, que é chamado de "menino" ou "João" no livro. Ele é um menino gentil e atencioso, que se interessa pela menina.
+ 
+ Os personagens do livro são todos importantes para a história, pois ajudam a menina a crescer e a se desenvolver como pessoa. A mãe e o pai representam as expectativas sociais sobre o que é ser uma menina, enquanto o irmão e a avó representam a liberdade e a aceitação. O amigo imaginário é uma representação da imaginação e da criatividade da menina, enquanto a professora e a amiga da escola representam o mundo exterior e as novas experiências.
+  
+:::
+::::
+-->
+</section>
+<section id="conte-uma-piada" class="level3" data-number="7.5.2">
+<h3 data-number="7.5.2" class="anchored" data-anchor-id="conte-uma-piada"><span class="header-section-number">7.5.2</span> Conte uma piada</h3>
+<p>Aqui exploramos a dimensão criativa dos agentes, pedindo ao ChatGPT que conte uma piada. A resposta do ChatGPT para o <em>prompt</em></p>
+<ul>
+<li>P. Você pode contar uma piada criativa, original e realmente engraçada?</li>
+</ul>
+<p>está na <a href="#fig-cap-agentes-conversacionais-piada-chatgpt" class="quarto-xref">Figura&nbsp;<span>7.21</span></a>. Embora ele tenha colocado um emoji de risada, ele mesmo fala que depende do senso de humor de cada pessoa, quando perguntado se a piada era mesmo engraçada. E você? Riu como o emoji? Ou você usaria outro emoji para representar a sua reação? E a piada é realmente original ou você já sabia dela por outras fontes?</p>
+<div id="fig-cap-agentes-conversacionais-piada-chatgpt" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-piada-chatgpt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.21: Piada inventada pelo ChatGPT em 2023
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-piada-chatgpt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/piada-chatgpt.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>O mesmo <em>prompt</em> foi passado para a MariTalk, que devolveu a resposta da <a href="#fig-cap-agentes-conversacionais-piada-mari" class="quarto-xref">Figura&nbsp;<span>7.22</span></a>. Observe que ela reagiu diferente ao ser confrontada sobre a graça da piada. Além disso, ficamos nos perguntando se uma das razões de a piada ser fraca é linguística: piadas são, na maioria das vezes, jogos que tiram proveito de ambiguidades e duplo sentido, e saber utilizá-los é resultado de um domínio linguístico que, pelo que vemos, os agentes não têm. Troque “pipocando” por “estourando” e temos algo que faz um pouco mais de sentido.</p>
+<div id="fig-cap-agentes-conversacionais-piada-mari" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-piada-mari-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.22: Piada inventada pela MariTalk em 2023
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-piada-mari-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/piada-mari.png" class="img-fluid figure-img" style="width:50.0%">
+</div>
+</figure>
+</div>
+<p></p>
+</section>
+<section id="inferências-e-raciocínio" class="level3" data-number="7.5.3">
+<h3 data-number="7.5.3" class="anchored" data-anchor-id="inferências-e-raciocínio"><span class="header-section-number">7.5.3</span> Inferências e raciocínio</h3>
+<p>Uma das críticas a este tipo de ferramentas e forma pela qual são feitas é a dificuldade de lidar com inferências, considerando dados novos. Na interação da <a href="#fig-cap-agentes-conversacionais-LigoLigo" class="quarto-xref">Figura&nbsp;<span>7.23</span></a> testamos a capacidade de realizar inferências do ChatGPT, perguntando sobre um animal inventado – e, portanto, nunca visto no treinamento. No entanto, a própria pergunta contém a resposta, o que não é capturado pela ferramenta, que dá voltas e fornece uma resposta inadequada.</p>
+<div id="fig-cap-agentes-conversacionais-LigoLigo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-LigoLigo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.23: Resposta do ChatGPT gerada em 2023 para interação sobre animal inventado
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-LigoLigo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/LigoLigo.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="quando-o-jogo-é-perigoso" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="quando-o-jogo-é-perigoso"><span class="header-section-number">7.6</span> Quando o jogo é perigoso</h2>
+<p>Embora a OpenAI tenha reportado a adoção de medidas para mitigar vieses no ChatGPT<a href="#fn30" class="footnote-ref" id="fnref30" role="doc-noteref"><sup>30</sup></a>, em particular com o uso do aprendizado por reforço com <em>feedback</em> humano, tal método está longe de ser perfeito para impedir que os textos gerados pela ferramenta apresentem vieses sociais. Este é um problema que se perpetua em outros agentes de conversação, mesmo aqueles que tenham surgido depois do ChatGPT e que tenham sido supostamente treinados com outros dados, <em>feedbacks</em> e técnicas. Embora ainda não exista um vasto estudo sobre o tema e as empresas como OpenAI e Google não tenham aberto publicamente suas metodologias de treinamento e validação, o treinamento do modelo de linguagem e o <em>feedback</em> parecem ser primordialmente fornecidos em inglês, o que pode trazer ainda mais problemas éticos e culturais para as muitas outras línguas espalhadas no planeta. Entretanto, este não é apenas um problema de treinar com uma certa língua, uma vez que vieses sociais podem estar inseridos, explicitamente ou implicitamente, nos milhares de textos usados para treinar os modelos (ver também <span>Subseção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/dados/cap-dataset-corpus/cap-dataset-corpus.html#sec-cap-dataset-corpus-multidao" target="_blank" title="Volume 1">Anotação: sabedoria de especialistas ou sabedoria da multidão?</a></span>).</p>
+<p>No que segue, reproduzimos uma tentativa de retorno de nomes de compositoras brasileiras por agentes de conversação, feita em 2023. Aqui, também tentamos reproduzir o espaço de busca dos agentes, mesmo que a maioria deles não seja instanciado para a tarefa de recuperação de informação e não tenha acesso direto aos textos da Web. <a href="#fn31" class="footnote-ref" id="fnref31" role="doc-noteref"><sup>31</sup></a>.</p>
+<ul>
+<li>P. Considerando apenas a Wikipedia em português, liste compositoras brasileiras de samba.</li>
+</ul>
+<p>A <a href="#fig-cap-agentes-conversacionais-chat-comp" class="quarto-xref">Figura&nbsp;<span>7.24</span></a> exibe a resposta do ChatGPT, que inclui o nome de um compositor.</p>
+<div id="fig-cap-agentes-conversacionais-chat-comp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-chat-comp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.24: Resposta do ChatGPT, em 2023, ao <em>prompt</em> “Considerando apenas a Wikipedia em português, liste compositoras brasileiras de samba.”
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-chat-comp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/compositoras-chatgpt.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>Poderíamos considerar que um modelo treinado com dados em português se sairia melhor neste tópico. Assim, utilizamos o mesmo <em>prompt</em> para a agente MariTalk. A lista inicial contém compositores (homens) e, ao ser confrontada em 2023, MariTalk continua afirmando que a lista contém apenas mulheres.</p>
+<div id="fig-cap-agentes-conversacionais-mari-comp.1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-mari-comp.1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.25: Resposta da MariTalk, em 2023, ao <em>prompt</em> “Considerando apenas a Wikipedia em português, liste compositoras brasileiras de samba.” e continuação do diálogo.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-mari-comp.1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/Compositoras_MariTalk.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>Em uma tentativa de verificar se o mesmo aconteceria ao perguntarmos por compositores, usamos o seguinte <em>prompt</em></p>
+<ul>
+<li>P. Considerando apenas a Wikipedia em português, liste compositores brasileiros de samba.</li>
+</ul>
+<p>A lista é tão extensa, com cerca de 190 itens, que dificulta a sua reprodução aqui. Entretanto, percebemos que:</p>
+<ul>
+<li>Dos 190 itens retornados, menos de 10 eram mulheres. Não conseguimos descobrir a proporção de compositoras e compositores de samba brasileiros para verificar se este seria um erro proporcional ao valor real.</li>
+<li>A lista contém várias escolas de samba, incluindo “Portela, Mocidade, Beija-Flor, Mangueira”, entre várias outras. Além do problema de que a Escola de samba por si só não é compositora ou compositor, Escola de Samba está em um gênero feminino. Ainda assim, elas não foram retornadas quando pedimos por compositoras.</li>
+</ul>
+<p></p>
+</section>
+<section id="conclusões-provisórias" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="conclusões-provisórias"><span class="header-section-number">7.7</span> Conclusões provisórias</h2>
+<p>Neste capítulo, arriscamos um retrato dos agentes de conversação baseados em LLMs em 2023 e em 2025. Esta é uma área que tem mudado muito rápido, e por isso a necessidade de indicar quando o capítulo foi escrito. Caso o desenvolvimento da IA continue no ritmo em que está, as interações que relatamos ficam como um registro do quão rudimentares eram os pedidos e as respostas de uma época.</p>
+<p>Ainda que existam situações que geram respostas aceitáveis, destacamos que, como estão hoje, estas ferramentas têm melhor aproveitamento se vistas como <strong>assistentes</strong> (“assistentes aprendizes”, como pessoas estagiárias de uma área), e <strong>não como oráculos</strong><a href="#fn32" class="footnote-ref" id="fnref32" role="doc-noteref"><sup>32</sup></a> (entendendo “oráculo” como a divindade capaz de fornecer respostas infalíveis). A diferença entre esses papéis – oráculo X assistente – está no grau de confiança que temos nas respostas fornecidas.</p>
+<p>Na situação “oráculo”, perguntamos/pedimos o que não sabemos, e, portanto, confiamos na resposta dada, sendo difícil avaliá-la. Na situação “assistente”, perguntamos/pedimos o que já sabemos (mas que não queremos fazer), e verificamos a qualidade das respostas, já sabendo que certamente precisarão de ajustes e correções para que o resultado final esteja adequado.</p>
+<p>Para além do grau de confiança nas respostas, não faltam questões éticas relacionadas a este tipo de tecnologia/ferramenta. Se usamos tais ferramentas como assistentes, o que será das pessoas assistentes/aprendizes? Como então iremos aprender coisas e/ou formar pessoas? Serão as máquinas responsáveis por isso? E quem ensina as máquinas<a href="#fn33" class="footnote-ref" id="fnref33" role="doc-noteref"><sup>33</sup></a>? Quais as implicações para o ensino? Como lidar com direitos autorais? Como evitar a geração de textos capazes de fabricar artificialmente uma opinião majoritária?</p>
+<p>Outra preocupação igualmente relevante é relacionada à questão ambiental. Já sabemos que o consumo de CO2 e de água<a href="#fn34" class="footnote-ref" id="fnref34" role="doc-noteref"><sup>34</sup></a> necessários para o treinamento dos modelos de linguagem gerativos é imenso. Estima-se, por exemplo, que a quantidade de água doce limpa necessária para treinar o GPT-3 foi equivalente à quantidade necessária para encher a torre de resfriamento de um reator nuclear <span class="citation" data-cites="ren2023water">(<a href="../../shared/referencias/referencias.html#ref-ren2023water" role="doc-biblioref">Li et al., 2023</a>)</span> <a href="#fn35" class="footnote-ref" id="fnref35" role="doc-noteref"><sup>35</sup></a>.</p>
+<p>E o que dizem os agentes de conversação a esse respeito (<a href="#fig-cap-agentes-conversacionais-Agua" class="quarto-xref">Figura&nbsp;<span>7.26</span></a>)?</p>
+<div id="fig-cap-agentes-conversacionais-Agua" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-agentes-conversacionais-Agua-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;7.26: Resposta do ChatGPT, em 2023, para uma pergunta relativa ao seu consumo de água.
+</figcaption>
+<div aria-describedby="fig-cap-agentes-conversacionais-Agua-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/Agua.png" class="img-fluid figure-img">
+</div>
+</figure>
+</div>
+<p>Diferentemente do que responde o ChatGPT, uma interação de cerca de 20-25 perguntas consome uma garrafinha de água de 500 ml – e, portanto, consumimos alguns litros na elaboração deste capítulo. Vale a pena? Quando vale a pena? Em que circunstâncias é aceitável este tipo de gasto? Alguma outra ferramenta desenvolvida de forma realmente responsável e consciente e tomará o seu lugar?</p>
+<p>Neste <a href="https://www.youtube.com/watch?v=RdSSfFtefLA&amp;t=1s">vídeo</a>, o leitor encontra uma análise do ChatGPT após um ano e meio de seu lançamento.</p>
+<!--
+[^cap-agentes-conversacionais-7]: <https://pt.wikipedia.org/wiki/Eduardo_Spohr>
+-->
+<!--
+[^cap-agentes-conversacionais-11]: <http://bing.com/>
+
+[^cap-agentes-conversacionais-12]: Esta é uma visão wittgensteiniana de linguagem, um ângulo sugerido pelo filósofo austríaco Ludwig Wittgenstein (1889-1951).
+
+[^cap-agentes-conversacionais-13]: Os exemplos são claramente inspirados pelos "jogos de linguagem" presentes no livro Investigações Filosóficas de L. Wittgenstein (1953). Os exemplos sinalizados com \* não contém qualquer adaptação do original, e estão citados exatamente como aparecem no livro (§ 23)
+-->
+<!--
+[^cap-agentes-conversacionais-15]: <https://chat.openai.com/>
+
+[^cap-agentes-conversacionais-16]: <https://chat.maritaca.ai/>
+
+[^cap-agentes-conversacionais-17]: https://bard.google.com/
+-->
+<!--
+[^cap-agentes-conversacionais-35]: <https://ai.google/static/documents/google-about-bard.pdf>
+
+[^cap-agentes-conversacionais-36]: <https://blog.google/technology/ai/lamda/>
+-->
+<!--
+[^cap-agentes-conversacionais-42]: Você também pode ver a resposta em <https://g.co/bard/share/b6fd7a5a8d53>.
+
+[^cap-agentes-conversacionais-43]: Você também pode ver a resposta em <https://g.co/bard/share/2b9538605f13>.
+
+[^cap-agentes-conversacionais-44]: Você também pode ver a resposta em <https://g.co/bard/share/f7b5eefcbfec>.
+-->
+
+
+<div id="refs" class="references csl-bib-body" data-entry-spacing="1" role="list" style="display: none">
+<div id="ref-banerjee-meteor-2005" class="csl-entry" role="listitem">
+BANERJEE, S.; LAVIE, A. <strong><span>METEOR</span>: An Automatic Metric for <span>MT</span> Evaluation with Improved Correlation with Human Judgments</strong>. (J. Goldstein et al., Eds.)Proceedings of the <span>ACL</span> Workshop on Intrinsic and Extrinsic Evaluation Measures for Machine Translation and/or Summarization. <strong>Anais</strong>...Ann Arbor, Michigan: Association for Computational Linguistics, jun. 2005. Disponível em: &lt;<a href="https://aclanthology.org/W05-0909">https://aclanthology.org/W05-0909</a>&gt;
+</div>
+<div id="ref-DBLP:journals/corr/abs-2305-01625" class="csl-entry" role="listitem">
+BERTSCH, A. et al. <a href="https://doi.org/10.48550/arXiv.2305.01625">Unlimiformer: Long-Range Transformers with Unlimited Length Input</a>. <strong>CoRR</strong>, v. abs/2305.01625, 2023.
+</div>
+<div id="ref-blom2010dictionary" class="csl-entry" role="listitem">
+BLOM, J. D. <strong>A dictionary of hallucinations</strong>. [s.l.] Springer, 2010.
+</div>
+<div id="ref-castilho-etal-2021-dela" class="csl-entry" role="listitem">
+CASTILHO, S. et al. <strong><span>DELA</span> Corpus - A Document-Level Corpus Annotated with Context-Related Issues</strong>. Proceedings of the Sixth Conference on Machine Translation. <strong>Anais</strong>...Online: Association for Computational Linguistics, nov. 2021. Disponível em: &lt;<a href="https://aclanthology.org/2021.wmt-1.63">https://aclanthology.org/2021.wmt-1.63</a>&gt;
+</div>
+<div id="ref-fyfe2008apophenia" class="csl-entry" role="listitem">
+FYFE, S. et al. Apophenia, theory of mind and schizotypy: perceiving meaning and intentionality in randomness. <strong>Cortex</strong>, v. 44, n. 10, p. 1316–1325, 2008.
+</div>
+<div id="ref-HANNIGAN2024" class="csl-entry" role="listitem">
+HANNIGAN, T. R.; MCCARTHY, I. P.; SPICER, A. <a href="https://doi.org/10.1016/j.bushor.2024.03.001">Beware of botshit: How to manage the epistemic risks of generative chatbots</a>. <strong>Business Horizons</strong>, v. 67, n. 5, p. 471–486, 2024.
+</div>
+<div id="ref-Jackson_Moulinier2002" class="csl-entry" role="listitem">
+JACKSON, P.; MOULINIER, I. <strong>Natural Language Processing for Online Applications – Text retrieval, extraction and categorization</strong>. [s.l.] John Benjamins, 2002.
+</div>
+<div id="ref-10.1145/3571730" class="csl-entry" role="listitem">
+JI, Z. et al. <a href="https://doi.org/10.1145/3571730">Survey of Hallucination in Natural Language Generation</a>. <strong>ACM Comput. Surv.</strong>, v. 55, n. 12, mar. 2023.
+</div>
+<div id="ref-jurafsky2023" class="csl-entry" role="listitem">
+JURAFSKY, D.; MARTIN, J. H. <strong>Speech and Language Processing: An Introduction to Natural Language Processing, Computational Linguistics, and Speech Recognition</strong>. 3rd. ed. USA: Prentice Hall PTR, 2023.
+</div>
+<div id="ref-DBLP:conf/nips/KojimaGRMI22" class="csl-entry" role="listitem">
+KOJIMA, T. et al. <strong>Large Language Models are Zero-Shot Reasoners</strong>. NeurIPS. <strong>Anais</strong>...2022. Disponível em: &lt;<a href="http://papers.nips.cc/paper\_files/paper/2022/hash/8bb0d291acd4acf06ef112099c16f326-Abstract-Conference.html">http://papers.nips.cc/paper\_files/paper/2022/hash/8bb0d291acd4acf06ef112099c16f326-Abstract-Conference.html</a>&gt;
+</div>
+<div id="ref-DBLP:conf/nips/LewisPPPKGKLYR020" class="csl-entry" role="listitem">
+LEWIS, P. S. H. et al. <strong>Retrieval-Augmented Generation for Knowledge-Intensive <span>NLP</span> Tasks</strong>. (H. Larochelle et al., Eds.)Advances in Neural Information Processing Systems 33: Annual Conference on Neural Information Processing Systems 2020, NeurIPS 2020, December 6-12, 2020, virtual. <strong>Anais</strong>...2020. Disponível em: &lt;<a href="https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html">https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html</a>&gt;
+</div>
+<div id="ref-ren2023water" class="csl-entry" role="listitem">
+LI, P. et al. Making AI Less "Thirsty": Uncovering and Addressing the Secret Water Footprint of AI Models. <strong>arXiv preprint arXiv:2304.03271</strong>, 2023.
+</div>
+<div id="ref-lin-2004-rouge" class="csl-entry" role="listitem">
+LIN, C.-Y. <strong><span>ROUGE</span>: A Package for Automatic Evaluation of Summaries</strong>. Text Summarization Branches Out. <strong>Anais</strong>...Barcelona, Spain: Association for Computational Linguistics, jul. 2004. Disponível em: &lt;<a href="https://aclanthology.org/W04-1013">https://aclanthology.org/W04-1013</a>&gt;
+</div>
+<div id="ref-Papineni2002" class="csl-entry" role="listitem">
+PAPINENI, K. et al. <strong><span>BLEU: A Method for Automatic Evaluation of Machine Translation</span></strong>. Proceedings of the 40th Annual Meeting on Association for Computational Linguistics. <strong>Anais</strong>...: ACL ’02.USA: Association for Computational Linguistics, 2002. Disponível em: &lt;<a href="https://doi.org/10.3115/1073083.1073135">https://doi.org/10.3115/1073083.1073135</a>&gt;
+</div>
+<div id="ref-pires2023sabia" class="csl-entry" role="listitem">
+PIRES, R. et al. <strong>Sabiá: Portuguese Large Language Models</strong>. (M. C. Naldi, R. A. C. Bianchi, Eds.)Intelligent Systems. <strong>Anais</strong>...Cham: Springer Nature Switzerland, 2023.
+</div>
+<div id="ref-DBLP:journals/csur/SaiMK23" class="csl-entry" role="listitem">
+SAI, A. B.; MOHANKUMAR, A. K.; KHAPRA, M. M. <a href="https://doi.org/10.1145/3485766">A Survey of Evaluation Metrics Used for <span>NLG</span> Systems</a>. <strong><span>ACM</span> Comput. Surv.</strong>, v. 55, n. 2, p. 26:1–26:39, 2023.
+</div>
+<div id="ref-aVaswani17" class="csl-entry" role="listitem">
+VASWANI, A. et al. <strong>Attention is All you Need</strong>. (I. Guyon et al., Eds.)Advances in Neural Information Processing Systems. <strong>Anais</strong>...Curran Associates, Inc., 2017. Disponível em: &lt;<a href="https://proceedings.neurips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html">https://proceedings.neurips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html</a>&gt;
+</div>
+<div id="ref-Zhang2020" class="csl-entry" role="listitem">
+ZHANG, T. et al. <strong>BERTScore: Evaluating Text Generation with <span>BERT</span></strong>. 8th International Conference on Learning Representations, <span>ICLR</span> 2020, Addis Ababa, Ethiopia, April 26-30, 2020. <strong>Anais</strong>...OpenReview.net, 2020. Disponível em: &lt;<a href="https://openreview.net/forum?id=SkeHuCVFDr">https://openreview.net/forum?id=SkeHuCVFDr</a>&gt;
+</div>
+<div id="ref-10.1162/COLI.a.16" class="csl-entry" role="listitem">
+ZHANG, Y. et al. <a href="https://doi.org/10.1162/COLI.a.16">🧜Siren’s Song in the AI Ocean: A Survey on Hallucination in Large Language Models</a>. <strong>Computational Linguistics</strong>, v. 51, n. 4, p. 1373–1418, dez. 2025.
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p><a href="https://chat.openai.com/" class="uri">https://chat.openai.com/</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://chat.maritaca.ai/" class="uri">https://chat.maritaca.ai/</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><a href="https://bard.google.com/" class="uri">https://bard.google.com/</a><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><a href="https://lmsys.org/blog/2023-03-30-vicuna/" class="uri">https://lmsys.org/blog/2023-03-30-vicuna/</a><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p><a href="https://www.anthropic.com/index/introducing-claude" class="uri">https://www.anthropic.com/index/introducing-claude</a><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Assista <a href="https://www.youtube.com/watch?v=F8yxBbx8woU&amp;t=5s">neste video</a> a apresentação de uma análise crítica do ChatGPT.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>A interação está relatada <a href="https://ccforum.biomedcentral.com/articles/10.1186/s13054-023-04393-x">neste artigo</a>.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Conforme o Dicionário Online da Língua Portuguesa&nbsp;(<a href="https://www.dicio.com.br/" class="uri">https://www.dicio.com.br/</a>), apofenia é o “Fenômeno cognitivo no qual os indivíduos têm a tendência de formar ou reconhecer conexões a partir de dados aleatórios, estabelecendo conclusões a partir de dados inconclusivos. Etimologia: do alemão Apophänie, termo criado pelo neurologista alemão Klaus Conrad.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p><a href="https://www1.folha.uol.com.br/tec/2023/07/ferramentas-como-chatgpt-so-existem-porque-humanos-veem-sentido-a-partir-de-qualquer-coisa.shtml" class="uri">https://www1.folha.uol.com.br/tec/2023/07/ferramentas-como-chatgpt-so-existem-porque-humanos-veem-sentido-a-partir-de-qualquer-coisa.shtml</a><a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>Um <em>prompt</em> é um texto em linguagem humana (em oposição à linguagem de programação) que dá ao <em>chatbot</em> uma instrução do que ele deve fazer. Um <em>prompt</em> pode ser formulado como uma pergunta, uma observação, um questionamento, ou ainda representar uma tarefa específica, por exemplo, para classificar um texto. <em>Prompts</em> podem ter um formato livre, mas <em>chatbots</em> são bastante sensíveis ao conteúdo textual dele, o que tem motivado a criação de modelos e padrões para a sua escrita. Falamos um pouco sobre o assunto no <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-linguagem/cap-modelos-linguagem.html#sec-cap-modelos-linguagem" target="_blank" title="Volume 2">Modelos de linguagem</a></span>.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>Desde que a sua língua seja contemplada com recursos suficientes, isto é, textos, para garantir um bom treinamento.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>Abreviação para <em>Recall-Oriented Understudy for Gisting Evaluation</em>. Esta é uma métrica utilizada para avaliar sumarizações, e, de maneira bastante simplificada, consiste em comparar a interseção de n-gramas entre textos sumarizados e referências<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p><em>Bilingual evaluation understudy</em>, usada para comparar traduções automáticas e suas referências. Veja <span>Subseção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol3/aplicacoes-e-dominios/cap-direito-ementas/cap-direito-ementas.html#sec-cap-direito-ementas-bleu" target="_blank" title="Volume 3"><em>Bilingual Evaluation Under-study</em> (BLEU)</a></span> para mais detalhes.<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>Utiliza embeddings contextualizados para comparar os textos gerados e referências<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn15"><p><em>Metric for Evaluation of Translation with Explicit ORdering</em>, utilizada para tradução, sumarização etc.<a href="#fnref15" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn16"><p><a href="https://chat.openai.com/" class="uri">https://chat.openai.com/</a><a href="#fnref16" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn17"><p><a href="https://chat.maritaca.ai/" class="uri">https://chat.maritaca.ai/</a><a href="#fnref17" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn18"><p><a href="https://mirrorthink.ai/" class="uri">https://mirrorthink.ai/</a><a href="#fnref18" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn19"><p><a href="https://github.com/features/copilot" class="uri">https://github.com/features/copilot</a>, <a href="https://ai.meta.com/blog/code-llama-large-language-model-coding/" class="uri">https://ai.meta.com/blog/code-llama-large-language-model-coding/</a><a href="#fnref19" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn20"><p><a href="https://www.compose.ai/" class="uri">https://www.compose.ai/</a><a href="#fnref20" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn21"><p><a href="https://clarice.ai/" class="uri">https://clarice.ai/</a><a href="#fnref21" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn22"><p>Veja o que são os Transformers no <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-linguagem/cap-modelos-linguagem.html#sec-cap-modelos-linguagem" target="_blank" title="Volume 2">Modelos de linguagem</a></span>.<a href="#fnref22" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn23"><p>Copiando e colando o conteúdo de <a href="https://www.bbc.com/portuguese/geral-46458304" class="uri">https://www.bbc.com/portuguese/geral-46458304</a>.<a href="#fnref23" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn24"><p><a href="https://pt.wikipedia.org/wiki/Estoicismo" class="uri">https://pt.wikipedia.org/wiki/Estoicismo</a><a href="#fnref24" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn25"><p>A resposta devolvida tem menos de 200 palavras, mas nem sempre os agentes de conversação obedecem a restrições como essa, inseridas nos <em>prompts</em>.<a href="#fnref25" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn26"><p>Segundo a Academia Brasileira de Letras, “O termo carochinha, atrelado à imagem de uma velha bondosa e afável a distrair os pequenos com suas narrativas feéricas, foi introduzido no nosso folclore através da obra Histórias da Carochinha, uma coleção de textos oriundos da tradição oral, organizada por Figueiredo Pimentel e que veio a ser o primeiro livro infantil publicado no Brasil, depois de 1920, para acalentar as crianças.” <a href="https://www.academia.org.br/artigos/historias-da-carochinha" class="uri">https://www.academia.org.br/artigos/historias-da-carochinha</a><a href="#fnref26" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn27"><p><a href="https://github.com/SheilaCastilho/DELA-Project" class="uri">https://github.com/SheilaCastilho/DELA-Project</a><a href="#fnref27" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn28"><p>Tradução fornecida pela profa. Adriana Pagano. O contexto da frase é esse: <em>Some people have to give up drinking completely, they can’t have a couple because they know where it would lead. Alcoholism is real. It requires a serious, courageous ongoing recovery process. That feels separate to what I’m describing here. I had fallen into grey-area drinking, a term coined by Jolene Park, that describes the feeling that you don’t have a “drinking problem”, but you do have a “problem with drinking” without it being a severe alcohol use disorder.</em><a href="#fnref28" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn29"><p>Na linguagem cotidiana, “simplificar um texto” pode ser sinônimo de “resumir um texto”. Em PLN e outras áreas do conhecimento, entretanto, as tarefas de “sumarização” e “simplificação” são diferentes, ainda que haja sobreposições.<a href="#fnref29" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn30"><p><a href="https://cdn.openai.com/snapshot-of-chatgpt-model-behavior-guidelines.pdf" class="uri">https://cdn.openai.com/snapshot-of-chatgpt-model-behavior-guidelines.pdf</a><a href="#fnref30" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn31"><p>Este tópico (“<em>Compositoras brasileiras de samba</em>”) foi um dos 150 tópicos utilizados na avaliação conjunta <em>Págico</em>, realizada em 2012. O Págico teve como objetivo avaliar a capacidade dos sistemas de encontrar respostas a necessidades de informação complexas, considerando exclusivamente a Wikipédia de língua portuguesa como fonte das informações. Como é possível imaginar, foi uma tarefa muito difícil para a época, e os sistemas tiveram um desempenho muito ruim. No entanto, todo o material usado – uma lista com 150 tópicos/perguntas, as respostas corretas, um retrato da Wikipédia em português de abril de 2012 e medidas de avaliação, entre outros – está disponível na página do Págico <a href="https://www.linguateca.pt/aval_conjunta/Pagico/index.html" class="uri">https://www.linguateca.pt/aval_conjunta/Pagico/index.html</a> e <a href="https://www.linguateca.pt/Cartola/" class="uri">https://www.linguateca.pt/Cartola/</a>, página dedicada apenas aos recursos criados. Uma apresentação do Págico, bem como discussão dos resultados e das participações, foi publicada em uma edição especial da revista Linguamática <a href="https://linguamatica.com/index.php/linguamatica/issue/view/8" class="uri">https://linguamatica.com/index.php/linguamatica/issue/view/8</a><a href="#fnref31" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn32"><p>A palestra <a href="https://youtu.be/F8yxBbx8woU?si=MfcBoV_tWhde-njy">ChatGPT: O que é? De onde veio? Para onde vamos?</a>, do grupo Brasileiras em PLN, embora tenha exemplos de uso do ChatGPT que já ficaram obsoletos, explora alguns limites do uso desses agentes como oráculo, além de fazer uma apresentação de como esses modelos como GPT são criados.<a href="#fnref32" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn33"><p>Veja-se por exemplo <a href="http://www.uol.com.br/tilt/reportagens-especiais/a-vida-dura-de-quem-treina-inteligencias-artificiais/" class="uri">http://www.uol.com.br/tilt/reportagens-especiais/a-vida-dura-de-quem-treina-inteligencias-artificiais/</a> e <span>Subseção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/dados/cap-dataset-corpus/cap-dataset-corpus.html#sec-cap-dataset-corpus-multidao" target="_blank" title="Volume 1">Anotação: sabedoria de especialistas ou sabedoria da multidão?</a></span><a href="#fnref33" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn34"><p>Água doce é necessária para resfriar os super-processadores.<a href="#fnref34" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn35"><p><a href="https://oglobo.globo.com/economia/tecnologia/noticia/2023/05/treino-do-chatgpt-consumiu-700-mil-litros-de-agua-equivalente-a-encher-uma-torre-de-resfriamento-de-um-reator-nuclear.ghtml" class="uri">https://oglobo.globo.com/economia/tecnologia/noticia/2023/05/treino-do-chatgpt-consumiu-700-mil-litros-de-agua-equivalente-a-encher-uma-torre-de-resfriamento-de-um-reator-nuclear.ghtml</a> ou <a href="https://www.printfriendly.com/p/g/D56wCg" class="uri">https://www.printfriendly.com/p/g/D56wCg</a><a href="#fnref35" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" class="pagination-link" aria-label="Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../shared/referencias/referencias.html" class="pagination-link" aria-label="Referências">
+        <span class="nav-page-text">Referências</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://brasileiraspln.com/">
+<p>Brasileiras em PLN, 2026. Todos os direitos reservados</p>
+</a>
+  </li>  
+</ul>
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

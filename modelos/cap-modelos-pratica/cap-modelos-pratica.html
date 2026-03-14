@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="João Vitor Mariano Correia">
+<meta name="author" content="João Renato Ribeiro Manesco">
+<meta name="author" content="Danilo Samuel Jodas">
+<meta name="author" content="Douglas Rodrigues">
+<meta name="author" content="Gabriel Lino Garcia">
+<meta name="author" content="Pedro Henrique Paiola">
+<meta name="author" content="João Paulo Papa">
+
+<title>3&nbsp; Treinamento de Grandes Modelos de Linguagem na prática – Processamento de Linguagem Natural</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 1em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" rel="next">
+<link href="../../modelos/cap-modelos-dados/cap-modelos-dados.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-8676d8d0f01772f2903466dda9733bcf.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Sem resultados",
+    "search-matching-documents-text": "Resultados encontrados",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<!-- Google tag (gtag.js) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-111J572WMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-111J572WMR');
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../shared/bpln.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../../index.html" class="sidebar-logo-link">
+      <img src="../../shared/logos/bpln.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Processamento de Linguagem Natural</a> 
+        <div class="sidebar-tools-main">
+    <a href="../../Livro_PLN_BPLN_4ed_vol2.pdf" title="Baixar PDF" class="quarto-navigation-tool px-1" aria-label="Baixar PDF"><i class="bi bi-file-pdf"></i></a>
+    <div class="dropdown">
+      <a href="" title="Compartilhar" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Compartilhar"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sobre o Volume 2</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Modelos de Linguagem</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Modelos de linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-dados/cap-modelos-dados.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-rag/cap-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-agentes-conversacionais/cap-agentes-conversacionais.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ChatGPT, MariTalk e outros agentes de conversação</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../shared/referencias/referencias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Referências</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../autores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>Sobre as/os autoras/es</strong></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Conteúdo</h2>
+   
+  <ul>
+  <li><a href="#sec-cap-modelos-pratica-introducao" id="toc-sec-cap-modelos-pratica-introducao" class="nav-link active" data-scroll-target="#sec-cap-modelos-pratica-introducao"><span class="header-section-number">3.1</span> Introdução</a></li>
+  <li><a href="#sec-cap-modelos-pratica-cpt" id="toc-sec-cap-modelos-pratica-cpt" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-cpt"><span class="header-section-number">3.2</span> Continuação de pré-treino</a>
+  <ul class="collapse">
+  <li><a href="#mecanismos-de-treinamento-autossupervisionado" id="toc-mecanismos-de-treinamento-autossupervisionado" class="nav-link" data-scroll-target="#mecanismos-de-treinamento-autossupervisionado"><span class="header-section-number">3.2.1</span> Mecanismos de treinamento autossupervisionado</a></li>
+  <li><a href="#contextos-e-objetivos-da-continuação-de-pré-treino" id="toc-contextos-e-objetivos-da-continuação-de-pré-treino" class="nav-link" data-scroll-target="#contextos-e-objetivos-da-continuação-de-pré-treino"><span class="header-section-number">3.2.2</span> Contextos e objetivos da continuação de pré-treino</a></li>
+  </ul></li>
+  <li><a href="#sec-cap-modelos-pratica-ajuste_fino" id="toc-sec-cap-modelos-pratica-ajuste_fino" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-ajuste_fino"><span class="header-section-number">3.3</span> Ajuste fino de modelos</a>
+  <ul class="collapse">
+  <li><a href="#sec-cap-modelos-pratica-full_tuning" id="toc-sec-cap-modelos-pratica-full_tuning" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-full_tuning"><span class="header-section-number">3.3.1</span> Ajuste fino completo</a></li>
+  <li><a href="#sec-cap-modelos-pratica-peft" id="toc-sec-cap-modelos-pratica-peft" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-peft"><span class="header-section-number">3.3.2</span> PEFT</a></li>
+  <li><a href="#sec-cap-modelos-pratica-few_shot" id="toc-sec-cap-modelos-pratica-few_shot" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-few_shot"><span class="header-section-number">3.3.3</span> <em>Few-shot learning</em></a></li>
+  </ul></li>
+  <li><a href="#sec-cap-modelos-pratica-alignment" id="toc-sec-cap-modelos-pratica-alignment" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-alignment"><span class="header-section-number">3.4</span> <em>AI alignment</em></a>
+  <ul class="collapse">
+  <li><a href="#sec-cap-modelos-pratica-rlbasics" id="toc-sec-cap-modelos-pratica-rlbasics" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-rlbasics"><span class="header-section-number">3.4.1</span> Fundamentos de aprendizado por reforço</a></li>
+  <li><a href="#sec-cap-modelos-pratica-rlhf" id="toc-sec-cap-modelos-pratica-rlhf" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-rlhf"><span class="header-section-number">3.4.2</span> <em>Reinforcement Learning from Human Feedback</em> (RLHF)</a></li>
+  <li><a href="#sec-cap-modelos-pratica-dpo" id="toc-sec-cap-modelos-pratica-dpo" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-dpo"><span class="header-section-number">3.4.3</span> <em>Direct Preference Optimization</em> (DPO)</a></li>
+  <li><a href="#discussão-comparativa-rlhf-vs.-dpo" id="toc-discussão-comparativa-rlhf-vs.-dpo" class="nav-link" data-scroll-target="#discussão-comparativa-rlhf-vs.-dpo"><span class="header-section-number">3.4.4</span> Discussão comparativa: RLHF vs.&nbsp;DPO</a></li>
+  </ul></li>
+  <li><a href="#sec-cap-modelos-pratica-exemplo_pratico" id="toc-sec-cap-modelos-pratica-exemplo_pratico" class="nav-link" data-scroll-target="#sec-cap-modelos-pratica-exemplo_pratico"><span class="header-section-number">3.5</span> Exemplo prático</a>
+  <ul class="collapse">
+  <li><a href="#preparando-o-ambiente" id="toc-preparando-o-ambiente" class="nav-link" data-scroll-target="#preparando-o-ambiente"><span class="header-section-number">3.5.1</span> Preparando o ambiente</a></li>
+  <li><a href="#o-ponto-de-partida" id="toc-o-ponto-de-partida" class="nav-link" data-scroll-target="#o-ponto-de-partida"><span class="header-section-number">3.5.2</span> O ponto de partida</a></li>
+  <li><a href="#ajuste-fino-supervisionado-com-lora" id="toc-ajuste-fino-supervisionado-com-lora" class="nav-link" data-scroll-target="#ajuste-fino-supervisionado-com-lora"><span class="header-section-number">3.5.3</span> Ajuste fino supervisionado com LoRA</a></li>
+  <li><a href="#refinamento-do-comportamento-com-dpo" id="toc-refinamento-do-comportamento-com-dpo" class="nav-link" data-scroll-target="#refinamento-do-comportamento-com-dpo"><span class="header-section-number">3.5.4</span> Refinamento do comportamento com DPO</a></li>
+  <li><a href="#considerações-finais" id="toc-considerações-finais" class="nav-link" data-scroll-target="#considerações-finais"><span class="header-section-number">3.5.5</span> Considerações finais</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-cap-modelos-pratica" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading"></div>
+    <div class="quarto-title-meta-contents">
+             <p>João Vitor Mariano Correia </p>
+             <p>João Renato Ribeiro Manesco </p>
+             <p>Danilo Samuel Jodas </p>
+             <p>Douglas Rodrigues </p>
+             <p>Gabriel Lino Garcia </p>
+             <p>Pedro Henrique Paiola </p>
+             <p>João Paulo Papa </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Publicado em:</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">13/04/2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+
+</div>
+<div>
+<div class="callout-body-container callout-body">
+<p>Este capítulo também está disponível em <a href="cap-modelos-pratica.pdf">PDF</a>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" aria-label="Toggle callout" aria-expanded="false" data-bs-target=".callout-cite-contents" aria-controls="callout-cite" data-bs-toggle="collapse">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Como citar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end">
+<i class="callout-toggle"></i>
+</div>
+</div>
+<div id="callout-cite" class="callout-cite-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="sourceCode" id="cb1"><pre class="sourceCode latex code-with-copy"><code class="sourceCode latex"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>@InCollection{BPLN_livro_cap-modelos-pratica:2026,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    author    = {Correia, João Vitor Mariano and Manesco, João Renato Ribeiro and Jodas, Danilo Samuel and Rodrigues, Douglas and Garcia, Gabriel Lino and Paiola, Pedro Henrique and Papa, João Paulo},</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    title     = {Treinamento de Grandes Modelos de Linguagem na prática},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    booktitle = {Processamento de Linguagem Natural: Conceitos, Técnicas e Aplicações em Português},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    publisher = {BPLN},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    year      = {2026},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    editor    = {Caseli, H. M. and Nunes, M. G. V.},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    type      = {Book Chapter},</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    chapter   = {3},</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    edition   = {4},</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    volume    = {2},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    isbn      = {XXXXXXXXXXXXXXXX},</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    url       = {https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-pratica/cap-modelos-pratica.html},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<section id="sec-cap-modelos-pratica-introducao" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sec-cap-modelos-pratica-introducao"><span class="header-section-number">3.1</span> Introdução</h2>
+<p>Grandes Modelos de Linguagem (LLMs) representam uma mudança de paradigma no Processamento de Linguagem Natural, impulsionada pela arquitetura de <em>Transformers</em>&nbsp;<span class="citation" data-cites="vaswani2017attention">(<a href="../../shared/referencias/referencias.html#ref-vaswani2017attention" role="doc-biblioref">Vaswani et al., 2017</a>)</span>, que permitiu um avanço significativo na capacidade dos modelos de ponderar contexto. Trabalhos pioneiros como o BERT&nbsp;<span class="citation" data-cites="Devlin19">(<a href="../../shared/referencias/referencias.html#ref-Devlin19" role="doc-biblioref">Devlin et al., 2019</a>)</span>, com sua abordagem de pré-treinamento bidirecional, validaram a eficácia de treinar modelos massivos em vastos conjuntos textuais, dando um passo fundamental para a compreensão de linguagem via redes neurais. O resultado é uma série de modelos com uma capacidade sem precedentes de processar e gerar texto de forma fluente e coerente.</p>
+<p>Essa fundação de entendimento de linguagem é adquirida durante a fase de pré-treinamento, em que o modelo absorve conhecimento de fontes como a internet e grandes acervos de livros, permitindo que diversas aplicações de ampla relevância possam surgir, tais como sistemas já discutidos anteriormente neste volume, incluindo sumarização no Capítulo 3, tradução no Capítulo 4 e tarefas de classificação e conversação tratadas no Capítulo [X] dedicado a LLMs, abrangendo diferentes contextos de uso&nbsp;<span class="citation" data-cites="minaee2024large">(<a href="../../shared/referencias/referencias.html#ref-minaee2024large" role="doc-biblioref">Minaee et al., 2024</a>)</span>.</p>
+<p>Apesar da eficácia dos LLM, sua aplicabilidade em cenários do mundo real depende criticamente de sua especialização, em especial tratando-se de modelos menores. A base generalista, embora ampla, é insuficiente para tarefas que exigem mais precisão ou conhecimento de nicho, tornando o processo de adaptação uma necessidade para determinados contextos&nbsp;<span class="citation" data-cites="anisuzzaman2025fine">(<a href="../../shared/referencias/referencias.html#ref-anisuzzaman2025fine" role="doc-biblioref">Anisuzzaman et al., 2025</a>)</span>. Essa necessidade de adaptação pode ser analisada a partir de duas dimensões principais e complementares: a especialização para domínios de conhecimento e o alinhamento para contextos linguísticos e culturais específicos.</p>
+<p>A primeira dimensão busca fazer com que o corpo de conhecimento dos modelos de linguagem seja composto por termos linguísticos e conhecimentos específicos de um campo nichado, facilitando sua aplicação em tarefas direcionadas, sendo crucial para aplicações de alto impacto. No campo jurídico, por exemplo, um modelo refinado é capaz de interagir mais precisamente com o vernáculo próprio de documentos legais para realizar sumarizações ou revisões&nbsp;<span class="citation" data-cites="lai2024large">(<a href="../../shared/referencias/referencias.html#ref-lai2024large" role="doc-biblioref">Lai et al., 2024</a>)</span>. Na medicina, a especialização permite que um modelo interprete literatura científica e registros de saúde para que seja capaz de apoiar decisões clínicas&nbsp;<span class="citation" data-cites="zhou2023survey">(<a href="../../shared/referencias/referencias.html#ref-zhou2023survey" role="doc-biblioref">Zhou et al., 2023</a>)</span>. Da mesma forma, no setor financeiro, um modelo ajustado pode identificar nuances em relatórios de mercado que seriam invisíveis a um sistema generalista&nbsp;<span class="citation" data-cites="lee2024survey">(<a href="../../shared/referencias/referencias.html#ref-lee2024survey" role="doc-biblioref">Lee et al., 2024</a>)</span>. Nesses contextos, o refinamento é o que distingue uma ferramenta funcional de um sistema verdadeiramente confiável e eficaz.</p>
+<p>A segunda dimensão busca realizar a adaptação linguística e cultural dos modelos, um desafio fundamental na construção de modelos equitativos. A grande maioria dos dados utilizados no pré-treinamento de modelos publicados abertamente está em inglês, o que cria um desequilíbrio cultural e representativo a nível de linguagem nesses modelos&nbsp;<span class="citation" data-cites="alkhamissi-etal-2024-investigating">(<a href="../../shared/referencias/referencias.html#ref-alkhamissi-etal-2024-investigating" role="doc-biblioref">AlKhamissi et al., 2024</a>)</span>. Desta forma, modelos pouco expostos à língua portuguesa sofrem dificuldade em entender certas nuances linguísticas, bem como podem estar expostos a certos vieses culturais dos dados, como é o caso de modelos médicos que ignoram a possibilidade de diagnóstico de certas doenças endêmicas como a dengue pelos dados de treinamento serem de locais não expostos a este problema&nbsp;<span class="citation" data-cites="paiola2024adapting">(<a href="../../shared/referencias/referencias.html#ref-paiola2024adapting" role="doc-biblioref">Paiola et al., 2024</a>)</span>.</p>
+<p>Para que a tecnologia seja efetivamente democrática e útil em contextos não anglófonos, como o brasileiro, a tradução da resposta nem sempre é a solução. Exigindo um processo de ajuste fino ou continuação de pré-treino com dados no idioma local. Garantindo que o modelo compreenda as particularidades culturais, expressões idiomáticas e o contexto social do idioma refinado.</p>
+<p>Atingir um alto nível de robustez com LLMs, no entanto, requer um processo que vai além do treinamento em escala. É necessária uma estratégia de adaptação cuidadosa, que considere tanto a profundidade técnica de um domínio quanto a riqueza de um contexto linguístico. Para abordar essa necessidade, este capítulo irá explorar o espectro de técnicas de especialização utilizadas no treinamento de modelos de linguagem. Iniciaremos discutindo a continuação de pré-treino, seguiremos para o ajuste fino supervisionado em suas diversas formas, incluindo técnicas de parametrização eficiente e aprendizado <em>few-shot</em>, e concluiremos com métodos de alinhamento, que refinam o comportamento do modelo com base em preferências humanas. Ao final do capítulo, apresentamos uma implementação prática do refinamento de modelos.</p>
+</section>
+<section id="sec-cap-modelos-pratica-cpt" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-cap-modelos-pratica-cpt"><span class="header-section-number">3.2</span> Continuação de pré-treino</h2>
+<p>A Continuação de Pré-treino (CPT) consiste em uma técnica de adaptação realizada antes do ajuste fino supervisionado, visando ampliar o conhecimento de um LLM em um domínio específico. Essa etapa intermediária entre o pré-treinamento generalista e o <em>fine-tuning</em> retoma o treinamento original do modelo, de forma autossupervisionada, através de técnicas como a Modelagem de Linguagem Mascarada (MLM) ou Causal (CLM), aplicadas em um <em>corpus</em> especializado de grande escala. Esta estratégia resulta na incorporação de vocabulário, conceitos e fatos do domínio desejado. Neste capítulo serão apresentados os fundamentos técnicos, cenários de aplicação e distinções relevantes dessa abordagem.</p>
+<section id="mecanismos-de-treinamento-autossupervisionado" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="mecanismos-de-treinamento-autossupervisionado"><span class="header-section-number">3.2.1</span> Mecanismos de treinamento autossupervisionado</h3>
+<p>Para modelos autorregressivos, como os das famílias GPT e Qwen, a técnica predominante é a de Modelagem de Linguagem Causal (CLM)&nbsp;<span class="citation" data-cites="radford2019language bai2023qwen">(<a href="../../shared/referencias/referencias.html#ref-bai2023qwen" role="doc-biblioref">Bai et al., 2023</a>; <a href="../../shared/referencias/referencias.html#ref-radford2019language" role="doc-biblioref">Radford et al., 2019</a>)</span>, cujo objetivo é treinar o modelo para prever o próximo <em>token</em> em uma sequência com base nos <em>tokens</em> anteriores. De forma mais precisa, a probabilidade de uma sequência de <em>tokens</em> é decomposta em uma cadeia de probabilidades condicionais, onde cada <em>token</em> é previsto condicionando-se nos <em>tokens</em> que o precedem.</p>
+<p>O objetivo da CLM é maximizar essa probabilidade nos textos observados, o que equivale a minimizar a soma dos erros associados a cada previsão individual, ou seja, a entropia cruzada entre as distribuições preditas e os <em>tokens</em> reais. A natureza estritamente unidirecional, da esquerda para a direita, do CLM flui naturalmente com a arquitetura do tipo <em>decoder</em> em arquiteturas de <em>transformers</em>, que empregam máscaras nos mecanismos de atenção. Essas máscaras garantem que, ao prever um <em>token</em> em uma determinada posição, o modelo utilize apenas informações dos <em>tokens</em> que o antecedem na sequência, e não dos posteriores.</p>
+<p>Em contrapartida, arquiteturas bidirecionais como o BERT utilizam a Modelagem de Linguagem Mascarada (MLM)&nbsp;<span class="citation" data-cites="Devlin19">(<a href="../../shared/referencias/referencias.html#ref-Devlin19" role="doc-biblioref">Devlin et al., 2019</a>)</span>, cujo funcionamento, ao invés de prever o próximo <em>token</em> de uma sequência, trabalha corrompendo uma fração dos <em>tokens</em> no texto de entrada, criando uma espécie da “máscara” no texto, desta forma, o modelo deve prever quais os <em>tokens</em> originais que deveriam compor a sequência. Nesse processo, para uma sequência de entrada <span class="math inline">\(T\)</span>, um subconjunto de posições <span class="math inline">\(M\)</span> é selecionado para mascaramento. Para cada posição <span class="math inline">\(i \in M\)</span>, um <em>token</em> <span class="math inline">\(t_i\)</span> pode ser substituído pelo símbolo de máscara, por um <em>token</em> aleatório ou mantido inalterado, de modo a incentivar o modelo a aprender representações contextuais mais robustas. A função de perda é calculada apenas sobre os <em>tokens</em> mascarados, já que o modelo se concentra em predizer esses elementos, e como a predição é condicionada à sequência inteira corrompida, o modelo aprende representações contextuais, considerando tanto o contexto à esquerda quanto à direita.</p>
+<p>Outra estratégia, chamada de Previsão da Próxima Sentença (NSP), introduzida no pré-treinamento do BERT, consiste em classificar se uma sentença sucede outra no texto. Diferente da Modelagem CLM, que realiza predição <em>token</em> a <em>token</em> de forma unidirecional, o NSP busca classificar sentenças completas. Essa técnica, no entanto, caiu em desuso no estado da arte, devido a estudos indicarem benefício limitado, e foi descartada em modelos recentes&nbsp;<span class="citation" data-cites="liu2019roberta">(<a href="../../shared/referencias/referencias.html#ref-liu2019roberta" role="doc-biblioref">Liu et al., 2019</a>)</span>.</p>
+</section>
+<section id="contextos-e-objetivos-da-continuação-de-pré-treino" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="contextos-e-objetivos-da-continuação-de-pré-treino"><span class="header-section-number">3.2.2</span> Contextos e objetivos da continuação de pré-treino</h3>
+<p>A aplicação da continuação de pré-treino é uma decisão estratégica que visa aprimorar o modelo de maneiras que o ajuste fino supervisionado por si só não consegue alcançar. O principal desses cenários é a adaptação para aplicações específicas, onde um LLM generalista é infundido com o conhecimento de um campo técnico&nbsp;<span class="citation" data-cites="shi2024continual">(<a href="../../shared/referencias/referencias.html#ref-shi2024continual" role="doc-biblioref">Shi et al., 2024</a>)</span>. Um exemplo prático seria treinar um LLM com uma biblioteca de artigos jurídicos, de tal forma que ele se torne fluente no jargão e nos conceitos do direito, ou até mesmo em conhecimento médico, como será trabalhado ao longo deste capítulo. Outro uso importante é a adaptação temporal, que atualiza o conhecimento do modelo para além de sua data de corte, utilizando um conjunto de textos e notícias recentes. Adicionalmente, a CPT é útil para adaptações de idioma, melhorando a proficiência de um modelo em uma língua menos representada nos dados de treinamento originais, como o português, aprimorando sua fluência e compreensão de nuances culturais.</p>
+<p>É importante reforçar a distinção entre a CPT e o Ajuste Fino Supervisionado, já que a CPT tem o objetivo de expandir a base de conhecimento geral de um modelo, através da utilização de dados não estruturados. Já o ajuste fino busca impor um comportamento específico ao modelo, utilizando dados rotulados preparados, para uma ou mais tarefas específicas. A CPT opera sobre conjuntos massivos de texto bruto, o resultado é um modelo com vocabulário e conhecimento de domínio aprofundados, mas não necessariamente com os detalhes específicos das tarefas em que deve atuar.</p>
+</section>
+</section>
+<section id="sec-cap-modelos-pratica-ajuste_fino" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-cap-modelos-pratica-ajuste_fino"><span class="header-section-number">3.3</span> Ajuste fino de modelos</h2>
+<p>Conforme explorado na seção anterior, na fase de pré-treinamento os Grandes Modelos de Linguagem adquirem um vasto conhecimento de mundo e uma profunda compreensão de padrões linguísticos, adquiridos a partir da exposição a <em>corpora</em> textuais massivos. Essa base de conhecimento confere aos modelos a capacidade de realizar uma gama de tarefas de forma emergente, sem treinamento explícito. Contudo, para alcançar excelência e confiabilidade em aplicações especializadas, é necessário um processo de adaptação direcionado. Este processo é conhecido como ajuste fino (do inglês, <em>fine-tuning</em>).</p>
+<p>O ajuste fino representa uma importante mudança de paradigma na história do Processamento de Linguagem Natural. Ele pode ser definido como a especialização de um modelo generalista, transformando-o em uma ferramenta especialista capaz de executar tarefas com alta precisão e adaptar-se a domínios de conhecimento específicos <span class="citation" data-cites="wu_llm_2025">(<a href="../../shared/referencias/referencias.html#ref-wu_llm_2025" role="doc-biblioref">Wu et al., 2025</a>)</span>. A intuição por trás desta técnica pode ser ilustrada por uma analogia com a formação médica: o pré-treinamento é análogo aos anos de faculdade, onde se adquire um conhecimento abrangente. O ajuste fino, por sua vez, equivale à residência médica, na qual o profissional aprofunda seu conhecimento em uma área específica, como a cardiologia, para diagnosticar e tratar com uma proficiência que um clínico geral não possui. De forma similar, o ajuste fino não ensina o LLM a gerar linguagem do zero; ele refina suas competências preexistentes para uma nova aplicação.</p>
+<p>Formalmente, a técnica se fundamenta no princípio da aprendizagem por transferência (do inglês, <em>transfer learning</em>), no qual um modelo desenvolvido para uma tarefa inicial é reutilizado como ponto de partida para treinar outro modelo em uma segunda tarefa, relacionada à primeira. O conhecimento capturado durante o pré-treinamento em um domínio de origem e tarefa de origem é transferido para melhorar o desempenho e acelerar a aprendizagem em um domínio de destino e uma tarefa de destino. Essa abordagem mostrou-se fundamental para superar um dos maiores desafios históricos da área: a necessidade de vastos conjuntos de dados rotulados e o custo computacional proibitivo do treinamento de modelos de ponta a partir do zero <span class="citation" data-cites="howard_universal_2018">(<a href="../../shared/referencias/referencias.html#ref-howard_universal_2018" role="doc-biblioref">Howard; Ruder, 2018</a>)</span>.</p>
+<p>O principal método para essa especialização é o Ajuste Fino Supervisionado (do inglês, <em>Supervised Fine-Tuning</em> ou SFT) <span class="citation" data-cites="Devlin19">(<a href="../../shared/referencias/referencias.html#ref-Devlin19" role="doc-biblioref">Devlin et al., 2019</a>)</span>. Neste processo, o modelo pré-treinado tem seu treinamento estendido, mas desta vez em um conjunto de dados menor e de alta qualidade, composto por exemplos rotulados que demonstram o comportamento desejado — geralmente em um formato de pares de entrada e saída (por exemplo, no caso da tarefa de <em>Question Answering</em> (QA), o par <code>pergunta -&gt; resposta esperada</code>). O mecanismo é uma continuação direta do treinamento de redes neurais:</p>
+<ol type="1">
+<li><p><strong>Seleção do modelo base</strong>: A escolha de um modelo pré-treinado apropriado é o primeiro passo. A decisão deve levar em conta a arquitetura, o tamanho e a afinidade do domínio de pré-treinamento com a tarefa final.</p></li>
+<li><p><strong>Preparação do <em>dataset</em></strong>: A qualidade do ajuste é diretamente proporcional à qualidade do conjunto de dados. Esta etapa envolve a coleta, limpeza e formatação de dados rotulados e representativos da tarefa, geralmente estruturados em pares de <em>prompt</em>-resposta.</p></li>
+<li><p><strong>Ajuste de hiperparâmetros</strong>: A seleção de hiperparâmetros como taxa de aprendizado, tamanho do lote (do inglês, <em>batch size</em>) e número de épocas é crucial. Um ajuste inadequado pode levar a um treinamento instável ou a um sobreajuste.</p></li>
+<li><p><strong>Treinamento e validação</strong>: O modelo é treinado em lotes de dados, e seu desempenho é continuamente monitorado em um conjunto de validação separado. O monitoramento da perda de validação é essencial para detectar sobreajuste e aplicar estratégias como a parada antecipada, que interrompe o treinamento quando a generalização para dados não vistos começa a piorar.</p></li>
+</ol>
+<p>Este processo iterativo refina gradualmente o conhecimento do modelo, especializando-o para as nuances da tarefa alvo. Neste ponto, é crucial diferenciar o ajuste fino de outras técnicas de adaptação:</p>
+<ul>
+<li><p><strong>Continuação de pré-treino</strong>: Enquanto a continuação de pré-treino visa expandir a base de conhecimento geral do modelo em um novo domínio (ex: alimentar um LLM com uma biblioteca de artigos jurídicos), utilizando dados não estruturados, o ajuste fino visa ensinar uma habilidade ou comportamento específico (ex: ensinar o modelo a sumarizar processos judiciais), utilizando dados rotulados.</p></li>
+<li><p><strong>Engenharia de <em>prompts</em></strong>: Esta técnica não modifica nenhum dos parâmetros do modelo. Em vez disso, ela guia o comportamento do modelo no momento da inferência, formulando cuidadosamente a entrada (<em>prompt</em>) para induzir a resposta desejada. Métodos como <em>one-shot</em> ou <em>few-shot learning</em>, onde um ou alguns exemplos da tarefa são incluídos no <em>prompt</em>, são formas de engenharia de <em>prompts</em>. É uma forma de adaptação sem treinamento, que depende inteiramente das capacidades de aprendizado no contexto do modelo base.</p></li>
+</ul>
+<p>Em suma, o ajuste fino representa um caminho poderoso para a especialização de LLMs, capacitando-os a ir além da fluência geral para entregar desempenho de ponta em aplicações de nicho. Contudo, a estratégia pela qual essa adaptação de parâmetros é realizada varia significativamente, levando a um espectro de métodos com diferentes <em>trade-offs</em> entre desempenho, custo computacional e complexidade. Nas subseções a seguir, exploraremos as principais abordagens práticas: desde o ajuste fino completo, que modifica todos os parâmetros do modelo, passando pelas eficientes técnicas de PEFT (do inglês, <em>Parameter-Efficient Fine-Tuning</em>), que ajustam apenas um pequeno subconjunto de parâmetros, até as estratégias de <em>Few-Shot Learning</em>, que operam na fronteira entre o ajuste e a engenharia de <em>prompts</em>. As seções seguintes exploram técnicas avançadas como <em>Reinforcement Learning from Human Feedback</em> (RLHF) e <em>Direct Preference Optimization</em> (DPO), que estendem o SFT para alinhamento com preferências humanas.</p>
+<section id="sec-cap-modelos-pratica-full_tuning" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="sec-cap-modelos-pratica-full_tuning"><span class="header-section-number">3.3.1</span> Ajuste fino completo</h3>
+<p>O ajuste fino completo (do inglês, <em>Full Fine-Tuning</em> ou FFT) representa a forma mais direta e conceitualmente mais simples de especialização de um modelo de linguagem. Nesta abordagem, a totalidade dos parâmetros do modelo pré-treinado é descongelada e se torna treinável. Isso concede ao modelo máxima flexibilidade para que todo o seu conhecimento generalista, encapsulado em bilhões de parâmetros, seja reconfigurado para se adaptar profundamente aos padrões do novo conjunto de dados <span class="citation" data-cites="raffel_exploring_2020 lv2024parameterfinetuninglargelanguage">(<a href="../../shared/referencias/referencias.html#ref-lv2024parameterfinetuninglargelanguage" role="doc-biblioref">Lv et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-raffel_exploring_2020" role="doc-biblioref">Raffel et al., 2020</a>)</span>.</p>
+<p>A principal vantagem desta abordagem é seu potencial para alcançar o máximo desempenho possível na tarefa alvo. Ao permitir que todas as camadas da rede neural sejam atualizadas, desde as representações iniciais de <em>embeddings</em> até os mecanismos de atenção e as camadas <em>feed-forward</em>, o modelo pode aprender nuances extremamente complexas e específicas do domínio, algo que abordagens mais restritivas poderiam não capturar. No entanto, este potencial de desempenho vem acompanhado de custos e desafios significativos, que devem ser cuidadosamente ponderados:</p>
+<ul>
+<li><p><strong>Alto custo computacional e de memória</strong>: O FFT é extremamente exigente em termos de recursos. Treinar todos os parâmetros de um modelo com bilhões de pesos requer acesso a múltiplas GPUs de ponta com alta capacidade de VRAM, não apenas para armazenar os pesos do modelo, mas também os gradientes, os estados do otimizador e as ativações intermediárias durante o treinamento. Isso torna o processo financeiramente proibitivo para muitas organizações.</p></li>
+<li><p><strong>Custo de armazenamento e implantação</strong>: Como o FFT modifica todos os pesos, cada nova tarefa especializada resulta em uma cópia completa e independente do modelo, que pode ocupar dezenas ou centenas de gigabytes. Gerenciar, armazenar e servir múltiplas instâncias de modelos tão grandes em um ambiente de produção é logisticamente complexo e caro.</p></li>
+<li><p><strong>Esquecimento catastrófico</strong>: Este é um dos riscos mais proeminentes. Ao se especializar intensamente na nova tarefa, o modelo pode sobrescrever e perder drasticamente as capacidades gerais adquiridas durante o pré-treinamento <span class="citation" data-cites="howard_universal_2018">(<a href="../../shared/referencias/referencias.html#ref-howard_universal_2018" role="doc-biblioref">Howard; Ruder, 2018</a>)</span>. Por exemplo, um modelo ajustado para gerar código em Python pode esquecer como manter um diálogo coerente sobre história.</p></li>
+<li><p><strong>Risco de sobreajuste</strong>: Especialmente quando o conjunto de dados de ajuste fino é pequeno ou pouco diverso, o modelo pode memorizar os exemplos de treinamento em vez de aprender a generalizar o padrão subjacente. Isso resulta em um excelente desempenho nos dados de validação, mas um baixo desempenho em dados novos e não vistos.</p></li>
+<li><p><strong>Amplificação de viés</strong>: Se o conjunto de dados utilizado para o ajuste fino contiver vieses sociais ou demográficos, o processo de FFT pode não apenas replicá-los, mas também reforçá-los, resultando em um modelo final ainda mais enviesado do que sua versão pré-treinada. Por exemplo, um modelo pode ser induzido a associar automaticamente certas profissões a um gênero, reforçando estereótipos sociais.</p></li>
+</ul>
+<p>Apesar de seus desafios, o FFT permanece uma ferramenta relevante e poderosa para cenários específicos. A decisão de utilizá-lo deve ser pragmática, considerando as seguintes condições:</p>
+<ol type="1">
+<li><p><strong>Quando o desempenho máximo é crítico</strong>: Em aplicações de alto risco, como diagnóstico médico ou análise financeira, onde cada ponto percentual de acurácia é crucial e o orçamento permite o investimento.</p></li>
+<li><p><strong>Quando há uma mudança substancial de domínio</strong>: Se a tarefa alvo for radicalmente diferente dos dados de pré-treinamento, uma adaptação profunda pode ser necessária.</p></li>
+<li><p><strong>Quando recursos e dados são abundantes</strong>: O FFT só deve ser considerado quando se tem acesso a recursos computacionais massivos e, fundamentalmente, a um conjunto de dados de ajuste fino que seja grande, diverso e de altíssima qualidade para mitigar os riscos.</p></li>
+</ol>
+<p>Em conclusão, o ajuste fino completo é uma faca de dois gumes. Ele oferece o caminho para o mais alto nível de especialização, mas a um custo extremo e com riscos significativos de degradar propriedades valiosas do modelo original. Para a grande maioria dos casos de uso práticos, o balanço entre desempenho, custo e risco pende favoravelmente para abordagens mais eficientes. Essas desvantagens impulsionaram a pesquisa e o desenvolvimento de uma nova família de técnicas, conhecidas como ajuste eficiente de parâmetros (do inglês, <em>Parameter-Efficient Fine-Tuning</em> ou PEFT).</p>
+</section>
+<section id="sec-cap-modelos-pratica-peft" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="sec-cap-modelos-pratica-peft"><span class="header-section-number">3.3.2</span> PEFT</h3>
+<p>O desenvolvimento de metodologias voltadas à redução do custo computacional associado a LLMs tornou-se um requisito crítico para sua adaptação a tarefas especializadas. Essa demanda torna-se relevante no contexto do <em>fine-tuning</em> sobre conjuntos de dados de domínio específico, onde o custo computacional impacta diretamente a viabilidade prática da aplicação. Nesse cenário, busca-se empregar estratégias de treinamento que priorizem a atualização seletiva de camadas ou módulos do modelo, ao mesmo tempo minimizando o número de parâmetros ajustados. Tal abordagem tem o objetivo de não apenas reduzir o consumo de recursos e o tempo de processamento, mas também preservar, ou até aprimorar, a acurácia de predição visando garantir que a especialização do modelo não comprometa seu desempenho geral.</p>
+<p>Neste contexto, surge uma abordagem denominada <em>Parameter-Efficient Fine-Tuning</em> (PEFT)&nbsp;<span class="citation" data-cites="ding2023parameter">(<a href="../../shared/referencias/referencias.html#ref-ding2023parameter" role="doc-biblioref">Ding et al., 2023</a>)</span>, cujo objetivo é oferecer um conjunto de técnicas para adaptar grandes modelos de linguagem previamente pré-treinados, como o LLaMA&nbsp;<span class="citation" data-cites="Gajulamandyam2025peft">(<a href="../../shared/referencias/referencias.html#ref-Gajulamandyam2025peft" role="doc-biblioref">Gajulamandyam et al., 2025</a>)</span> ou BERT&nbsp;<span class="citation" data-cites="qi2024peft">(<a href="../../shared/referencias/referencias.html#ref-qi2024peft" role="doc-biblioref">Li, 2024</a>)</span>, para tarefas mais específicas. Em vez de re-treinar integralmente o modelo, que pode conter bilhões de parâmetros e exigir recursos computacionais significativos, o PEFT se concentra em ajustar apenas uma pequena fração desses parâmetros. O objetivo primário consiste em manter o conhecimento geral que o modelo adquiriu durante seu treinamento inicial. O PEFT, então, age como uma “camada extra”, adicionando um pequeno número de novos parâmetros treináveis. Esses novos parâmetros são ajustados para a tarefa específica, enquanto a maioria do modelo original permanece “congelada”.</p>
+<p>A motivação fundamental por trás do PEFT é a observação de que, durante o <em>fine-tuning</em>, nem todos os parâmetros de um modelo precisam ser atualizados para alcançar a melhor adaptação. Modelos pré-treinados são compostos por representações que generalizam o conhecimento linguístico. Neste sentido, apenas pequenos ajustes direcionais são necessários para especializar o modelo em domínios ou tarefas específicas. Este conceito levou ao desenvolvimento de técnicas que preservam o conhecimento original do modelo enquanto introduzem capacidades adaptativas através de estruturas paramétricas eficientes.</p>
+<p>Técnicas de PEFT têm demonstrado melhorias significativas no que tange à eficácia dos novos modelos desenvolvidos, tanto do ponto de análise quantitativa quanto da avaliação qualitativa dos resultados. Estes avanços indicam a consolidação de tais técnicas no contexto de adaptação de modelos em diversos cenários, permitindo uma redução que abrange parcelas minúsculas dos parâmetros do modelo original, enquanto mantém performance similar com o <em>fine-tuning</em> completo. Li&nbsp;<span class="citation" data-cites="qi2024peft">(<a href="../../shared/referencias/referencias.html#ref-qi2024peft" role="doc-biblioref">Li, 2024</a>)</span>, por exemplo, apresentou um refinamento seletivo de 0,2% dos parâmetros de um modelo BERT usando uma abordagem baseada na atualização dos parâmetros de <em>bias</em> e normalização, demonstrando resultados competitivos com técnicas consolidadas na literatura.</p>
+<section id="low-ranking-adaptation" class="level4" data-number="3.3.2.1">
+<h4 data-number="3.3.2.1" class="anchored" data-anchor-id="low-ranking-adaptation"><span class="header-section-number">3.3.2.1</span> Low-Ranking Adaptation</h4>
+<p>No contexto do PEFT, a técnica de <em>Low-Rank Adaptation</em> (LoRA)&nbsp;<span class="citation" data-cites="hu2021loralowrankadaptationlarge">(<a href="../../shared/referencias/referencias.html#ref-hu2021loralowrankadaptationlarge" role="doc-biblioref">Hu et al., 2021</a>)</span> emergiu como uma das mais conhecidas e amplamente utilizadas. Seu funcionamento consiste em aplicar uma decomposição matemática para atualizar os pesos durante o processo de <em>fine-tuning</em>. Quando o <em>fine-tuning</em> tradicional é aplicado, cada matriz de peso do modelo original, <span class="math inline">\(W_0\)</span>, é atualizada para <span class="math inline">\(W_0 + \Delta W\)</span>. No entanto, o LoRA reformula essa atualização <span class="math inline">\(\Delta W\)</span> como o produto de duas matrizes menores:</p>
+<div style="transform-origin:left; scale:0.8;">
+<p> <span id="eq-cap-modelos-pratica-lora"><span class="math display">\[
+\Delta W = BA,
+\tag{3.1}\]</span></span> </p>
+</div>
+<p>onde <span class="math inline">\(B\)</span> e <span class="math inline">\(A\)</span> são matrizes de baixo <em>rank</em>, onde <span class="math inline">\(B\)</span> possui dimensões <span class="math inline">\(d \times r\)</span> e <span class="math inline">\(A\)</span> possui dimensões <span class="math inline">\(r \times k\)</span>, sendo <span class="math inline">\(d\)</span> a dimensão da matriz original de pesos. Esta abordagem é fundamentada no princípio de que as mudanças necessárias para adaptar um modelo a uma nova tarefa podem ser representadas de forma eficiente em um espaço de menor dimensão.</p>
+<p>Durante o processo de treinamento com LoRA, as matrizes de peso originais, <span class="math inline">\(W_0\)</span>, são mantidas completamente congeladas para preservar o conhecimento adquirido durante o pré-treinamento. As novas matrizes <span class="math inline">\(A\)</span> e <span class="math inline">\(B\)</span> são inicializadas de forma que seu produto <span class="math inline">\(BA\)</span> seja inicialmente zero. Isso assegura que o modelo, no início do treinamento, seja idêntico ao modelo pré-treinado original. Conforme o treinamento avança, as matrizes <span class="math inline">\(A\)</span> e <span class="math inline">\(B\)</span> são as únicas que aprendem as adaptações necessárias para a tarefa específica. A saída de cada camada é então calculada como <span class="math inline">\(h = W_0x + BAx\)</span>, onde o primeiro termo mantém o comportamento original do modelo e o segundo adiciona a especialização aprendida.</p>
+<p>O parâmetro de <em>rank</em>, <span class="math inline">\(r\)</span>, é um hiperparâmetro essencial no LoRA, que governa o equilíbrio entre eficiência e capacidade expressiva do modelo. <em>Ranks</em> menores resultam em maior eficiência computacional e menor uso de memória, mas podem limitar a capacidade de adaptação do modelo. Por outro lado, <em>ranks</em> maiores aumentam a flexibilidade, mas também elevam o custo computacional.</p>
+</section>
+<section id="quantized-low-rank-adaptation" class="level4" data-number="3.3.2.2">
+<h4 data-number="3.3.2.2" class="anchored" data-anchor-id="quantized-low-rank-adaptation"><span class="header-section-number">3.3.2.2</span> Quantized Low-Rank Adaptation</h4>
+<p>A combinação de quantização e LoRA é uma técnica avançada e extremamente eficiente para otimizar o ajuste fino de LLMs. A quantização é o processo de converter os pesos e ativações de uma rede neural de um formato de alta precisão (como ponto flutuante de 32 bits - <strong>float32</strong>) para um formato de baixa precisão (como inteiros de 4 ou 8 bits - <strong>int8</strong> ou <strong>int32</strong>). A principal motivação para isso é a economia de memória, já que um <strong>float32</strong> ocupa 4 bytes, enquanto um <strong>int8</strong> ocupa apenas 1 byte. Apesar de a diferença de memória na quantização de um único parâmetro ser pequena, ela se torna muito significativa quando aplicada a modelos de bilhões de parâmetros. Além de economizar memória, a quantização também acelera os cálculos, pois processadores e GPUs podem realizar operações com inteiros de forma muito mais rápida e eficiente. Contudo, o principal desafio dessa abordagem é a possível perda de precisão, que pode degradar o desempenho do modelo se não for tratada com cautela.</p>
+<p>A técnica de <em>Quantization</em> LoRA&nbsp;<span class="citation" data-cites="dettmers2023qlora">(<a href="../../shared/referencias/referencias.html#ref-dettmers2023qlora" role="doc-biblioref">Dettmers et al., 2023</a>)</span>, denominada QLoRA, fornece uma solução para o desafio da perda de precisão ao aplicar a quantização seletivamente. O processo é dividido basicamente em duas etapas. Primeiro, o modelo pré-treinado original é quantizado para um formato de baixa precisão, usando uma técnica denominada <strong>NormalFloat</strong> de 4 bits. Todos os parâmetros são convertidos e armazenados em menos bits, reduzindo o modelo de dezenas de <em>gigabytes</em> para apenas alguns.</p>
+<p>Em seguida, o processo de <em>fine-tuning</em> é realizado apenas nas matrizes de baixo <em>rank</em> do LoRA, que são mantidas em um formato de alta precisão, ou seja, em f<em>loats</em> de 16 ou 32 bits. Esses poucos parâmetros em alta precisão representam o ponto chave para evitar a degradação de desempenho, pois o otimizador precisa de precisão para calcular os gradientes e atualizar os pesos de forma eficaz. Se as matrizes LoRA fossem quantizadas, o processo de aprendizado seria instável e ineficaz.</p>
+<p>Mais especificamente, o QLoRA é baseado nas seguintes técnicas:</p>
+<ol type="1">
+<li><p><strong>NormalFloat 4 (NF4)</strong>: A maioria dos pesos em uma rede neural profunda segue uma distribuição próxima de uma gaussiana ou normal, onde a maioria dos valores se concentra perto de zero. O NF4 define 16 pontos de quantização (já que <span class="math inline">\(2^4=16\)</span>) de forma não uniforme, alocando mais pontos de precisão para os valores próximos de zero. Isso significa que os valores mais comuns e críticos do modelo são representados com maior precisão, enquanto os valores extremos, que são menos frequentes, são representados com menor precisão. O resultado é uma perda de informação muito menor em comparação com a quantização uniforme.</p></li>
+<li><p><strong><em>Double Quantization</em></strong>: Executa a quantização das constantes de quantização NF4 que auxiliam na reconstrução dos valores originais. Essa segunda etapa de quantização visa aplicar uma segunda redução do consumo de memória da rede, aplicando uma quantificação de ponto flutuante de 32 bits dessas constantes para 8 bits.</p></li>
+<li><p><strong><em>Paged Optimizers</em></strong>: é uma técnica de gerenciamento de memória cuja função é evitar os picos de uso de VRAM (memória da GPU) que ocorrem durante o treinamento, especialmente para armazenar parâmetros como gradiente, o momento do gradiente e a variância. Para solucionar esse problema, os <em>Paged Optimizers</em> alocam o estado do otimizador na memória da CPU. Quando a GPU precisa de espaço específico desses dados para o cálculo de gradientes, ela o aloca na VRAM. Após isso, esse espaço é realocado de volta para a CPU. Essa troca dinâmica entre a memória da CPU e da GPU garante que o treinamento continue de forma estável, sem ultrapassar o limite de VRAM.</p></li>
+</ol>
+<p>Na prática, durante o treinamento, o fluxo de dados em uma camada com LoRA quantizado funciona da seguinte maneira: a entrada de um <em>token</em>, <strong><em>x</em></strong>, é multiplicada pela matriz de peso quantizada do modelo base, <span class="math inline">\(W_0^{int8}\)</span>. Em paralelo, essa mesma entrada é multiplicada pelas matrizes de alta precisão do LoRA, <span class="math inline">\(A\)</span> e <span class="math inline">\(B\)</span>. O resultado do cálculo com LoRA, isto é, <span class="math inline">\(BAx\)</span>, é então somado ao resultado do cálculo com o modelo base (<span class="math inline">\(W_0^{int8}\)</span>), e tudo é feito em alta precisão antes de ser passado para a próxima camada.</p>
+<p>A principal vantagem reside no fato de que a computação de maior custo, que envolve a maior parte dos parâmetros (<span class="math inline">\(W_0^{int8}\)</span>), é feito de forma rápida e com pouca memória. O cálculo com os parâmetros do LoRA, que é a parte que realmente “aprende’, é mantido em alta precisão para garantir a qualidade do <em>fine-tuning</em> e evitar perda de precisão no cálculo dos gradientes. Como resultado, a combinação de <em>quantization</em> e LoRA preserva o desempenho do modelo, mas de maneira mais eficiente no que concerne ao uso de memória.</p>
+</section>
+<section id="módulos-adapters" class="level4" data-number="3.3.2.3">
+<h4 data-number="3.3.2.3" class="anchored" data-anchor-id="módulos-adapters"><span class="header-section-number">3.3.2.3</span> Módulos adapters</h4>
+<p>Outra técnica que se destaca no contexto de PEFT são os módulos <em>Adapters</em>, propostos por Houlsby et al.&nbsp;<span class="citation" data-cites="DBLP:conf/icml/HoulsbyGJMLGAG19">(<a href="../../shared/referencias/referencias.html#ref-DBLP:conf/icml/HoulsbyGJMLGAG19" role="doc-biblioref">Houlsby et al., 2019</a>)</span>, cuja estrutura é formada por pequenos módulos de rede neural que são incorporados nas camadas de um modelo <em>Transformer</em> pré-treinado. O princípio consiste em manter fixos os parâmetros do modelo base e treinar apenas os parâmetros desses novos módulos adicionados. Essa abordagem permite que o modelo original preserve o conhecimento já adquirido durante o pré-treinamento, enquanto os <em>Adapters</em> aprendem as adaptações específicas para a nova tarefa durante o ajuste fino do modelo.</p>
+<p>A arquitetura de um módulo <em>Adapter</em>, em sua forma original, segue o padrão de um gargalo (<em>bottleneck</em>). Essa estrutura consiste em:</p>
+<ol type="1">
+<li><p><strong><em>Down-projection</em>:</strong> A entrada de uma camada do modelo original (com dimensão <span class="math inline">\(d\)</span>) é projetada para uma dimensão menor, <span class="math inline">\(m\)</span>, usando uma matriz de peso <span class="math inline">\(W_{down}\)</span>. Isso cria um “gargalo” na arquitetura para comprimir a representação do dado.</p></li>
+<li><p><strong><em>Up-projection</em>:</strong> A representação comprimida (<span class="math inline">\(h_{down}\)</span>) é então projetada de volta para a dimensão original <span class="math inline">\(d\)</span> usando uma segunda matriz de peso <span class="math inline">\(W_{up}\)</span>, dando origem à uma representação de dimensão original <span class="math inline">\(h_{up}\)</span>.</p></li>
+</ol>
+<p>O valor da dimensão <span class="math inline">\(m\)</span> é um hiperparâmetro, e geralmente é menor que <span class="math inline">\(d\)</span>. Isso faz com que o número de parâmetros nos <em>Adapters</em> seja menor que o número de parâmetros do modelo original.</p>
+<p>Para garantir a estabilidade do treinamento, é comum que a saída do módulo <em>Adapter</em> seja somada à entrada da camada, seguindo uma conexão residual (<em>skip-connection</em>). A saída final da camada com o <em>Adapter</em> é então representada por:</p>
+<div style="transform-origin:left; scale:0.9;">
+<p> <span id="eq-cap-modelos-pratica-adapters"><span class="math display">\[
+h_{final} = \mathbf{x} + h_{up},
+\tag{3.2}\]</span></span> </p>
+</div>
+<p>onde <span class="math inline">\(\mathbf{x}\)</span> é a entrada original do <em>Adapter</em>. A matriz <span class="math inline">\(W_{up}\)</span> é geralmente inicializada com valores próximos de zero, para que o módulo <em>Adapter</em> comece com uma função de identidade. Isso garante que, no início do treinamento, a saída do <em>Adapter</em> seja zero e o comportamento do modelo seja idêntico ao original.</p>
+<p>Em suma, as técnicas de PEFT consolidaram-se no contexto de ajuste fino de grandes modelos de linguagens ao oferecerem uma alternativa com a introdução de módulos com pouco impacto em suas arquiteturas originais. Entretanto, tais técnicas possuem suas próprias limitações, sendo a principal delas a de não poder replicar completamente o desempenho do <em>fine-tuning</em> tradicional em todos os cenários. Em tarefas que exigem uma adaptação mais complexa e mudanças significativas no modelo, o ajuste completo de todos os parâmetros ainda pode ser a abordagem mais eficaz.</p>
+</section>
+</section>
+<section id="sec-cap-modelos-pratica-few_shot" class="level3" data-number="3.3.3">
+<h3 data-number="3.3.3" class="anchored" data-anchor-id="sec-cap-modelos-pratica-few_shot"><span class="header-section-number">3.3.3</span> <em>Few-shot learning</em></h3>
+<p>Complementar às estratégias de ajuste fino completo e às técnicas de PEFT, as abordagens de aprendizagem com poucas amostras (do inglês, <em>few-shot learning</em>) buscam maximizar ainda mais a eficiência computacional, reduzindo a quantidade de exemplos necessários para a especialização de um modelo. No campo do Processamento de Linguagem Natural, este termo abrange duas metodologias distintas para adaptar modelos a novas tarefas, nomeadamente <em>In-Context Learning</em> e Ajuste Fino com Poucas Amostras. Embora ambas partam da premissa de utilizar uma quantidade mínima de exemplos, elas diferem fundamentalmente no mecanismo de aprendizado, onde uma ocorre sem a atualização dos pesos do modelo, enquanto a outra envolve um ajuste fino deliberado.</p>
+<section id="aprendizagem-no-contexto-in-context-learning" class="level4" data-number="3.3.3.1">
+<h4 data-number="3.3.3.1" class="anchored" data-anchor-id="aprendizagem-no-contexto-in-context-learning"><span class="header-section-number">3.3.3.1</span> Aprendizagem no contexto (<em>In-Context Learning</em>)</h4>
+<p>A primeira abordagem, e a que mais popularizou o termo no contexto de PLN. Este método não envolve uma fase de treinamento com atualização de gradientes. Em vez disso, o modelo é condicionado a realizar uma nova tarefa no momento da inferência. O aprendizado é transitório e guiado pelo <em>prompt</em> de entrada, que contém uma descrição da tarefa e um pequeno númeo de exemplos ilustrativos (os <em>shots</em>).</p>
+<p>O trabalho de demonstrou que modelos de grande escala possuem capacidades emergentes de generalização a partir de poucos exemplos, viabilizando a aprendizagem no contexto de forma eficaz. Os autores avaliam três configurações:</p>
+<ul>
+<li><p><strong><em>Zero-shot learning</em>:</strong> O modelo recebe apenas a descrição em linguagem natural da tarefa, sem nenhum exemplo de como executá-la.</p></li>
+<li><p><strong><em>One-shot learning</em>:</strong> O modelo recebe a descrição da tarefa acompanhada de um único exemplo.</p></li>
+<li><p><strong><em>Few-shot learning</em>:</strong> O modelo recebe a descrição da tarefa e múltiplos exemplos (tipicamente entre 2 e 32).</p></li>
+</ul>
+<p>A eficácia desta técnica está intrinsecamente ligada à qualidade e ao formato do <em>prompt</em>. A engenharia de <em>prompts</em> torna-se uma disciplina crucial, pois a maneira como os exemplos são apresentados pode influenciar drasticamente a precisão e a coerência da saída do modelo. A seleção de exemplos diversificados e representativos da tarefa em questão é fundamental para guiar o modelo de forma adequada.</p>
+<p>A principal vantagem desta abordagem reside na sua eficiência computacional e na economia de recursos. Como não há treinamento, os custos associados à esta etapa são completamente eliminados. No entanto, a performance embora muitas vezes competitiva, pode não alcançar a mesma robustez de um modelo que passou pelo processo de atualização de parâmetros, especialmente em tarefas altamente especializadas ou que requerem conhecimento de um domínio muito específico. Além disso, a janela de contexto do modelo impõe um limite físico à quantidade de exemplos que podem ser fornecidos, e o custo da inferência pode aumentar.</p>
+</section>
+<section id="ajuste-fino-com-poucas-amostras" class="level4" data-number="3.3.3.2">
+<h4 data-number="3.3.3.2" class="anchored" data-anchor-id="ajuste-fino-com-poucas-amostras"><span class="header-section-number">3.3.3.2</span> Ajuste fino com poucas amostras</h4>
+<p>A segunda abordagem alinha-se mais com a definição clássica de <em>few-shot learning</em> em outras áreas de IA. Ela consiste em realizar o ajuste fino supervisionado do modelo utilizando um conjunto de dados deliberadamente pequeno, mas de alta qualidade. A hipótese central é que, para modelos que já possuem um vasto conhecimento de mundo adquirido durante o pré-treinamento, não é a quantidade de dados de ajuste fino que importa, mas sim a sua qualidade.</p>
+<p>Um exemplo proeminente desta técnica é apresentado no trabalho de <span class="citation" data-cites="ye_limo_2025">(<a href="../../shared/referencias/referencias.html#ref-ye_limo_2025" role="doc-biblioref">Ye et al., 2025</a>)</span>. Os autores exploram a premissa de que o raciocínio complexo exige volumes massivos de dados de treinamento. Eles propõem a hipótese LIMO (do inglês, <em>Less-Is-More Reasoning Hypothesis</em>) que postula que, em modelos onde o conhecimento de um domínio já foi extensivamente codificado o raciocínio sofisticado pode emergir a partir de demonstrações mínimas, mas estrategicamente desenhadas, de processos cognitivos. Segundo a hipótese, existem dois fatores principais que determinam o ponto de ativação para o raciocínio complexo: (1) a presença de conhecimento prévio dentro dos parâmetros do modelo, adquirido durante o pré-treinamento e (2) a efetividade de poucos exemplos em demonstrar processos de solução de problemas que estimulem uma reflexão mais extensa.</p>
+<p>Para validar essa hipótese, os autores desenvolvem um rigoroso processo de curadoria de dados. Partindo de um conjunto com dezenas de milhões de problemas matemáticos, eles aplicam um sistema de filtragem em múltiplos estágios para selecionar apenas 800 amostras de treinamento de alta qualidade. Os critérios de seleção priorizaram problemas desafiadores e cadeias de raciocínio que exibiam características como elaboração detalhada, autoverificação e clareza lógica. Utilizando apenas 800 amostras para realizar um ajuste fino supervisionado simples o modelo alcançou resultados notáveis e amplamente superiores a outros modelos, tanto dentro quanto fora do domínio, confirmando que, para certas tarefas, a curadoria meticulosa de um pequeno conjunto de dados é mais crucial do que a quantidade massiva, permitindo o desenvolvimento de capacidades de raciocínio robustas de forma muito mais eficiente</p>
+<p>Em suma, as duas vertentes do <em>few-shot learning</em> oferecem um contraponto claro em termos de mecanismo e objetivo. A aprendizagem no contexto é uma técnica de inferência: ela não altera os pesos do modelo e depende da qualidade do <em>prompt</em> para guiar o comportamento do modelo de forma temporária. Por outro lado, o ajuste fino com poucas amostras é uma técnica de treinamento que modifica permanentemente o modelo. Porém, seu sucesso não está no volume, mas na qualidade e na densidade informacional dos dados. O investimento é deslocado da coleta massiva para a curadoria meticulosa, com o objetivo de alcançar um desempenho robusto e de ponta em domínios específicos.</p>
+</section>
+</section>
+</section>
+<section id="sec-cap-modelos-pratica-alignment" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="sec-cap-modelos-pratica-alignment"><span class="header-section-number">3.4</span> <em>AI alignment</em></h2>
+<p>O alinhamento de sistemas de IA aos valores humanos (do inglês, <em>AI Alignment</em>) refere-se ao desafio de garantir que agentes artificiais otimizem objetivos que estejam em conformidade com as intenções humanas, mesmo em contextos complexos, ambíguos ou não totalmente especificados. Esse problema é frequentemente enquadrado no contexto mais amplo do <em>controle de sistemas inteligentes</em>, conforme discutido por Russell&nbsp;<span class="citation" data-cites="RUSSEL:2019">(<a href="../../shared/referencias/referencias.html#ref-RUSSEL:2019" role="doc-biblioref">Russel, 2019</a>)</span> e Bostrom&nbsp;<span class="citation" data-cites="bostrom2014superintelligence">(<a href="../../shared/referencias/referencias.html#ref-bostrom2014superintelligence" role="doc-biblioref">Bostrom, 2014</a>)</span>, e está no cerne das preocupações de segurança da IA contemporânea&nbsp;<span class="citation" data-cites="hendrycks2021unsolved ngo2023alignment">(<a href="../../shared/referencias/referencias.html#ref-hendrycks2021unsolved" role="doc-biblioref">Hendrycks et al., 2021</a>; <a href="../../shared/referencias/referencias.html#ref-ngo2023alignment" role="doc-biblioref">Ngo et al., 2023</a>)</span>.</p>
+<p>À medida que LLMs, agentes de decisão e sistemas autônomos adquirem maior expressividade e poder de generalização, torna-se cada vez mais crítico mitigar riscos decorrentes de comportamentos inesperados, otimizações mal direcionadas ou divergências entre metas explícitas e consequências práticas. Trabalhos como Gabriel&nbsp;<span class="citation" data-cites="gabriel2020artificial">(<a href="../../shared/referencias/referencias.html#ref-gabriel2020artificial" role="doc-biblioref">Gabriel, 2020</a>)</span> destacam que o alinhamento não se restringe a uma questão técnica, mas envolve também aspectos normativos e éticos sobre quais valores humanos devem orientar a otimização algorítmica.</p>
+<p>Ao contrário de tarefas com métricas bem definidas, como acurácia em classificação, muitos problemas reais envolvem critérios subjetivos, valores éticos e decisões com múltiplas dimensões. Nesses casos, especificar manualmente uma função de recompensa ou um conjunto de regras explicitamente alinhadas com os valores humanos é frequentemente impraticável. Assim, cresce o interesse por abordagens que incorporam diretamente o julgamento humano no processo de treinamento, não apenas como fonte de dados supervisionados, mas como sinal de alinhamento.</p>
+<p>É útil esclarecer o que se entende por agentes artificiais. São sistemas de IA capazes de interagir com um ambiente e tomar decisões de forma autônoma, com base em objetivos explícitos ou implícitos. Eles operam em um ciclo de percepção, decisão e ação, recebendo observações do ambiente (por exemplo, entradas textuais ou sensores), executando ações (como gerar respostas, mover-se fisicamente ou chamar APIs) e otimizando comportamentos de acordo com critérios de desempenho. Exemplos incluem assistentes conversacionais interativos, robôs autônomos, sistemas de recomendação adaptativos ou LLMs integrados a agentes de planejamento e execução como o AutoGPT. À medida que o grau de autonomia e poder de ação desses agentes aumenta, cresce também o potencial de desalinhamento, tornando o <em>AI Alignment</em> uma prioridade crítica.</p>
+<p>O tema ganhou relevância crescente à medida que sistemas de IA passaram a atuar de forma autônoma em cenários críticos, como decisões financeiras, diagnósticos médicos e controle de veículos autônomos, onde pequenos desalinhamentos entre a função de recompensa e os valores humanos podem gerar comportamentos perigosos ou não intencionais&nbsp;<span class="citation" data-cites="amodei2016concrete carlsmith2022power">(<a href="../../shared/referencias/referencias.html#ref-amodei2016concrete" role="doc-biblioref">Amodei et al., 2016</a>; <a href="../../shared/referencias/referencias.html#ref-carlsmith2022power" role="doc-biblioref">Carlsmith, 2022</a>)</span>. Além disso, fenômenos como <em>goal misgeneralization</em> e <em>specification gaming</em> ilustram a dificuldade de definir objetivos de forma robusta&nbsp;<span class="citation" data-cites="shah2022goal krakovna2020specification">(<a href="../../shared/referencias/referencias.html#ref-krakovna2020specification" role="doc-biblioref">Krakovna et al., 2020</a>; <a href="../../shared/referencias/referencias.html#ref-shah2022goal" role="doc-biblioref">Shah et al., 2022</a>)</span>.</p>
+<p>O primeiro ocorre quando o modelo aprende corretamente o comportamento desejado durante o treinamento, mas generaliza a meta subjacente de forma incorreta em novos contextos, perseguindo intenções aparentes em vez de objetivos reais. Por exemplo, um agente treinado para coletar moedas em um jogo pode, em cenários novos, priorizar qualquer objeto circular, interpretando erroneamente o conceito de “moeda”. Já o <em>specification gaming</em> refere-se à exploração de falhas na função de recompensa ou nas restrições impostas pelo projetista, levando o agente a atingir pontuações elevadas sem realizar a tarefa de maneira adequada. Um exemplo clássico é o de agentes que maximizam métricas intermediárias, como distância percorrida, sem cumprir o objetivo final de forma útil. Esses fenômenos reforçam a necessidade de métodos de alinhamento que incorporem o julgamento humano de forma mais direta e adaptativa.</p>
+<p>Duas das abordagens mais representativas desse paradigma são o <em>Reinforcement Learning from Human Feedback</em> (RLHF)&nbsp;<span class="citation" data-cites="DBLP:conf/nips/ChristianoLBMLA17 ouyang2022training leike2018scalable stiennon2020learning">(<a href="../../shared/referencias/referencias.html#ref-DBLP:conf/nips/ChristianoLBMLA17" role="doc-biblioref">Christiano et al., 2017</a>; <a href="../../shared/referencias/referencias.html#ref-leike2018scalable" role="doc-biblioref">Leike et al., 2018</a>; <a href="../../shared/referencias/referencias.html#ref-ouyang2022training" role="doc-biblioref">Ouyang et al., 2022</a>; <a href="../../shared/referencias/referencias.html#ref-stiennon2020learning" role="doc-biblioref">Stiennon et al., 2020</a>)</span> e o <em>Direct Preference Optimization</em> (DPO)&nbsp;<span class="citation" data-cites="rafailov2023direct">(<a href="../../shared/referencias/referencias.html#ref-rafailov2023direct" role="doc-biblioref">Rafailov et al., 2023</a>)</span>, descritos a seguir com maior detalhamento.</p>
+<section id="sec-cap-modelos-pratica-rlbasics" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="sec-cap-modelos-pratica-rlbasics"><span class="header-section-number">3.4.1</span> Fundamentos de aprendizado por reforço</h3>
+<p>Antes de descrever RLHF e DPO, é importante revisar brevemente conceitos fundamentais do aprendizado por reforço (RL). O RL modela a interação entre um agente e um ambiente como um processo de decisão de Markov (MDP), definido por um conjunto de estados <span class="math inline">\(\mathcal{S}\)</span>, ações <span class="math inline">\(\mathcal{A}\)</span>, uma função de transição <span class="math inline">\(P(s' \mid s, a)\)</span> e uma função de recompensa <span class="math inline">\(r(s, a)\)</span>.</p>
+<p>Uma política <span class="math inline">\(\pi_\phi(a \mid s)\)</span> descreve a probabilidade de o agente tomar a ação <span class="math inline">\(a\)</span> no estado <span class="math inline">\(s\)</span>, parametrizada por <span class="math inline">\(\phi\)</span>. O objetivo do RL é maximizar a recompensa esperada acumulada ao longo do tempo:</p>
+<div style="transform-origin:left; scale:0.9;">
+<p> <span id="eq-cap-modelos-pratica-rl"><span class="math display">\[
+J(\pi_\phi) = \mathbb{E}_{\pi_\phi}\left[ \sum_{t=0}^{\infty} \gamma^t r(s_t, a_t) \right]
+\tag{3.3}\]</span></span> </p>
+</div>
+<p>onde <span class="math inline">\(\gamma \in [0, 1)\)</span> é um fator de desconto temporal. Tradicionalmente, assume-se que a função de recompensa <span class="math inline">\(r(s, a)\)</span> é totalmente especificada pelo projetista do sistema. No entanto, em tarefas abertas e de alto nível, como diálogo natural, decisões éticas ou planejamento estratégico, definir manualmente <span class="math inline">\(r(s, a)\)</span> de forma alinhada aos valores humanos é virtualmente impossível. Essa limitação motiva métodos que estimam recompensas indiretamente a partir de preferências humanas ou substituem sua modelagem explícita por técnicas baseadas em sinais comportamentais observados.</p>
+</section>
+<section id="sec-cap-modelos-pratica-rlhf" class="level3" data-number="3.4.2">
+<h3 data-number="3.4.2" class="anchored" data-anchor-id="sec-cap-modelos-pratica-rlhf"><span class="header-section-number">3.4.2</span> <em>Reinforcement Learning from Human Feedback</em> (RLHF)</h3>
+<p>O RLHF&nbsp;<span class="citation" data-cites="DBLP:conf/nips/ChristianoLBMLA17 ouyang2022training leike2018scalable">(<a href="../../shared/referencias/referencias.html#ref-DBLP:conf/nips/ChristianoLBMLA17" role="doc-biblioref">Christiano et al., 2017</a>; <a href="../../shared/referencias/referencias.html#ref-leike2018scalable" role="doc-biblioref">Leike et al., 2018</a>; <a href="../../shared/referencias/referencias.html#ref-ouyang2022training" role="doc-biblioref">Ouyang et al., 2022</a>)</span> é um procedimento de alinhamento que modela o problema como uma tarefa de controle sequencial, na qual um agente otimiza uma política <span class="math inline">\(\pi_\phi(y \mid x)\)</span>, a probabilidade de gerar uma resposta <span class="math inline">\(y\)</span> dado um <em>prompt</em> <span class="math inline">\(x\)</span>, com o objetivo de maximizar uma função de recompensa derivada de preferências humanas.</p>
+<section id="modelo-de-recompensa" class="level4" data-number="3.4.2.1">
+<h4 data-number="3.4.2.1" class="anchored" data-anchor-id="modelo-de-recompensa"><span class="header-section-number">3.4.2.1</span> Modelo de recompensa</h4>
+<p>Dado um conjunto de comparações humanas entre respostas <span class="math inline">\(y^+\)</span> (preferida) e <span class="math inline">\(y^-\)</span> (rejeitada) para um mesmo <span class="math inline">\(x\)</span>, o objetivo é aprender uma função de recompensa <span class="math inline">\(r_\theta(x, y)\)</span> tal que:</p>
+<div style="transform-origin:left; scale:0.9;">
+<p> <span id="eq-cap-modelos-pratica-rlhf-rm"><span class="math display">\[
+P(y^+ \succ y^-) = \frac{\exp(r_\theta(x, y^+))}{\exp(r_\theta(x, y^+)) + \exp(r_\theta(x, y^-))}
+\tag{3.4}\]</span></span> </p>
+</div>
+<p>A função de perda associada é a entropia cruzada negativa entre as preferências humanas e a distribuição induzida por <span class="math inline">\(r_\theta\)</span>:</p>
+<div style="transform-origin:left; scale:0.9;">
+<p> <span id="eq-cap-modelos-pratica-rlhf-rm-loss"><span class="math display">\[
+\mathcal{L}_\text{RM}(\theta) = - \mathbb{E}_{(x, y^+, y^-)} \left[ \log \frac{\exp(r_\theta(x, y^+))}{\exp(r_\theta(x, y^+)) + \exp(r_\theta(x, y^-))} \right]
+\tag{3.5}\]</span></span> </p>
+</div>
+</section>
+<section id="aprendizado-por-reforço" class="level4" data-number="3.4.2.2">
+<h4 data-number="3.4.2.2" class="anchored" data-anchor-id="aprendizado-por-reforço"><span class="header-section-number">3.4.2.2</span> Aprendizado por reforço</h4>
+<p>Com <span class="math inline">\(r_\theta\)</span> fixado, ajusta-se a política <span class="math inline">\(\pi_\phi\)</span> para maximizar a recompensa esperada:</p>
+<div style="transform-origin:left; scale:0.9;">
+<p> <span id="eq-cap-modelos-pratica-rlhf-rl"><span class="math display">\[
+\max_{\phi} \quad \mathbb{E}_{x \sim \mathcal{D}} \left[ \mathbb{E}_{y \sim \pi_\phi(\cdot \mid x)} \left[ r_\theta(x, y) \right] \right]
+\tag{3.6}\]</span></span> </p>
+</div>
+<p>Para garantir estabilidade e evitar <em>drift</em>, impõe-se uma penalidade de divergência Kullback-Leibler (KL) em relação à política original <span class="math inline">\(\pi_0\)</span>:</p>
+<div style="transform-origin:left; scale:0.9;">
+<p> <span id="eq-cap-modelos-pratica-rlhf-rl-loss"><span class="math display">\[
+\mathcal{L}_\text{RLHF}(\phi) = - \mathbb{E}_{x \sim \mathcal{D}} \left[ \mathbb{E}_{y \sim \pi_\phi(y \mid x)} \left[ r_\theta(x, y) - \beta \cdot \log \frac{\pi_\phi(y \mid x)}{\pi_0(y \mid x)} \right] \right]
+\tag{3.7}\]</span></span> </p>
+</div>
+<p>A função da <a href="#eq-cap-modelos-pratica-rlhf-rl" class="quarto-xref">Equação&nbsp;<span>3.6</span></a> pode ser reinterpretada como a maximização de uma vantagem regularizada:</p>
+<p><span class="math display">\[\mathcal{L}_\text{RLHF}(\phi) = - \mathbb{E}_{\pi_\phi}\left[ A^{r_\theta}(x, y) - \beta D_\text{KL}(\pi_\phi \parallel \pi_0) \right]\]</span></p>
+<p>onde <span class="math inline">\(A^{r_\theta}(x, y)\)</span> representa a vantagem induzida pelo modelo de recompensa. Essa formulação evidencia que o treinamento busca não apenas maximizar a recompensa, mas também restringir a divergência da política em relação ao comportamento original do modelo. Essa função é comumente otimizada via <em>Proximal Policy Optimization</em> (PPO)&nbsp;<span class="citation" data-cites="schulman2017proximal">(<a href="../../shared/referencias/referencias.html#ref-schulman2017proximal" role="doc-biblioref">Schulman et al., 2017</a>)</span>, um algoritmo de aprendizado por reforço que atualiza a política por gradientes com restrições de divergência KL, garantindo que mudanças bruscas não degradem o desempenho.</p>
+</section>
+<section id="discussão-sobre-instabilidades" class="level4" data-number="3.4.2.3">
+<h4 data-number="3.4.2.3" class="anchored" data-anchor-id="discussão-sobre-instabilidades"><span class="header-section-number">3.4.2.3</span> Discussão sobre instabilidades</h4>
+<p>A separação entre a estimativa de preferências (<span class="math inline">\(r_\theta\)</span>) e a otimização da política (<span class="math inline">\(\pi_\phi\)</span>) pode introduzir instabilidades devido ao fenômeno conhecido como <em>reward hacking</em>. Quando o modelo de recompensa é imperfeito, a política pode explorar regiões do espaço de respostas onde <span class="math inline">\(r_\theta\)</span> é superestimado, produzindo comportamentos desalinhados com as intenções humanas. Além disso, a escolha do coeficiente <span class="math inline">\(\beta\)</span> na Eq.&nbsp;(6) afeta a regularização: valores baixos permitem derivações excessivas da política, enquanto valores altos podem restringir a exploração, levando à subotimização.</p>
+</section>
+</section>
+<section id="sec-cap-modelos-pratica-dpo" class="level3" data-number="3.4.3">
+<h3 data-number="3.4.3" class="anchored" data-anchor-id="sec-cap-modelos-pratica-dpo"><span class="header-section-number">3.4.3</span> <em>Direct Preference Optimization</em> (DPO)</h3>
+<p>O DPO&nbsp;<span class="citation" data-cites="rafailov2023direct">(<a href="../../shared/referencias/referencias.html#ref-rafailov2023direct" role="doc-biblioref">Rafailov et al., 2023</a>)</span> propõe um modelo mais direto e principiado para treinamento de políticas alinhadas, evitando a estimativa explícita de uma função de recompensa. A ideia central é modelar as preferências humanas como uma distribuição <em>a posteriori</em> sobre políticas, baseada na inferência bayesiana.</p>
+<section id="formulação-bayesiana" class="level4" data-number="3.4.3.1">
+<h4 data-number="3.4.3.1" class="anchored" data-anchor-id="formulação-bayesiana"><span class="header-section-number">3.4.3.1</span> Formulação bayesiana</h4>
+<p>Assume-se que os dados de preferência <span class="math inline">\(y^+ \succ y^-\)</span> são amostrados de uma distribuição preferencial induzida por uma política ótima <span class="math inline">\(\pi^*\)</span>, tal que:</p>
+<div style="transform-origin:left; scale:0.9;">
+<p> <span id="eq-cap-modelos-pratica-dpo-bayesian"><span class="math display">\[
+P(y^+ \succ y^- \mid x) = \frac{\exp(\beta \cdot \log \pi^*(y^+ \mid x))}{\exp(\beta \cdot \log \pi^*(y^+ \mid x)) + \exp(\beta \cdot \log \pi^*(y^- \mid x))}
+\tag{3.8}\]</span></span> </p>
+</div>
+<p>onde <span class="math inline">\(\beta &gt; 0\)</span> controla a rigidez da preferência. Ao aproximar <span class="math inline">\(\pi^* \approx \pi_\phi\)</span>, pode-se obter uma função de perda supervisionada para o aprendizado direto da política:</p>
+<div style="transform-origin:left; scale:0.9;">
+<p> <span id="eq-cap-modelos-pratica-dpo-loss"><span class="math display">\[
+\mathcal{L}_\text{DPO}(\phi) = - \mathbb{E}_{(x, y^+, y^-)} \left[ \log \frac{\exp(\beta \cdot \Delta \log \pi_\phi)}{\exp(\beta \cdot \Delta \log \pi_\phi) + 1} \right]
+\tag{3.9}\]</span></span> </p>
+</div>
+<p>com <span class="math inline">\(\Delta \log \pi_\phi = \log \pi_\phi(y^+ \mid x) - \log \pi_\phi(y^- \mid x)\)</span>.</p>
+<p>A função de perda da Eq.&nbsp;(8) é análoga à perda logística em tarefas de classificação binária, onde o modelo aprende a distinguir respostas preferidas de rejeitadas. Sob essa perspectiva, o DPO pode ser interpretado como uma forma de inferência bayesiana aproximada, na qual a política ótima é tratada como distribuição posterior sobre ações condicionada às preferências humanas observadas.</p>
+</section>
+<section id="relação-com-aprendizado-por-reforço" class="level4" data-number="3.4.3.2">
+<h4 data-number="3.4.3.2" class="anchored" data-anchor-id="relação-com-aprendizado-por-reforço"><span class="header-section-number">3.4.3.2</span> Relação com aprendizado por reforço</h4>
+<p>A perda DPO pode ser interpretada como uma aproximação supervisionada do gradiente de política que surge da maximização da preferência empírica. Em vez de utilizar amostragem ou atualização por episódios, o DPO permite otimização por <em>backpropagation</em> puro, pois todas as quantidades relevantes são diretamente diferenciáveis.</p>
+</section>
+<section id="vantagens-e-limitações" class="level4" data-number="3.4.3.3">
+<h4 data-number="3.4.3.3" class="anchored" data-anchor-id="vantagens-e-limitações"><span class="header-section-number">3.4.3.3</span> Vantagens e limitações</h4>
+<p>Dentre as principais vantagens do DPO, temos:</p>
+<ul>
+<li><p><strong>Eficiência computacional:</strong> não requer RL nem estimativa de <span class="math inline">\(r_\theta\)</span>;</p></li>
+<li><p><strong>Estabilidade:</strong> treinamento supervisionado direto evita instabilidades de PPO;</p></li>
+<li><p><strong>Simplicidade:</strong> menos componentes, menos fontes de erro, maior interpretabilidade.</p></li>
+</ul>
+<p>Apesar de seus méritos, o DPO depende fortemente da fidelidade das distribuições de preferência observadas. Essa dependência significa que a política tende a reproduzir fielmente os padrões nos dados disponíveis, mas pode falhar em capturar estruturas de longo prazo que só emergem após várias etapas de decisão. Um modelo de recompensa explícito, ao inferir padrões latentes e recompensas cumulativas, pode capturar dependências temporais e objetivos hierárquicos que o DPO, por sua natureza supervisionada, tende a ignorar.</p>
+</section>
+</section>
+<section id="discussão-comparativa-rlhf-vs.-dpo" class="level3" data-number="3.4.4">
+<h3 data-number="3.4.4" class="anchored" data-anchor-id="discussão-comparativa-rlhf-vs.-dpo"><span class="header-section-number">3.4.4</span> Discussão comparativa: RLHF vs.&nbsp;DPO</h3>
+<p>Ambas as abordagens compartilham o objetivo de incorporar preferências humanas ao treinamento de políticas, mas diferem em aspectos fundamentais. O RLHF separa o aprendizado da função de recompensa do processo de otimização, o que oferece maior flexibilidade e capacidade de generalização, porém introduz complexidade e risco de instabilidades devido ao <em>reward hacking</em>. O DPO, por outro lado, adota uma formulação mais direta e eficiente, reduzindo o custo computacional e a instabilidade, ao preço de depender fortemente da qualidade dos dados de preferência. Assim, o RLHF tende a ser mais adequado para cenários com dados escassos, mas onde a generalização é essencial, enquanto o DPO se mostra vantajoso quando há abundância de <em>feedback</em> humano confiável e rápido treinamento é desejável. Revisões abrangentes recentes&nbsp;<span class="citation" data-cites="ngo2023alignment hendrycks2021unsolved">(<a href="../../shared/referencias/referencias.html#ref-hendrycks2021unsolved" role="doc-biblioref">Hendrycks et al., 2021</a>; <a href="../../shared/referencias/referencias.html#ref-ngo2023alignment" role="doc-biblioref">Ngo et al., 2023</a>)</span> destacam que abordagens híbridas e multiestágio, combinando aprendizado por preferências, interpretabilidade e segurança formal, representam um caminho promissor para sistemas de IA alinhados e robustos. O <a href="#def-cap-modelos-pratica-rlhf_dpo" class="quarto-xref">Quadro&nbsp;<span>3.1</span></a> resume comparativamente as principais diferenças entre o RLHF e o DPO, destacando seus fundamentos teóricos, características de treinamento e limitações práticas.</p>
+<div id="def-cap-modelos-pratica-rlhf_dpo" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 3.1</strong></span> Comparação entre <em>Reinforcement Learning from Human Feedback</em> (RLHF) e <em>Direct Preference Optimization</em> (DPO)</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 31%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Aspecto</strong></th>
+<th style="text-align: left;"><strong>RLHF</strong></th>
+<th style="text-align: left;"><strong>DPO</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Formulação</strong></td>
+<td style="text-align: left;">Baseado em aprendizado por reforço com modelagem explícita de recompensa e atualização da política via PPO&nbsp;<span class="citation" data-cites="DBLP:conf/nips/ChristianoLBMLA17 ouyang2022training schulman2017proximal">(<a href="../../shared/referencias/referencias.html#ref-DBLP:conf/nips/ChristianoLBMLA17" role="doc-biblioref">Christiano et al., 2017</a>; <a href="../../shared/referencias/referencias.html#ref-ouyang2022training" role="doc-biblioref">Ouyang et al., 2022</a>; <a href="../../shared/referencias/referencias.html#ref-schulman2017proximal" role="doc-biblioref">Schulman et al., 2017</a>)</span>.</td>
+<td style="text-align: left;">Baseado em otimização supervisionada direta de preferências humanas, sem estimar explicitamente a função de recompensa&nbsp;<span class="citation" data-cites="rafailov2023direct">(<a href="../../shared/referencias/referencias.html#ref-rafailov2023direct" role="doc-biblioref">Rafailov et al., 2023</a>)</span>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Objetivo de treinamento</strong></td>
+<td style="text-align: left;">Maximizar a recompensa aprendida <span class="math inline">\(r_\theta(x, y)\)</span> regularizada pela divergência KL entre políticas.</td>
+<td style="text-align: left;">Maximizar diretamente a probabilidade de respostas preferidas <span class="math inline">\(y^+\)</span> sobre rejeitadas <span class="math inline">\(y^-\)</span> em uma formulação logística.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Tipo de atualização</strong></td>
+<td style="text-align: left;">Aprendizado por reforço com amostragem de trajetórias e gradientes de política (<em>policy gradients</em>).</td>
+<td style="text-align: left;">Treinamento supervisionado via <em>backpropagation</em> padrão, sem interação com o ambiente.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Custo computacional</strong></td>
+<td style="text-align: left;">Alto, devido à necessidade de amostragem, atualização iterativa da política e estimativa de recompensas.</td>
+<td style="text-align: left;">Baixo, pois elimina o ciclo de RL e opera inteiramente em dados estáticos de preferências.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Estabilidade de treinamento</strong></td>
+<td style="text-align: left;">Sensível ao ajuste do coeficiente de regularização <span class="math inline">\(\beta\)</span> e à qualidade do modelo de recompensa, sujeito a <em>reward hacking</em>.</td>
+<td style="text-align: left;">Mais estável, pois não requer modelagem de recompensas nem otimização sequencial via PPO.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Interpretação teórica</strong></td>
+<td style="text-align: left;">Aproximação regularizada do gradiente de vantagem em um MDP com recompensa aprendida.</td>
+<td style="text-align: left;">Inferência bayesiana aproximada sobre políticas condicionadas a preferências humanas.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Generalização</strong></td>
+<td style="text-align: left;">Pode extrapolar preferências para novos contextos, desde que o modelo de recompensa capture relações latentes.</td>
+<td style="text-align: left;">Limitado à distribuição observada de preferências, podendo falhar em extrapolações de longo prazo.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Aplicações típicas</strong></td>
+<td style="text-align: left;">Treinamento de LLMs (por exemplo, InstructGPT) e agentes de decisão com <em>feedback</em> humano em tempo real.</td>
+<td style="text-align: left;">Ajuste fino supervisionado de LLMs com grandes conjuntos de preferências curadas (<em>offline alignment</em>).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Principais limitações</strong></td>
+<td style="text-align: left;">Complexidade computacional, dependência de modelo de recompensa robusto e risco de instabilidade.</td>
+<td style="text-align: left;">Dependência da qualidade das preferências e dificuldade em capturar dependências temporais complexas.</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-cap-modelos-pratica-exemplo_pratico" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="sec-cap-modelos-pratica-exemplo_pratico"><span class="header-section-number">3.5</span> Exemplo prático</h2>
+<p>Nesta seção, materializamos os conceitos teóricos discutidos ao longo do capítulo em uma aplicação prática de ponta a ponta. O objetivo é demonstrar o processo de especialização de um grande modelo de linguagem para uma tarefa de nicho no idioma português. Para isso, vamos criar o Dr.&nbsp;Bode, um assistente virtual de saúde, partindo de um modelo generalista e aplicando as técnicas de ajuste fino supervisionado (com PEFT) e otimização por preferência direta para adaptá-lo a um domínio altamente especializado, como a medicina.</p>
+<section id="preparando-o-ambiente" class="level3" data-number="3.5.1">
+<h3 data-number="3.5.1" class="anchored" data-anchor-id="preparando-o-ambiente"><span class="header-section-number">3.5.1</span> Preparando o ambiente</h3>
+<p>A reprodutibilidade é um pilar da pesquisa e desenvolvimento em IA. Para garantir a consistência dos resultados, nosso ambiente de trabalho deve ser configurado corretamente. Este guia foi desenvolvido e testado com <code>Python 3.9</code>. As bibliotecas e suas respectivas versões são listadas abaixo. Destacamos as principais: <code>transformers</code> e <code>datasets</code> para o ecossistema <em>Hugging Face</em>; <code>peft</code> para a aplicação de <em>Parameter-Efficient Fine-Tuning</em>; <code>trl</code> para os treinadores de alto nível (SFT e DPO); e <code>bitsandbytes</code> para a quantização do modelo.</p>
+<p></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>transformers<span class="op">==</span><span class="fl">4.53.1</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>torch<span class="op">==</span><span class="fl">2.7.1</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>datasets<span class="op">==</span><span class="fl">3.6.0</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>tqdm<span class="op">==</span><span class="fl">4.67.1</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>peft<span class="op">==</span><span class="fl">0.16.0</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>accelerate<span class="op">==</span><span class="fl">1.8.1</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>trl<span class="op">==</span><span class="fl">0.9.6</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>bitsandbytes<span class="op">==</span><span class="fl">0.41.1</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p></p>
+<p>Ainda, definimos as seguintes variáveis globais, utilizadas durante a execução das células a seguir</p>
+<p></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>NOME_MODELO <span class="op">=</span> <span class="st">"Qwen/Qwen3-1.7B"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>DATASET_AVALIACAO <span class="op">=</span> <span class="st">"recogna-nlp/drbodebench"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>DATASET_SFT <span class="op">=</span> <span class="st">"recogna-nlp/drbode240_dataset"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>DATASET_DPO <span class="op">=</span> <span class="st">"recogna-nlp/dpo-mmlu-ptbr"</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p></p>
+</section>
+<section id="o-ponto-de-partida" class="level3" data-number="3.5.2">
+<h3 data-number="3.5.2" class="anchored" data-anchor-id="o-ponto-de-partida"><span class="header-section-number">3.5.2</span> O ponto de partida</h3>
+<p>Todo projeto de ajuste fino começa com a escolha de um modelo de propósito geral. Para este estudo de caso, nosso ponto de partida será o <code>Qwen/Qwen3-1.7B</code>, um modelo com 1.7 bilhão de parâmetros. Este modelo foi escolhido por seu sólido desempenho em tarefas de raciocínio e seguimento de instruções, aliado a um tamanho que permite o treinamento em hardware acessível. Contudo, ele carece de conhecimento especializado em saúde, e nosso objetivo é justamente preencher essa lacuna. O treinamento será realizado com o <em>dataset</em> <code>recogna-nlp/drbode240_dataset</code><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>Antes de qualquer modificação, é crucial estabelecer uma linha de base (<em>baseline</em>) para quantificar nosso progresso. Avaliaremos o desempenho do modelo original no <em>benchmark</em> <code>recogna-nlp/drbodebench</code><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, um conjunto composto por questões de múltipla escolha extraídas de provas de residência médica no Brasil. O resultado nos mostrará a capacidade inicial do modelo de responder a questões médicas complexas, servindo como ponto de partida para a jornada de especialização. O script a seguir realiza três etapas fundamentais:</p>
+<ul>
+<li><p><strong>Formatação do <em>prompt</em>:</strong> Estrutura a questão no formato esperado pelo modelo.</p></li>
+<li><p><strong>Geração e extração da resposta:</strong> Envia o <em>prompt</em> ao modelo e extrai a alternativa prevista.</p></li>
+<li><p><strong>Cálculo de acurácia:</strong> Compara a resposta do modelo com o gabarito e calcula a acurácia total.</p></li>
+</ul>
+<!--
+:::: {#def-cap-modelos-pratica-quadro-baseline}
+  Estabelecendo o baseline
+
+::: {.callout-note icon=false}
+-->
+<p></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> formatar_prompt_medico(questao: <span class="bu">dict</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Cria um prompt formatado a partir de um item do dataset.</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">        questao (dict): Um dicionário contendo 'enunciado', 'alternativas'</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">                        e opcionalmente 'img_description'.</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">        str: O prompt completo e formatado, pronto para ser enviado ao modelo.</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> <span class="ss">f"""Você é um especialista médico. Responda APENAS com a letra da </span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="ss">    alternativa correta (A, B, C, D ou E). Não escreva nada mais.</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="ss">Questão:</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>questao[<span class="st">'enunciado'</span>]<span class="sc">}</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Trata de forma segura a existência de imagens na questão.</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> questao.get(<span class="st">"contains_img"</span>, <span class="va">False</span>):</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        prompt <span class="op">+=</span> <span class="ss">f"Descrição da imagem: </span><span class="sc">{</span>questao<span class="sc">.</span>get(<span class="st">'img_description'</span>, <span class="st">''</span>)<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> letra, texto <span class="kw">in</span> questao[<span class="st">"alternativas"</span>].items():</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        prompt <span class="op">+=</span> <span class="ss">f"</span><span class="sc">{</span>letra<span class="sc">}</span><span class="ss">) </span><span class="sc">{</span>texto<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">+=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">Resposta (apenas a letra):"</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> prompt.strip()</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> obter_resposta_modelo(prompt: <span class="bu">str</span>, modelo: AutoModelForCausalLM, </span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    tokenizer: AutoTokenizer) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="co">    Gera uma resposta do modelo para um determinado prompt.</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="co">        prompt (str): O prompt formatado.</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="co">        modelo (AutoModelForCausalLM): O modelo de linguagem carregado.</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="co">        tokenizer (AutoTokenizer): O tokenizer correspondente.</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="co">        str: A resposta textual gerada pelo modelo.</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># O template de chat é específico de cada família de modelos.</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Esta etapa garante que a entrada seja formatada como o modelo espera.</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt}]</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    input_ids <span class="op">=</span> tokenizer.apply_chat_template(</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        messages, add_generation_prompt<span class="op">=</span><span class="va">True</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>, </span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        enable_thinking<span class="op">=</span><span class="va">False</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    ).to(modelo.device)</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Gera a resposta. `max_new_tokens` é baixo pois esperamos apenas uma letra.</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    outputs <span class="op">=</span> modelo.generate(</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>        input_ids,</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>        max_new_tokens<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>        pad_token_id<span class="op">=</span>tokenizer.eos_token_id</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Decodifica os tokens gerados, ignorando o prompt de entrada.</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    resposta <span class="op">=</span> tokenizer.decode(</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>        outputs[<span class="dv">0</span>][input_ids.shape[<span class="dv">1</span>] :],</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>        skip_special_tokens<span class="op">=</span><span class="va">True</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> resposta.strip()</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extrair_alternativa(texto_resposta: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="co">    Extrai a primeira letra de alternativa (A-E) de um texto.</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a><span class="co">        texto_resposta (str): O texto bruto gerado pelo modelo.</span></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a><span class="co">        str: A letra da alternativa em maiúsculo, ou uma string vazia se não for </span></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a><span class="co">        encontrada.</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>    <span class="co"># A regex [A-Ea-e] busca a primeira ocorrência de uma das letras.</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>    match <span class="op">=</span> re.search(<span class="vs">r"</span><span class="pp">[A-Ea-e]</span><span class="vs">"</span>, texto_resposta)</span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> match:</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> match.group(<span class="dv">0</span>).upper()</span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">""</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> executar_avaliacao(modelo: AutoModelForCausalLM, tokenizer: AutoTokenizer, </span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    dataset: load_dataset, arquivo_saida: <span class="bu">str</span>):</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a><span class="co">    Orquestra o processo de avaliação em todo o dataset.</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>    start_time <span class="op">=</span> time.time()</span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>    resultados <span class="op">=</span> []</span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> item <span class="kw">in</span> tqdm(dataset, desc<span class="op">=</span><span class="st">"Avaliando Questões"</span>):</span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>        prompt <span class="op">=</span> formatar_prompt_medico(item)</span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>        resposta_bruta <span class="op">=</span> obter_resposta_modelo(prompt, modelo, tokenizer)</span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>        predicao_processada <span class="op">=</span> extrair_alternativa(resposta_bruta)</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>        resultados.append({</span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>            <span class="st">"origem"</span>: item[<span class="st">"origem"</span>],</span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>            <span class="st">"prova"</span>: item[<span class="st">"prova"</span>],</span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>            <span class="st">"numero_questao"</span>: item[<span class="st">"numero"</span>],</span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>            <span class="st">"enunciado"</span>: item[<span class="st">"enunciado"</span>],</span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>            <span class="st">"resposta_correta"</span>: item[<span class="st">"resposta"</span>],</span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>            <span class="st">"predicao_modelo"</span>: predicao_processada,</span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>            <span class="st">"resposta_bruta_modelo"</span>: resposta_bruta,</span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Cálculo de métricas e salvamento</span></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>    end_time <span class="op">=</span> time.time()</span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>    duracao_min <span class="op">=</span> (end_time <span class="op">-</span> start_time) <span class="op">/</span> <span class="dv">60</span></span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Avaliação finalizada em </span><span class="sc">{</span>duracao_min<span class="sc">:.2f}</span><span class="ss"> minutos."</span>)</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>    corretos <span class="op">=</span> <span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> res <span class="kw">in</span> resultados <span class="cf">if</span> res[<span class="st">"predicao_modelo"</span>] <span class="op">==</span> </span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>    res[<span class="st">"resposta_correta"</span>])</span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="bu">len</span>(resultados)</span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>    acuracia <span class="op">=</span> (corretos <span class="op">/</span> total) <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Acurácia final: </span><span class="sc">{</span>acuracia<span class="sc">:.2f}</span><span class="ss">% (</span><span class="sc">{</span>corretos<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>total<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(arquivo_saida, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>        json.dump(resultados, f, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Resultados salvos em: </span><span class="sc">{</span>arquivo_saida<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregando modelo e tokenizer</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(</span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>    NOME_MODELO,</span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>    trust_remote_code<span class="op">=</span><span class="va">True</span></span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>    NOME_MODELO,</span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>    trust_remote_code<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>    torch_dtype<span class="op">=</span>torch.bfloat16,</span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregando dataset de avaliação</span></span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>eval_dataset <span class="op">=</span> load_dataset(DATASET_AVALIACAO, split<span class="op">=</span><span class="st">"train"</span>)</span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a><span class="co"># Executar a avaliação</span></span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a>output_file <span class="op">=</span> <span class="st">"resultado_modelo_base.json"</span></span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>executar_avaliacao(model, tokenizer, eval_dataset, output_file)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<!--
+:::
+::::
+-->
+<p>Após a avaliação, o modelo base acerta 281 de 1301 questões, resultando em uma acurácia de 21,60%. Este valor, pouco acima de uma escolha aleatória (20% para 5 alternativas), confirma a ausência de conhecimento médico especializado e estabelece nosso ponto de partida.</p>
+</section>
+<section id="ajuste-fino-supervisionado-com-lora" class="level3" data-number="3.5.3">
+<h3 data-number="3.5.3" class="anchored" data-anchor-id="ajuste-fino-supervisionado-com-lora"><span class="header-section-number">3.5.3</span> Ajuste fino supervisionado com LoRA</h3>
+<p>Com a linha de base estabelecida, o próximo passo é ensinar ao modelo o conhecimento específico do domínio proposto. Utilizaremos a técnica de ajuste fino supervisionado, aplicando QLoRA para otimizar o uso de memória e reduzir os requisitos computacionais. Para o treinamento, seguiremos os passos de (1) carregar o modelo base quantizado, (2) configurar os adaptadores LoRA e (3) executar o treinamento com o <code>SFTTrainer</code>.</p>
+<ul>
+<li><p><strong>Configuração e carregamento do modelo:</strong> Primeiro, configuramos a quantização e carregamos o modelo base. A quantização de 4 bits, gerenciada pela biblioteca <code>bitsandbytes</code>, é o que nos permite carregar um modelo de bilhões de parâmetros em uma GPU com VRAM limitada. A biblioteca <code>accelerate</code> auxilia no mapeamento do modelo para o dispositivo correto de forma automática.</p></li>
+<li><p><strong>Configuração do LoRA</strong>: Definimos a configuração do LoRA usando a biblioteca <code>peft</code>. Em vez de treinar todos os 1.7 bilhão de parâmetros, vamos inserir adaptadores em camadas específicas do modelo. Apenas esses adaptadores, que representam uma pequena fração do total de parâmetros, serão treinados, resultando em uma economia massiva de recursos.</p></li>
+<li><p><strong>Treinamento com SFTTrainer:</strong> Com o modelo preparado, utilizamos o <code>SFTTrainer</code> da biblioteca <code>trl</code>. Esta classe é um facilitador de alto nível que abstrai a complexidade do loop de treinamento. Ela lida com a formatação dos dados, o processamento em lotes e a otimização do treinamento de forma eficiente, exigindo apenas a configuração dos hiperparâmetros através da classe <code>SFTConfig</code>.</p></li>
+</ul>
+<!--
+:::: {#def-cap-modelos-pratica-quadro-ajuste-fino}
+  Ajuste fino supervisionado
+
+::: {.callout-note icon=false}
+`\begingroup\footnotesize`{=latex}
+-->
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> accelerate <span class="im">import</span> PartialState</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peft <span class="im">import</span> LoraConfig, get_peft_model, prepare_model_for_kbit_training</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> trl <span class="im">import</span> SFTConfig, SFTTrainer</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> encontrar_modulos_lineares(modelo: AutoModelForCausalLM) <span class="op">-&gt;</span> <span class="bu">list</span>:</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">    Encontra todos os módulos lineares no modelo para aplicar o LoRA.</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">    Esta função auxiliar percorre todas as camadas do modelo e identifica aquelas</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">    que são instâncias de `torch.nn.Linear`, que são os alvos ideais para</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">    a inserção dos adaptadores LoRA. A camada 'lm_head' é geralmente excluída</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">    porque sua adaptação pode levar a instabilidade no treinamento.</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">        modelo (AutoModelForCausalLM): O modelo a ser inspecionado.</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co">        list: Uma lista de nomes dos módulos lineares alvo.</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    cls <span class="op">=</span> torch.nn.Linear</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    modulos_lora <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> nome, modulo <span class="kw">in</span> modelo.named_modules():</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(modulo, cls):</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>            nomes <span class="op">=</span> nome.split(<span class="st">"."</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>            modulos_lora.add(nomes[<span class="dv">0</span>] <span class="cf">if</span> <span class="bu">len</span>(nomes) <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> nomes[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"lm_head"</span> <span class="kw">in</span> modulos_lora:</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        modulos_lora.remove(<span class="st">"lm_head"</span>)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">list</span>(modulos_lora)</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> preprocessar_dataset(exemplo):</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="co">    Formata uma entrada do dataset para o formato de texto único esperado pelo </span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="co">    SFTTrainer.</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    partes_texto <span class="op">=</span> []</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> entrada <span class="kw">in</span> exemplo[<span class="st">"data"</span>]:</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>        partes_texto.append(<span class="ss">f"</span><span class="sc">{</span>entrada[<span class="st">'role'</span>]<span class="sc">.</span>capitalize()<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>entrada[<span class="st">'content'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"data"</span>: <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(partes_texto)}</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Determina o dispositivo para treinamento distribuído, se aplicável</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>string_dispositivo <span class="op">=</span> PartialState().process_index</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Configuração da Quantização (QLoRA)</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="co"># QLoRA reduz o uso de memória ao carregar o modelo com pesos de 4 bits.</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>config_quantizacao <span class="op">=</span> BitsAndBytesConfig(</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    load_in_4bit<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    bnb_4bit_quant_type<span class="op">=</span><span class="st">"nf4"</span>,  <span class="co"># Tipo de quantização (Normal Float 4)</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    bnb_4bit_compute_dtype<span class="op">=</span>torch.bfloat16,  <span class="co"># Tipo de dado para os cálculos</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregamento do modelo com a configuração de quantização</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>modelo_base <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    NOME_MODELO,</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    torch_dtype<span class="op">=</span>torch.bfloat16,</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    trust_remote_code<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    quantization_config<span class="op">=</span>config_quantizacao,</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span>{<span class="st">""</span>: string_dispositivo},</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="co"># Desativa o cache para treinamento</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>modelo_base.config.use_cache <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>modelo_base <span class="op">=</span> prepare_model_for_kbit_training(modelo_base)</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregamento do tokenizer</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    NOME_MODELO,</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    trust_remote_code<span class="op">=</span><span class="va">True</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>tokenizer.pad_token <span class="op">=</span> tokenizer.eos_token  <span class="co"># Token de padding como fim de sentença.</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>tokenizer.padding_side <span class="op">=</span> <span class="st">"right"</span> <span class="co"># Garante que o padding seja adicionado à direita.</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a><span class="co"># Configuracao do PEFT (LoRA)</span></span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a><span class="co"># LoRA congela os pesos do modelo original e injeta</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a><span class="co"># matrizes treináveis (adapters) em camadas específicas.</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>peft_config <span class="op">=</span> LoraConfig(</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>    r<span class="op">=</span><span class="dv">128</span>,  <span class="co"># O posto (rank) das matrizes de adaptação.</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>    lora_alpha<span class="op">=</span><span class="dv">256</span>,  <span class="co"># Fator de escala para os pesos do LoRA.</span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>    target_modules<span class="op">=</span>encontrar_modulos_lineares(modelo_base),  <span class="co"># Aplica LoRA em </span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>                                                        <span class="co">#todas as camadas lineares.</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>    lora_dropout<span class="op">=</span><span class="fl">0.05</span>,  <span class="co"># Dropout para regularização dos adaptadores LoRA.</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>    bias<span class="op">=</span><span class="st">"none"</span>,  <span class="co"># Não treina os vieses das camadas.</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>    task_type<span class="op">=</span><span class="st">"CAUSAL_LM"</span>, <span class="co"># Especifica a tarefa como modelagem de linguagem causal.</span></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a><span class="co"># Aplica o wrapper PEFT para preparar o modelo para o treinamento LoRA.</span></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>modelo_peft <span class="op">=</span> get_peft_model(modelo_base, peft_config)</span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregamento do dataset</span></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>sft_dataset <span class="op">=</span> load_dataset(DATASET_SFT, split<span class="op">=</span><span class="st">"train"</span>)</span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>sft_dataset <span class="op">=</span> sft_dataset.<span class="bu">map</span>(preprocessar_dataset, remove_columns<span class="op">=</span>[<span class="st">"data"</span>])</span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a><span class="co"># Configuração do treinamento</span></span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a><span class="co"># A classe SFTConfig armazena todos os hiperparâmetros para o SFTTrainer</span></span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>output_dir_sft <span class="op">=</span> <span class="st">"./modelo_sft"</span></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a>argumentos_treinamento <span class="op">=</span> SFTConfig(</span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a>    gradient_accumulation_steps<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>    gradient_checkpointing<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a>    max_grad_norm<span class="op">=</span><span class="fl">0.3</span>,</span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a>    num_train_epochs<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a>    learning_rate<span class="op">=</span><span class="fl">2e-5</span>,</span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a>    bf16<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a>    save_total_limit<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a>    logging_steps<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a>    output_dir<span class="op">=</span>output_dir_sft,</span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a>    optim<span class="op">=</span><span class="st">"paged_adamw_32bit"</span>,</span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a>    lr_scheduler_type<span class="op">=</span><span class="st">"cosine"</span>,</span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a>    overwrite_output_dir<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a>    warmup_ratio<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a>    dataset_text_field<span class="op">=</span><span class="st">"data"</span>,</span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a><span class="co"># Instanciação e execução do treinador</span></span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a>treinador <span class="op">=</span> SFTTrainer(</span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>modelo_peft,</span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a>    train_dataset<span class="op">=</span>sft_dataset,</span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a>    peft_config<span class="op">=</span>peft_config,</span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a>    args<span class="op">=</span>argumentos_treinamento,</span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a>    processing_class<span class="op">=</span>tokenizer,</span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a>treinador.train()</span>
+<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a><span class="co"># Salva apenas os pesos dos adaptadores LoRA, que é um arquivo muito pequeno.</span></span>
+<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a>diretorio_checkpoint_final <span class="op">=</span> os.path.join(output_dir_sft, <span class="st">"final_checkpoint"</span>)</span>
+<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a>treinador.model.save_pretrained(diretorio_checkpoint_final)</span>
+<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a>tokenizer.save_pretrained(diretorio_checkpoint_final)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<!--
+:::
+::::
+-->
+<p>Após o treinamento por uma única época, realizamos uma nova avaliação no <em>benchmark</em>. O modelo ajustado responde corretamente a 325 questões, alcançando uma acurácia de 24,98%, um aumento absoluto de 3,38 pontos percentuais. O ganho, embora positivo, é modesto. Isso ilustra um ponto importante: o SFT é altamente dependente da qualidade, diversidade e volume dos dados de treinamento. Fatores como o tamanho limitado do conjunto e o treinamento por uma única época podem explicar a magnitude do ganho. Para melhorias mais substanciais, seria necessário um conjunto de dados mais extenso, de maior qualidade ou treinando por múltiplas épocas de treinamento.</p>
+</section>
+<section id="refinamento-do-comportamento-com-dpo" class="level3" data-number="3.5.4">
+<h3 data-number="3.5.4" class="anchored" data-anchor-id="refinamento-do-comportamento-com-dpo"><span class="header-section-number">3.5.4</span> Refinamento do comportamento com DPO</h3>
+<p>Nosso modelo agora possui conhecimento especializado, adquirido durante o ajuste fino supervisionado. O próximo passo é refinar seu comportamento para que ele não apenas gere respostas corretas, mas também prefira um estilo de resposta a outro. O objetivo do DPO não é primariamente ensinar novo conhecimento, mas alinhar o comportamento do modelo a um estilo preferível.</p>
+<p>O DPO requer um <em>dataset</em> de preferências no formato <code>(prompt, chosen, rejected)</code>. A criação desses datasets é um dos grandes gargalos em AI Alignment, pois geralmente exige anotação humana especializada e cara. Para fins didáticos, utilizamos um pequeno <em>dataset</em> de exemplo. O mecanismo do DPO ajusta o modelo para que a probabilidade da resposta chosen seja maximizada em relação à rejected, aprendendo implicitamente uma função de recompensa. O ponto de partida para o DPO é o nosso modelo já ajustado com SFT. Utilizamos o <code>DPOTrainer</code> da biblioteca <code>trl</code>, que ajustará os pesos do modelo com base no <em>dataset</em> de preferências para alinhar seu comportamento.</p>
+<!--
+:::: {#def-cap-modelos-pratica-quadro-dpo}
+  Treinamento com DPO
+
+::: {.callout-note icon=false}
+-->
+<p></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peft <span class="im">import</span> PeftModel</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> trl <span class="im">import</span> DPOConfig, DPOTrainer</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregamento do dataset de preferência</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>dataset_dpo <span class="op">=</span> load_dataset(DATASET_DPO, split<span class="op">=</span><span class="st">"train"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>dataset_dpo <span class="op">=</span> dataset_dpo.train_test_split(test_size<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregamento do modelo ajustado com SFT</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>caminho_adaptadores <span class="op">=</span> <span class="st">"./modelo_sft/final_checkpoint"</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>modelo_base <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    NOME_MODELO,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    trust_remote_code<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    torch_dtype<span class="op">=</span>torch.bfloat16,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span><span class="st">"auto"</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Anexa os adaptadores LoRA do SFT e os torna treináveis novamente para a fase de </span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co"># DPO.</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>modelo_dpo <span class="op">=</span> PeftModel.from_pretrained(</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    modelo_base,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    caminho_adaptadores,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    is_trainable<span class="op">=</span><span class="va">True</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(caminho_adaptadores, </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>trust_remote_code<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Configura o token de padding, se necessário.</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> tokenizer.pad_token <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    tokenizer.pad_token <span class="op">=</span> tokenizer.eos_token</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="co"># A classe DPOConfig armazena todos os hiperparâmetros para o treinamento.</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>config_dpo <span class="op">=</span> DPOConfig(</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    per_device_eval_batch_size<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    gradient_accumulation_steps<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    num_train_epochs<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    learning_rate<span class="op">=</span><span class="fl">5e-7</span>,</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    logging_steps<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    eval_strategy<span class="op">=</span><span class="st">"steps"</span>,</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    eval_steps<span class="op">=</span><span class="dv">100</span>,</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    save_strategy<span class="op">=</span><span class="st">"steps"</span>,</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    save_steps<span class="op">=</span><span class="dv">500</span>,</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    save_total_limit<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    report_to<span class="op">=</span><span class="st">"none"</span>,</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    remove_unused_columns<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    max_length<span class="op">=</span><span class="dv">512</span>,</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    padding_value<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    beta<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    loss_type<span class="op">=</span><span class="st">"sigmoid"</span>,</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Instanciação e execução do treinador DPO</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>treinador_dpo <span class="op">=</span> DPOTrainer(</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>modelo_dpo,</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    ref_model<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>    args<span class="op">=</span>config_dpo,</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>    processing_class<span class="op">=</span>tokenizer,</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>    train_dataset<span class="op">=</span>dataset_dpo[<span class="st">"train"</span>],</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>    eval_dataset<span class="op">=</span>dataset_dpo[<span class="st">"test"</span>],</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>treinador_dpo.train()</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="co"># Salva os adaptadores LoRA refinados pelo DPO.</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>output_dir_dpo <span class="op">=</span> <span class="st">"./modelo_dpo"</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>treinador_dpo.save_model(output_dir_dpo)</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>tokenizer.save_pretrained(output_dir_dpo)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<!--
+:::
+::::
+-->
+<p>Após a etapa de DPO, a acurácia do modelo foi de 25,06% (326 acertos). O ganho de 0,08 pontos percentuais é marginal, o que é esperado. O DPO não foi projetado para melhorar a performance em testes de conhecimento de múltipla escolha, mas sim para moldar o estilo da geração de texto. Uma avaliação qualitativa, analisando a cautela, clareza e segurança das respostas abertas do modelo, seria necessária para medir o verdadeiro impacto desta etapa em cenários reais de avaliação.</p>
+</section>
+<section id="considerações-finais" class="level3" data-number="3.5.5">
+<h3 data-number="3.5.5" class="anchored" data-anchor-id="considerações-finais"><span class="header-section-number">3.5.5</span> Considerações finais</h3>
+<p>Neste estudo de caso, transformamos o modelo generalista <code>Qwen/Qwen3-1.7B</code> em um protótipo de especialista em saúde. Partimos de uma acurácia de 21,60% e, por meio de um processo incremental de duas fases, aprimoramos tanto seu conhecimento quanto seu comportamento.</p>
+<ol type="1">
+<li><p>Ajuste fino supervisionado: Com QLoRA, infundimos conhecimento médico específico, elevando a acurácia para 24,98%. Esta etapa foi crucial para ensinar ao modelo o conteúdo factual do domínio.</p></li>
+<li><p>Otimização por preferência direta: Com um <em>dataset</em> de preferências, alinhamos o comportamento do modelo, resultando em uma acurácia final de 25,06% e refinando o estilo e a forma da resposta.</p></li>
+</ol>
+<p>A análise comparativa revela os pontos fortes e fracos inerentes a cada técnica. O SFT é a principal fonte de ganho de conhecimento, enquanto o DPO oferece um controle mais refinado sobre o comportamento. Este exemplo prático demonstra que a especialização de LLMs não é um ato único, mas um processo iterativo, onde a combinação de técnicas permite criar modelos mais capazes, seguros e alinhados. O Dr.&nbsp;Bode, desenvolvido neste capítulo, embora ainda um protótipo, ilustra o potencial e os desafios práticos dessa jornada.</p>
+
+
+<div id="refs" class="references csl-bib-body" data-entry-spacing="1" role="list" style="display: none">
+<div id="ref-alkhamissi-etal-2024-investigating" class="csl-entry" role="listitem">
+ALKHAMISSI, B. et al. <strong>Investigating Cultural Alignment of Large Language Models</strong>. (L.-W. Ku, A. Martins, V. Srikumar, Eds.)Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). <strong>Anais</strong>...Bangkok, Thailand: Association for Computational Linguistics, ago. 2024. Disponível em: &lt;<a href="https://aclanthology.org/2024.acl-long.671/">https://aclanthology.org/2024.acl-long.671/</a>&gt;
+</div>
+<div id="ref-amodei2016concrete" class="csl-entry" role="listitem">
+AMODEI, D. et al. <strong>Concrete Problems in AI Safety</strong>. arXiv preprint arXiv:1606.06565. <strong>Anais</strong>...2016.
+</div>
+<div id="ref-anisuzzaman2025fine" class="csl-entry" role="listitem">
+ANISUZZAMAN, D. et al. Fine-tuning large language models for specialized use cases. <strong>Mayo Clinic Proceedings: Digital Health</strong>, v. 3, n. 1, p. 100184, 2025.
+</div>
+<div id="ref-bai2023qwen" class="csl-entry" role="listitem">
+BAI, J. et al. Qwen technical report. <strong>arXiv preprint arXiv:2309.16609</strong>, 2023.
+</div>
+<div id="ref-bostrom2014superintelligence" class="csl-entry" role="listitem">
+BOSTROM, N. <strong>Superintelligence: Paths, Dangers, Strategies</strong>. Oxford, UK: Oxford University Press, 2014.
+</div>
+<div id="ref-carlsmith2022power" class="csl-entry" role="listitem">
+CARLSMITH, J. <strong>Is Power-Seeking AI an Existential Risk?</strong> [s.l.] Open Philanthropy, 2022.
+</div>
+<div id="ref-DBLP:conf/nips/ChristianoLBMLA17" class="csl-entry" role="listitem">
+CHRISTIANO, P. F. et al. <strong>Deep Reinforcement Learning from Human Preferences</strong>. (I. Guyon et al., Eds.)Advances in Neural Information Processing Systems 30: Annual Conference on Neural Information Processing Systems 2017, December 4-9, 2017, Long Beach, CA, <span>USA</span>. <strong>Anais</strong>...2017. Disponível em: &lt;<a href="https://proceedings.neurips.cc/paper/2017/hash/d5e2c0adad503c91f91df240d0cd4e49-Abstract.html">https://proceedings.neurips.cc/paper/2017/hash/d5e2c0adad503c91f91df240d0cd4e49-Abstract.html</a>&gt;
+</div>
+<div id="ref-dettmers2023qlora" class="csl-entry" role="listitem">
+DETTMERS, T. et al. QLoRA: Efficient Finetuning of Quantized LLMs. <strong>arXiv preprint arXiv:2305.14314</strong>, 2023.
+</div>
+<div id="ref-Devlin19" class="csl-entry" role="listitem">
+DEVLIN, J. et al. <strong><span>BERT:</span> Pre-training of Deep Bidirectional Transformers for Language Understanding</strong>. (J. Burstein, C. Doran, T. Solorio, Eds.)Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, <span>NAACL-HLT</span> 2019. <strong>Anais</strong>...Minneapolis, MN, USA: Association for Computational Linguistics, 2019. Disponível em: &lt;<a href="https://doi.org/10.18653/v1/n19-1423">https://doi.org/10.18653/v1/n19-1423</a>&gt;
+</div>
+<div id="ref-ding2023parameter" class="csl-entry" role="listitem">
+DING, N. et al. <a href="https://doi.org/10.1038/s42256-023-00626-4">Parameter-efficient fine-tuning of large-scale pre-trained language models</a>. <strong>Nature machine intelligence</strong>, v. 5, n. 3, p. 220–235, 2023.
+</div>
+<div id="ref-gabriel2020artificial" class="csl-entry" role="listitem">
+GABRIEL, I. <a href="https://doi.org/10.1007/s11023-020-09548-2">Artificial Intelligence, Values and Alignment</a>. <strong>Minds and Machines</strong>, v. 30, n. 3, p. 411–437, 2020.
+</div>
+<div id="ref-Gajulamandyam2025peft" class="csl-entry" role="listitem">
+GAJULAMANDYAM, D. K. et al. <strong><a href="https://doi.org/10.1109/CCWC62904.2025.10903789">Domain Specific Finetuning of LLMs Using PEFT Techniques</a></strong>. 2025 IEEE 15th Annual Computing and Communication Workshop and Conference (CCWC). <strong>Anais</strong>...2025.
+</div>
+<div id="ref-hendrycks2021unsolved" class="csl-entry" role="listitem">
+HENDRYCKS, D. et al. Unsolved Problems in ML Safety. <strong>arXiv preprint arXiv:2109.13916</strong>, 2021.
+</div>
+<div id="ref-DBLP:conf/icml/HoulsbyGJMLGAG19" class="csl-entry" role="listitem">
+HOULSBY, N. et al. <strong>Parameter-Efficient Transfer Learning for <span>NLP</span></strong>. (K. Chaudhuri, R. Salakhutdinov, Eds.)Proceedings of the 36th International Conference on Machine Learning, <span>ICML</span> 2019, 9-15 June 2019, Long Beach, California, <span>USA</span>. <strong>Anais</strong>...: Proceedings of Machine Learning Research.<span>PMLR</span>, 2019. Disponível em: &lt;<a href="http://proceedings.mlr.press/v97/houlsby19a.html">http://proceedings.mlr.press/v97/houlsby19a.html</a>&gt;
+</div>
+<div id="ref-howard_universal_2018" class="csl-entry" role="listitem">
+HOWARD, J.; RUDER, S. <strong>Universal <span>Language</span> <span>Model</span> <span>Fine</span>-tuning for <span>Text</span> <span>Classification</span></strong>. (I. Gurevych, Y. Miyao, Eds.)Proceedings of the 56th <span>Annual</span> <span>Meeting</span> of the <span>Association</span> for <span>Computational</span> <span>Linguistics</span> (<span>Volume</span> 1: <span>Long</span> <span>Papers</span>). <strong>Anais</strong>...Melbourne, Australia: Association for Computational Linguistics, jul. 2018. Disponível em: &lt;<a href="https://aclanthology.org/P18-1031/">https://aclanthology.org/P18-1031/</a>&gt;. Acesso em: 25 jul. 2025
+</div>
+<div id="ref-hu2021loralowrankadaptationlarge" class="csl-entry" role="listitem">
+HU, E. J. et al. <strong><span>LoRA: Low-Rank Adaptation of Large Language Models</span></strong>., 2021. Disponível em: &lt;<a href="https://arxiv.org/abs/2106.09685">https://arxiv.org/abs/2106.09685</a>&gt;
+</div>
+<div id="ref-krakovna2020specification" class="csl-entry" role="listitem">
+KRAKOVNA, V. et al. Specification Gaming: The Flip Side of AI Ingenuity. <strong>DeepMind Safety Research Blog</strong>, 2020.
+</div>
+<div id="ref-lai2024large" class="csl-entry" role="listitem">
+LAI, J. et al. Large language models in law: A survey. <strong>AI Open</strong>, v. 5, p. 181–196, 2024.
+</div>
+<div id="ref-lee2024survey" class="csl-entry" role="listitem">
+LEE, J. et al. A survey of large language models in finance (finllms). <strong>arXiv preprint arXiv:2402.02315</strong>, 2024.
+</div>
+<div id="ref-leike2018scalable" class="csl-entry" role="listitem">
+LEIKE, J. et al. <strong>Scalable Agent Alignment via Reward Modeling: a Research Direction</strong>. arXiv preprint arXiv:1811.07871. <strong>Anais</strong>...2018.
+</div>
+<div id="ref-qi2024peft" class="csl-entry" role="listitem">
+LI, Q. <strong><a href="https://doi.org/10.1109/ICME57554.2024.10688138">Parameter Efficient Fine-Tuning on Selective Parameters for Transformer-Based Pre-Trained Models</a></strong>. 2024 IEEE International Conference on Multimedia and Expo (ICME). <strong>Anais</strong>...2024.
+</div>
+<div id="ref-liu2019roberta" class="csl-entry" role="listitem">
+LIU, Y. et al. Roberta: A robustly optimized bert pretraining approach. <strong>arXiv preprint arXiv:1907.11692</strong>, 2019.
+</div>
+<div id="ref-lv2024parameterfinetuninglargelanguage" class="csl-entry" role="listitem">
+LV, K. et al. <strong>Full Parameter Fine-tuning for Large Language Models with Limited Resources</strong>., 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2306.09782">https://arxiv.org/abs/2306.09782</a>&gt;
+</div>
+<div id="ref-minaee2024large" class="csl-entry" role="listitem">
+MINAEE, S. et al. Large language models: A survey. <strong>arXiv preprint arXiv:2402.06196</strong>, 2024.
+</div>
+<div id="ref-ngo2023alignment" class="csl-entry" role="listitem">
+NGO, R.; CHAN, L.; MINDERMANN, S. The Alignment Problem from a Deep Learning Perspective. <strong>arXiv preprint arXiv:2303.16200</strong>, 2023.
+</div>
+<div id="ref-ouyang2022training" class="csl-entry" role="listitem">
+OUYANG, L. et al. <strong>Training language models to follow instructions with human feedback</strong>. (A. H. Oh et al., Eds.)Advances in Neural Information Processing Systems. <strong>Anais</strong>...2022. Disponível em: &lt;<a href="https://openreview.net/forum?id=TG8KACxEON">https://openreview.net/forum?id=TG8KACxEON</a>&gt;
+</div>
+<div id="ref-paiola2024adapting" class="csl-entry" role="listitem">
+PAIOLA, P. H. et al. Adapting llms for the medical domain in portuguese: A study on fine-tuning and model evaluation. <strong>arXiv preprint arXiv:2410.00163</strong>, 2024.
+</div>
+<div id="ref-radford2019language" class="csl-entry" role="listitem">
+RADFORD, A. et al. Language models are unsupervised multitask learners. <strong>OpenAI blog</strong>, v. 1, n. 8, p. 9, 2019.
+</div>
+<div id="ref-rafailov2023direct" class="csl-entry" role="listitem">
+RAFAILOV, R. et al. <strong>Direct Preference Optimization: Your Language Model is Secretly a Reward Model</strong>. Advances in Neural Information Processing Systems (NeurIPS). <strong>Anais</strong>...2023.
+</div>
+<div id="ref-raffel_exploring_2020" class="csl-entry" role="listitem">
+RAFFEL, C. et al. Exploring the limits of transfer learning with a unified text-to-text transformer. <strong>J. Mach. Learn. Res.</strong>, v. 21, n. 1, p. 140:5485–140:5551, jan. 2020.
+</div>
+<div id="ref-RUSSEL:2019" class="csl-entry" role="listitem">
+RUSSEL, S. <strong>Human Compatible Artificial Intelligence and the Problem of Control</strong>. [s.l.] Penguin Books, 2019.
+</div>
+<div id="ref-schulman2017proximal" class="csl-entry" role="listitem">
+SCHULMAN, J. et al. <strong>Proximal Policy Optimization Algorithms</strong>. arXiv preprint arXiv:1707.06347. <strong>Anais</strong>...2017.
+</div>
+<div id="ref-shah2022goal" class="csl-entry" role="listitem">
+SHAH, R. et al. Goal Misgeneralization in Deep Reinforcement Learning. <strong>arXiv preprint arXiv:2210.01790</strong>, 2022.
+</div>
+<div id="ref-shi2024continual" class="csl-entry" role="listitem">
+SHI, H. et al. Continual learning of large language models: A comprehensive survey. <strong>ACM Computing Surveys</strong>, 2024.
+</div>
+<div id="ref-stiennon2020learning" class="csl-entry" role="listitem">
+STIENNON, N. et al. Learning to Summarize with Human Feedback. <strong>Advances in Neural Information Processing Systems (NeurIPS)</strong>, 2020.
+</div>
+<div id="ref-vaswani2017attention" class="csl-entry" role="listitem">
+VASWANI, A. et al. Attention is all you need. <strong>Advances in neural information processing systems</strong>, v. 30, 2017.
+</div>
+<div id="ref-wu_llm_2025" class="csl-entry" role="listitem">
+WU, X.-K. et al. <a href="https://doi.org/10.3390/bdcc9040087"><span>LLM</span> <span>Fine</span>-<span>Tuning</span>: <span>Concepts</span>, <span>Opportunities</span>, and <span>Challenges</span></a>. <strong>Big Data and Cognitive Computing</strong>, v. 9, n. 4, p. 87, abr. 2025.
+</div>
+<div id="ref-ye_limo_2025" class="csl-entry" role="listitem">
+YE, Y. et al. <strong><span>LIMO</span>: <span>Less</span> is <span>More</span> for <span>Reasoning</span></strong>. arXiv, jul. 2025. Disponível em: &lt;<a href="http://arxiv.org/abs/2502.03387">http://arxiv.org/abs/2502.03387</a>&gt;. Acesso em: 7 ago. 2025
+</div>
+<div id="ref-zhou2023survey" class="csl-entry" role="listitem">
+ZHOU, H. et al. A survey of large language models in medicine: Progress, application, and challenge. <strong>arXiv preprint arXiv:2311.05112</strong>, 2023.
+</div>
+</div>
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p><a href="https://huggingface.co/datasets/recogna-nlp/drbode240_dataset" class="uri">https://huggingface.co/datasets/recogna-nlp/drbode240_dataset</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://huggingface.co/datasets/recogna-nlp/drbodebench" class="uri">https://huggingface.co/datasets/recogna-nlp/drbodebench</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../modelos/cap-modelos-dados/cap-modelos-dados.html" class="pagination-link" aria-label="O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" class="pagination-link" aria-label="Avaliação de Grandes Modelos de Linguagem">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://brasileiraspln.com/">
+<p>Brasileiras em PLN, 2026. Todos os direitos reservados</p>
+</a>
+  </li>  
+</ul>
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

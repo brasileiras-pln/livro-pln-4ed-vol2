@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="André Carvalho">
+<meta name="author" content="Livy Real">
+<meta name="author" content="Altigran Soares da Silva">
+
+<title>5&nbsp; Geração Aumentada por Recuperação (RAG) – Processamento de Linguagem Natural</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 1em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" rel="next">
+<link href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-8676d8d0f01772f2903466dda9733bcf.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Sem resultados",
+    "search-matching-documents-text": "Resultados encontrados",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<!-- Google tag (gtag.js) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-111J572WMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-111J572WMR');
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../shared/bpln.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-rag/cap-rag.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../../index.html" class="sidebar-logo-link">
+      <img src="../../shared/logos/bpln.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Processamento de Linguagem Natural</a> 
+        <div class="sidebar-tools-main">
+    <a href="../../Livro_PLN_BPLN_4ed_vol2.pdf" title="Baixar PDF" class="quarto-navigation-tool px-1" aria-label="Baixar PDF"><i class="bi bi-file-pdf"></i></a>
+    <div class="dropdown">
+      <a href="" title="Compartilhar" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Compartilhar"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sobre o Volume 2</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Modelos de Linguagem</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Modelos de linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-dados/cap-modelos-dados.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-rag/cap-rag.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-agentes-conversacionais/cap-agentes-conversacionais.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ChatGPT, MariTalk e outros agentes de conversação</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../shared/referencias/referencias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Referências</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../autores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>Sobre as/os autoras/es</strong></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Conteúdo</h2>
+   
+  <ul>
+  <li><a href="#fundamentos-da-geração-aumentada-por-recuperação" id="toc-fundamentos-da-geração-aumentada-por-recuperação" class="nav-link active" data-scroll-target="#fundamentos-da-geração-aumentada-por-recuperação"><span class="header-section-number">5.1</span> Fundamentos da Geração Aumentada por Recuperação</a>
+  <ul class="collapse">
+  <li><a href="#introdução-à-rag" id="toc-introdução-à-rag" class="nav-link" data-scroll-target="#introdução-à-rag"><span class="header-section-number">5.1.1</span> Introdução à RAG</a></li>
+  <li><a href="#arquitetura-rag" id="toc-arquitetura-rag" class="nav-link" data-scroll-target="#arquitetura-rag"><span class="header-section-number">5.1.2</span> Arquitetura RAG</a></li>
+  <li><a href="#sec-cap-rag-retriever" id="toc-sec-cap-rag-retriever" class="nav-link" data-scroll-target="#sec-cap-rag-retriever"><span class="header-section-number">5.1.3</span> O componente Recuperador (<em>Retriever</em>)</a></li>
+  <li><a href="#sec-cap-rag-generator" id="toc-sec-cap-rag-generator" class="nav-link" data-scroll-target="#sec-cap-rag-generator"><span class="header-section-number">5.1.4</span> O componente Gerador (<em>Generator</em>)</a></li>
+  </ul></li>
+  <li><a href="#sec-cap-rag-rag_vs_finetuning" id="toc-sec-cap-rag-rag_vs_finetuning" class="nav-link" data-scroll-target="#sec-cap-rag-rag_vs_finetuning"><span class="header-section-number">5.2</span> RAG vs.&nbsp;<em>Fine-tuning</em></a>
+  <ul class="collapse">
+  <li><a href="#sec-cap-rag-finetuning" id="toc-sec-cap-rag-finetuning" class="nav-link" data-scroll-target="#sec-cap-rag-finetuning"><span class="header-section-number">5.2.1</span> <em>Fine-tuning</em></a></li>
+  <li><a href="#sec-cap-rag-rag" id="toc-sec-cap-rag-rag" class="nav-link" data-scroll-target="#sec-cap-rag-rag"><span class="header-section-number">5.2.2</span> RAG</a></li>
+  <li><a href="#abordagens-híbridas" id="toc-abordagens-híbridas" class="nav-link" data-scroll-target="#abordagens-híbridas"><span class="header-section-number">5.2.3</span> Abordagens híbridas</a></li>
+  </ul></li>
+  <li><a href="#rag---aspectos-avançados" id="toc-rag---aspectos-avançados" class="nav-link" data-scroll-target="#rag---aspectos-avançados"><span class="header-section-number">5.3</span> RAG - Aspectos avançados</a>
+  <ul class="collapse">
+  <li><a href="#rag-em-duas-etapas-re-ordenando-resultados" id="toc-rag-em-duas-etapas-re-ordenando-resultados" class="nav-link" data-scroll-target="#rag-em-duas-etapas-re-ordenando-resultados"><span class="header-section-number">5.3.1</span> RAG em duas etapas: Re-ordenando resultados</a></li>
+  <li><a href="#rag-adaptiva-e-o-modelo-agêntico" id="toc-rag-adaptiva-e-o-modelo-agêntico" class="nav-link" data-scroll-target="#rag-adaptiva-e-o-modelo-agêntico"><span class="header-section-number">5.3.2</span> RAG adaptiva e o Modelo agêntico</a></li>
+  <li><a href="#indo-além-do-texto" id="toc-indo-além-do-texto" class="nav-link" data-scroll-target="#indo-além-do-texto"><span class="header-section-number">5.3.3</span> Indo além do texto</a></li>
+  <li><a href="#avaliando-rag" id="toc-avaliando-rag" class="nav-link" data-scroll-target="#avaliando-rag"><span class="header-section-number">5.3.4</span> Avaliando RAG</a></li>
+  <li><a href="#otimização-de-desempenho-latência-e-escalabilidade" id="toc-otimização-de-desempenho-latência-e-escalabilidade" class="nav-link" data-scroll-target="#otimização-de-desempenho-latência-e-escalabilidade"><span class="header-section-number">5.3.5</span> Otimização de desempenho: Latência e Escalabilidade</a></li>
+  <li><a href="#ética-em-rag-viés-privacidade-e-responsabilidade" id="toc-ética-em-rag-viés-privacidade-e-responsabilidade" class="nav-link" data-scroll-target="#ética-em-rag-viés-privacidade-e-responsabilidade"><span class="header-section-number">5.3.6</span> Ética em RAG: Viés, privacidade e responsabilidade</a></li>
+  </ul></li>
+  <li><a href="#rag-no-mundo-real-estudos-de-caso-por-indústria" id="toc-rag-no-mundo-real-estudos-de-caso-por-indústria" class="nav-link" data-scroll-target="#rag-no-mundo-real-estudos-de-caso-por-indústria"><span class="header-section-number">5.4</span> RAG no mundo real: Estudos de caso por indústria</a>
+  <ul class="collapse">
+  <li><a href="#setor-financeiro-conformidade-regulatória-e-análise-de-risco" id="toc-setor-financeiro-conformidade-regulatória-e-análise-de-risco" class="nav-link" data-scroll-target="#setor-financeiro-conformidade-regulatória-e-análise-de-risco"><span class="header-section-number">5.4.1</span> Setor financeiro: Conformidade regulatória e Análise de risco</a></li>
+  <li><a href="#saúde-e-ciências-da-vida-suporte-à-decisão-clínica" id="toc-saúde-e-ciências-da-vida-suporte-à-decisão-clínica" class="nav-link" data-scroll-target="#saúde-e-ciências-da-vida-suporte-à-decisão-clínica"><span class="header-section-number">5.4.2</span> Saúde e Ciências da vida: Suporte à decisão clínica</a></li>
+  <li><a href="#setor-jurídico-revolucionando-a-pesquisa-e-a-due-diligence" id="toc-setor-jurídico-revolucionando-a-pesquisa-e-a-due-diligence" class="nav-link" data-scroll-target="#setor-jurídico-revolucionando-a-pesquisa-e-a-due-diligence"><span class="header-section-number">5.4.3</span> Setor jurídico: Revolucionando a pesquisa e a <em>Due Diligence</em></a></li>
+  <li><a href="#contexto-científico-rastreabilidade-da-informação" id="toc-contexto-científico-rastreabilidade-da-informação" class="nav-link" data-scroll-target="#contexto-científico-rastreabilidade-da-informação"><span class="header-section-number">5.4.4</span> Contexto científico: Rastreabilidade da informação</a></li>
+  </ul></li>
+  <li><a href="#o-futuro-da-rag" id="toc-o-futuro-da-rag" class="nav-link" data-scroll-target="#o-futuro-da-rag"><span class="header-section-number">5.5</span> O futuro da RAG</a>
+  <ul class="collapse">
+  <li><a href="#o-debate-rag-vs.-janelas-de-contexto-amplas-lcw" id="toc-o-debate-rag-vs.-janelas-de-contexto-amplas-lcw" class="nav-link" data-scroll-target="#o-debate-rag-vs.-janelas-de-contexto-amplas-lcw"><span class="header-section-number">5.5.1</span> O debate: RAG vs.&nbsp;Janelas de contexto amplas (LCW)</a></li>
+  <li><a href="#rag-como-um-mecanismo-de-atenção-inteligente" id="toc-rag-como-um-mecanismo-de-atenção-inteligente" class="nav-link" data-scroll-target="#rag-como-um-mecanismo-de-atenção-inteligente"><span class="header-section-number">5.5.2</span> RAG como um mecanismo de atenção inteligente</a></li>
+  </ul></li>
+  <li><a href="#agradecimentos" id="toc-agradecimentos" class="nav-link" data-scroll-target="#agradecimentos">Agradecimentos</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-rag/cap-rag.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-cap-rag" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading"></div>
+    <div class="quarto-title-meta-contents">
+             <p>André Carvalho </p>
+             <p>Livy Real </p>
+             <p>Altigran Soares da Silva </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Publicado em:</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">13/04/2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+
+</div>
+<div>
+<div class="callout-body-container callout-body">
+<p>Este capítulo também está disponível em <a href="cap-rag.pdf">PDF</a>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-target=".callout-cite-contents" data-bs-toggle="collapse" aria-label="Toggle callout" aria-expanded="false" aria-controls="callout-cite">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Como citar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end">
+<i class="callout-toggle"></i>
+</div>
+</div>
+<div class="callout-cite-contents callout-collapse collapse" id="callout-cite">
+<div class="callout-body-container callout-body">
+<div class="sourceCode" id="cb1"><pre class="sourceCode latex code-with-copy"><code class="sourceCode latex"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>@InCollection{BPLN_livro_cap-rag:2026,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    author    = {Carvalho, André and Real, Livy and Silva, Altigran Soares da},</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    title     = {Geração Aumentada por Recuperação (RAG)},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    booktitle = {Processamento de Linguagem Natural: Conceitos, Técnicas e Aplicações em Português},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    publisher = {BPLN},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    year      = {2026},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    editor    = {Caseli, H. M. and Nunes, M. G. V.},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    type      = {Book Chapter},</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    chapter   = {5},</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    edition   = {4},</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    volume    = {2},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    isbn      = {XXXXXXXXXXXXXXXX},</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    url       = {https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-rag/cap-rag.html},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<section id="fundamentos-da-geração-aumentada-por-recuperação" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="fundamentos-da-geração-aumentada-por-recuperação"><span class="header-section-number">5.1</span> Fundamentos da Geração Aumentada por Recuperação</h2>
+<p>Grandes Modelos de Linguagem, ou ainda, Modelos de Linguagem de Grande Escala (LLMs), representam um marco na Inteligência Artificial, demonstrando uma capacidade sem precedentes de ‘compreender’, gerar e interagir usando a linguagem humana. No entanto, apesar de sua sofisticação, esses modelos são inerentemente limitados por sua arquitetura e pelo processo de treinamento. A Geração Aumentada por Recuperação (RAG) surge não como um aprimoramento incremental, mas um paradigma de uso dos LLMs em resposta às limitações dos modelos de fundação (<em>foundation models</em>)<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Para compreender a importância da RAG, é crucial primeiro dissecar os quatro principais desafios que ela se propõe a resolver:</p>
+<ul>
+<li><p>Conhecimento Desatualizado (<em>Knowledge Cutoff</em>): O treinamento de um LLM é um processo computacionalmente intensivo e caro, que consome vastos recursos e tempo. Consequentemente, o conhecimento codificado em um modelo é estático e congelado no tempo, correspondendo à data em que seus dados de treinamento foram coletados. Esse “ponto de corte de conhecimento” (<em>knowledge cutoff</em>) significa que para dar resultados relativos a certos temas a LLM precisa de conteúdos sobre os eventos subsequentes ao seu treinamento, tornando-o inadequado para aplicações que exigem informações atuais ou em tempo real.&nbsp;<span class="citation" data-cites="cheng2024dated">(<a href="../../shared/referencias/referencias.html#ref-cheng2024dated" role="doc-biblioref">Cheng et al., 2024</a>)</span></p></li>
+<li><p>Alucinações: Um dos riscos mais significativos associados aos LLMs é sua tendência a “alucinar”, ou seja, gerar informações que são plausíveis, bem escritas e contextualmente adequadas, mas factualmente incorretas ou completamente fabricadas. Isso ocorre porque os LLMs são modelos probabilísticos otimizados para gerar a sequência de palavras mais provável, não a mais verdadeira. Deste modo, sem o controle necessário, os <em>foundation models</em> tendem a confeccionar fatos, combinar informações e apresentar referências inválidas, gerando respostas potencialmente divergentes da realidade <span class="citation" data-cites="kalai2025">(<a href="../../shared/referencias/referencias.html#ref-kalai2025" role="doc-biblioref">Kalai et al., 2025</a>)</span>. Em domínios críticos como saúde, finanças ou direito, as alucinações representam um risco inaceitável para a confiança e a segurança do uso desses modelos.&nbsp;<span class="citation" data-cites="huang2024survey">(<a href="../../shared/referencias/referencias.html#ref-huang2024survey" role="doc-biblioref">Huang et al., 2024</a>)</span></p></li>
+<li><p>Falta de Especificidade de Domínio: LLMs de propósito geral, treinados em dados disponíveis publicamente, carecem de conhecimento profundo sobre domínios especializados ou dados proprietários de uma organização. Assim, em nível de aplicação, a especificidade de domínio é responsável por delimitar o tema, caracterizando quais detalhes são pertinentes ao contexto. Os LLMs desconhecem documentos internos, bases de dados de clientes, manuais técnicos específicos ou a terminologia de um nicho de mercado. Sem acesso a essa informação, suas respostas permanecem genéricas e de valor limitado para casos de uso empresariais.</p></li>
+<li><p>Falta de Verificabilidade (Black Box): A natureza de “caixa-preta” dos LLMs torna extremamente difícil, se não impossível, rastrear a origem de uma informação específica gerada. Essa opacidade impede a verificação de fatos, a atribuição de fontes e a auditoria das respostas do modelo — requisitos cruciais em ambientes que exigem precisão como o acadêmico, o jornalístico e o corporativo, onde a confiabilidade e a transparência são primordiais.&nbsp;<span class="citation" data-cites="DBLP:conf/nips/LewisPPPKGKLYR020">(<a href="../../shared/referencias/referencias.html#ref-DBLP:conf/nips/LewisPPPKGKLYR020" role="doc-biblioref">Lewis et al., 2020</a>)</span></p></li>
+</ul>
+<section id="introdução-à-rag" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="introdução-à-rag"><span class="header-section-number">5.1.1</span> Introdução à RAG</h3>
+<div id="fig-cap-rag-placeholder" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-rag-placeholder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;5.1: Exemplo de arquitetura RAG usando vetores de <em>embeddings</em>.
+</figcaption>
+<div aria-describedby="fig-cap-rag-placeholder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/diagrama-rag.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+</figure>
+</div>
+<p>A Geração Aumentada por Recuperação (RAG)&nbsp;<span class="citation" data-cites="DBLP:conf/nips/LewisPPPKGKLYR020">(<a href="../../shared/referencias/referencias.html#ref-DBLP:conf/nips/LewisPPPKGKLYR020" role="doc-biblioref">Lewis et al., 2020</a>)</span> é um paradigma de integração entre modelos de linguagem e sistemas de recuperação de informação que aprimora a capacidade dos LLMs ao conectá-los a conteúdo externo e autoritativo antes de gerar uma resposta. Em sua essência, a RAG transforma o LLM de um sistema de “livro fechado”, que depende exclusivamente de sua memória interna (os parâmetros aprendidos durante o treinamento), para um sistema de “livro aberto”, que pode consultar fontes externas em tempo real para formular suas respostas.</p>
+<p>Essa mudança de paradigma é sutil, mas profunda. Em vez de tentar incluir e adaptar novos conhecimentos como pesos de um modelo, algo que não garante o efetivo aprendizado de domínio, a RAG desacopla o processo de raciocínio linguístico do processo de aquisição de conhecimento. Enquanto o LLM mantém a função principal de gerar conteúdo, a tarefa de selecionar material relevante é delegada ao módulo de recuperação de informação. Deste modo, o módulo de geração compartilha a função de identificar e alinhar o contexto relevante com um módulo especializado nesta tarefa.</p>
+<p>Esta abordagem acaba por atacar as principais limitações do uso de LLMs até então, como mostrado no <a href="#def-cap-rag-limitações_llm" class="quarto-xref">Quadro&nbsp;<span>5.1</span></a>.</p>
+<div id="def-cap-rag-limitações_llm" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 5.1</strong></span> Limitações dos LLMs e a abordagem RAG.</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 36%">
+<col style="width: 31%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Limitação do LLM</strong></th>
+<th style="text-align: left;"><strong>Descrição da limitação</strong></th>
+<th style="text-align: left;"><strong>Como a RAG aborda</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Conhecimento desatualizado</td>
+<td style="text-align: left;">LLMs têm uma “data de corte” e desconhecem eventos recentes.</td>
+<td style="text-align: left;">Recupera informações atuais de bases de conhecimento externas.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Alucinações</td>
+<td style="text-align: left;">Geram informações plausíveis, mas factualmente incorretas.</td>
+<td style="text-align: left;">Ancora a resposta do LLM em fatos recuperados.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Falta de especificidade</td>
+<td style="text-align: left;">Carecem de conhecimento de domínios específicos ou dados proprietários.</td>
+<td style="text-align: left;">Conecta o LLM a bases de conhecimento especializadas.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Falta de verificabilidade</td>
+<td style="text-align: left;">É difícil rastrear a fonte da informação gerada.</td>
+<td style="text-align: left;">Permite fazer referencia às fontes a partir dos documentos recuperados.</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+<p>A análise do termo <em>“Retrieval-Augmented Generation”</em> revela as três etapas sequenciais que definem seu funcionamento:</p>
+<ol type="1">
+<li><p><strong>Recuperação (<em>Retrieval</em>)</strong>: Dada uma consulta do usuário, o sistema primeiro aciona um mecanismo de busca para encontrar e extrair os trechos de informação mais relevantes de um <em>corpus</em> de conhecimento externo. Este <em>corpus</em> pode ser a internet, uma coleção de documentos proprietários, um banco de dados ou qualquer outra fonte de informação.</p></li>
+<li><p><strong>Aumentada (<em>Augmentation</em>)</strong>: As informações recuperadas são então usadas para “aumentar” o <em>prompt</em> original do usuário. Tipicamente, o contexto recuperado é inserido, descrito e estruturtado em um <em>template</em> de <em>prompt</em> juntamente com a pergunta, fornecendo ao LLM os fatos necessários para formular uma resposta informada.</p></li>
+<li><p><strong>Geração (<em>Generation</em>)</strong>: Finalmente, o <em>prompt</em> aumentado é enviado ao LLM. O modelo, então, sintetiza uma resposta coerente e em linguagem natural, baseando-se tanto no contexto factual recém-fornecido quanto em seu conhecimento pré-treinado sobre linguagem, estrutura e raciocínio geral.</p></li>
+</ol>
+<p>Essa arquitetura de dois estágios (recuperação e geração) permite que os sistemas RAG produzam respostas que não são apenas fluentes e contextualmente apropriadas, mas também factualmente precisas, atualizadas e verificáveis.</p>
+<p>Contudo, os benefícios da RAG transcendem a melhoria técnica da qualidade das respostas, oferecendo vantagens estratégicas que impulsionam sua adoção em ambientes corporativos. A arquitetura RAG permite que as organizações aproveitem o poder dos LLMs de forma mais segura, econômica e personalizada.</p>
+<ul>
+<li><p>Melhora da Precisão e Redução de Alucinações: Ao ancorar as respostas em conteúdo recuperado, a RAG aumenta drasticamente a factualidade e mitiga o risco de o LLM gerar informações incorretas. A adoção da arquitetura torna a resposta potencialmente fundamentada em uma fonte específica, em vez de depender apenas do conhecimento parametrizado do modelo.</p></li>
+<li><p>Acesso a Informações Atualizadas: A base de conhecimento de um sistema RAG pode ser atualizada continuamente e em tempo real. Isso permite que o LLM responda a perguntas sobre eventos recentes ou conteúdos dinâmicos, como o status de um pedido ou as últimas notícias do mercado, superando as limitações impostas pelo uso de conhecimento desatualizado (<em>knowledge cutoff</em>).</p></li>
+<li><p>Confiabilidade e Verificabilidade: Como as respostas são baseadas em documentos específicos, os sistemas RAG podem facilmente citar suas fontes. Essa característica permite identificar e quantificar quais são os aspectos positivos e negativos na resposta. Assim, ao rastrear a origem da informação, a RAG aumenta a confiança do usuário e permite a auditoria e verificação dos fatos, algo essencial em aplicações que exigem segurança e responsabilidade.</p></li>
+<li><p>Custo-Benefício: Manter um LLM atualizado através de re-treinamento ou fine-tuning contínuo é proibitivamente caro e demorado. Em contraste, atualizar o conteúdo usado em um sistema RAG é uma operação de baixo custo e alta velocidade. Isso torna a RAG uma abordagem muito mais econômica para manter o conhecimento do sistema atualizado.</p></li>
+<li><p>Personalização e Segurança de Dados: A RAG é um método bastante adequado para adaptar LLMs a domínios específicos usando dados proprietários. As informações sensíveis de uma organização (dados de clientes, documentos internos, propriedade intelectual) permanecem em uma base de conhecimento controlada e segura, sendo acessadas apenas no momento da consulta, sem nunca serem usadas para treinar o modelo base de terceiros. Isso oferece um forte controle sobre a privacidade e a segurança dos dados, especialmente se os modelos usados forem internos.</p></li>
+</ul>
+<p>A confluência desses benefícios estratégicos resultou em uma rápida e ampla adoção da RAG no mercado. Embora seja difícil obter uma estatística única e precisa sobre o uso da RAG, as tendências em tecnologias adjacentes e a adoção de produtos baseados em RAG pintam um quadro claro de sua importância. Por exemplo, a Databricks, que atende mais de 300 empresas da Fortune 500, lista das maiores empresas dos Estados Unidos, relatou que, em sua plataforma no último ano, houve um crescimento de 377% no uso de bancos de dados vetoriais<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, um componente central da RAG que visitaremos em breve. A adoção massiva de copilotos empresariais, como o Microsoft 365 Copilot, por quase 70% das empresas da Fortune 500<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, demonstra a demanda por sistemas que, como a RAG, conectam LLMs a dados corporativos internos. Esses indicadores mostram que a RAG não é uma tecnologia de nicho, mas sim um pilar fundamental da estratégia de IA gerativa em grandes empresas, impulsionada pela necessidade crítica de personalizar LLMs com dados proprietários de forma segura e econômica.</p>
+</section>
+<section id="arquitetura-rag" class="level3" data-number="5.1.2">
+<h3 data-number="5.1.2" class="anchored" data-anchor-id="arquitetura-rag"><span class="header-section-number">5.1.2</span> Arquitetura RAG</h3>
+<div id="fig-cap-rag-placeholder" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-rag-placeholder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;5.2: Arquitetura Recuperador-Gerador em Sistemas RAG.
+</figcaption>
+<div aria-describedby="fig-cap-rag-placeholder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/gerador-recuperador.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+</figure>
+</div>
+<p>No nível mais fundamental, todos os sistemas RAG são compostos por dois pilares arquitetônicos: o <em>Recuperador</em> e o <em>Gerador</em>. A simplicidade dessa arquitetura modular é uma de suas maiores forças, permitindo que cada componente seja otimizado de forma independente.</p>
+<p>O <strong>Recuperador</strong> (<em>Retriever</em>) funciona como uma máquina de busca especializada. Sua principal responsabilidade é: dada uma consulta do usuário, encontrar e retornar a informação mais relevante de uma base de conhecimento pré-indexada. O recuperador atua como um filtro de conhecimento, navegando por um vasto repositório de dados para selecionar apenas alguns elementos que são cruciais para a tarefa em questão. Portanto, a base de conhecimento pode conter uma série de fontes de informação e estas, por sua vez, podem conter milhões itens de dados, por exemplo, documentos. A eficácia de todo o sistema RAG depende criticamente da qualidade desta etapa; se o recuperador falhar em encontrar o contexto correto, o gerador não terá a informação necessária para produzir uma resposta precisa, um princípio conhecido como <em>“garbage in garbage out”</em>.</p>
+<p>Já o <strong>Gerador</strong> (<em>Generator</em>) é tipicamente um LLM pré-treinado. Geralmente, ele recebe um <em>template</em> de <em>prompt</em> de entrada preenchido com as regras de geração de resposta, a consulta original do usuário e o contexto fornecido pelo recuperador. A sua tarefa não é simplesmente extrair ou repetir a informação recuperada, mas sim realizar uma síntese inteligente. O gerador deve integrar a intenção da pergunta do usuário com os fatos específicos do contexto, utilizando seu conhecimento linguístico e de raciocínio para gerar uma resposta final que seja coerente, relevante e em linguagem natural. A habilidade de sintetizar, contextualizar e adaptar, em vez de apenas repetir, é o que diferencia um sistema RAG sofisticado de um simples sistema de busca e extração.</p>
+</section>
+<section id="sec-cap-rag-retriever" class="level3" data-number="5.1.3">
+<h3 data-number="5.1.3" class="anchored" data-anchor-id="sec-cap-rag-retriever"><span class="header-section-number">5.1.3</span> O componente Recuperador (<em>Retriever</em>)</h3>
+<p>O recuperador é, em sua essência, um sistema de busca. Sua função primária é vasculhar uma base de conhecimento, que pode ser uma coleção de documentos, uma base de dados ou a web, para encontrar e extrair os trechos (<em>chunks</em>) de texto mais relevantes para a consulta do usuário. Embora existam diversas técnicas de recuperação, a abordagem mais comum atualmente tem um foco predominante na <strong>busca semântica</strong>, que busca por significado e contexto, em vez de simples correspondência de palavras-chave.</p>
+<section id="etapas-do-processo-de-recuperação" class="level4" data-number="5.1.3.1">
+<h4 data-number="5.1.3.1" class="anchored" data-anchor-id="etapas-do-processo-de-recuperação"><span class="header-section-number">5.1.3.1</span> Etapas do processo de recuperação</h4>
+<p>O funcionamento do recuperador pode ser dividido em quatro etapas principais, que preparam e executam a busca por informações.</p>
+<ul>
+<li><p><strong>Indexação e Divisão (<em>Chunking</em>)</strong>: Antes de qualquer busca, a base de conhecimento precisa ser processada. No caso de documentos, estes são divididos em pedaços menores e gerenciáveis, chamados de <em>chunks</em>. Essa divisão é crucial, pois permite que a busca retorne trechos específicos e de maior aderência à pergunta do usuário, em vez de documentos completos, otimizando o contexto que será enviado ao gerador.</p></li>
+<li><p><strong>Codificação (<em>Embedding</em>)</strong>: Tanto a consulta do usuário quanto cada <em>chunk</em> de documento são transformados em uma representação vetorial numérica densa, conhecida como <em>embedding</em>. Esse processo é realizado por modelos de codificação (<em>encoders</em>) que capturam o significado semântico do documento em um espaço vetorial de alta dimensão. Tais modelos de linguagem especializados são denominados modelos de <em>embedding</em>.</p></li>
+<li><p><strong>Armazenamento</strong>: Os <em>embeddings</em> dos <em>chunks</em> são armazenados e indexados em um banco de dados vetorial (<em>vector database</em>). Esses bancos de dados, como FAISS, Chroma ou Pinecone, são otimizados para realizar buscas de similaridade em alta velocidade em espaços vetoriais de milhões ou bilhões de vetores.</p></li>
+<li><p><strong>Busca por Similaridade</strong>: Quando um usuário faz uma pergunta, o <em>embedding</em> da sua consulta geralmente é comparado com os <em>embeddings</em> dos documentos armazenados no banco de dados vetorial. O sistema então calcula a “distância” ou “proximidade” entre os vetores (usando métricas como a similaridade de cosseno) para encontrar os <em>chunks</em> mais similares semanticamente, que são então retornados como contexto.</p></li>
+</ul>
+</section>
+<section id="preparação-de-documentos-e-chunking" class="level4" data-number="5.1.3.2">
+<h4 data-number="5.1.3.2" class="anchored" data-anchor-id="preparação-de-documentos-e-chunking"><span class="header-section-number">5.1.3.2</span> Preparação de documentos e <em>Chunking</em></h4>
+<p>O primeiro desafio em um <em>pipeline</em> RAG é lidar com o tamanho dos documentos. A maioria dos documentos do mundo real, como relatórios, artigos ou livros, excede em muito a janela de contexto dos LLMs, o número máximo de <em>token</em> que um modelo pode processar de uma só vez. Neste ponto, a RAG atua para evitar a adição de ruído no <em>prompt</em>, selecionando apenas os documentos ou trechos de documentos que são considerados relevantes a serem inseridos como contexto. Além disso, gerar um único <em>embedding</em> para um documento muito longo pode “diluir” a sua semântica, resultando em uma representação vetorial pouco informativa, ou uma massa gigantesca de texto que não corresponde bem ao necessário para consultas mais específicas.</p>
+<p>A solução para este problema é a segmentação, ou <em>chunking</em>: o processo de dividir documentos longos em pedaços menores e mais gerenciáveis. A escolha da estratégia e do tamanho do <em>chunk</em> é uma das decisões de engenharia mais impactantes na qualidade de um sistema RAG. Existe um equilíbrio fundamental&nbsp;<span class="citation" data-cites="lita2024chunking">(<a href="../../shared/referencias/referencias.html#ref-lita2024chunking" role="doc-biblioref">Lita et al., 2024</a>)</span>:</p>
+<ul>
+<li><p><strong><em>Chunks</em> maiores</strong>: Capturam mais contexto semântico, preservando a relação entre parágrafos e seções. No entanto, aumentam o risco de incluir informações irrelevantes (ruído) que podem confundir o LLM e são menos precisos para consultas muito específicas.</p></li>
+<li><p><strong><em>Chunks</em> menores</strong>: Oferecem representações mais focadas e com menos ruído, favorecendo a precisão em consultas granulares. Contudo, carregam menos contexto, o que pode dificultar a compreensão completa da informação se uma ideia estiver espalhada por múltiplos <em>chunks</em>.</p></li>
+</ul>
+<p>Existem diversas estratégias de <em>chunking</em>, cada uma com seus próprios trade-offs&nbsp;<span class="citation" data-cites="lita2024chunking">(<a href="../../shared/referencias/referencias.html#ref-lita2024chunking" role="doc-biblioref">Lita et al., 2024</a>)</span>:</p>
+<ul>
+<li><p><em>Chunking</em> fixo (<em>Fixed-size</em>): A abordagem mais simples, que consiste em dividir o texto em segmentos de tamanho fixo. Em geral pelo número de <em>tokens</em>, caracteres ou palavras, com uma sobreposição (<em>overlap</em>) opcional para manter a continuidade e evitar a perda de informação com os cortes. É rápido e fácil de implementar, mas pode quebrar sentenças ou ideias no meio, prejudicando a coesão semântica do conteúdo textual.</p></li>
+<li><p><em>Chunking</em> recursivo (<em>Recursive</em>): Uma melhoria em relação ao <em>chunking</em> fixo. Tenta dividir o texto recursivamente usando uma lista hierárquica de separadores, como quebras de parágrafo (\n\n), quebras de linha (\n) e espaços. Ele prioriza a manutenção da estrutura sintática do texto e só recorre a uma divisão de tamanho fixo como último recurso.</p></li>
+<li><p><em>Chunking</em> semântico (<em>Semantic</em>): Esta técnica visa criar <em>chunks</em> que são semanticamente coerentes. Uma abordagem comum é agrupar sentenças com base na similaridade de seus <em>embeddings</em>. O processo parte da segmentação do texto, geralmente no nível das sentenças, com o agrupamento das partições por similaridade semântica com o <em>chunk</em> acumulado. As partições são agrupadas de acordo com um limiar de similaridade predefinido. Isso produz trechos mais coesos, mas é computacionalmente mais caro.</p></li>
+<li><p><em>Chunking</em> baseado em estrutura (<em>Structure-based</em>): Aproveita a estrutura inerente do documento, como títulos, seções e subseções em arquivos HTML, Markdown ou LaTeX, para definir os limites dos <em>chunks</em>. Isso preserva a estrutura lógica do conteúdo, mas pode resultar em <em>chunks</em> de tamanho muito variável.</p></li>
+<li><p><em>Chunking</em> via LLM (<em>Agentic Chunking</em>): Uma abordagem de ponta que utiliza um LLM para analisar o documento e decidir inteligentemente como segmentá-lo. O LLM pode ser instruído a criar resumos de seções ou a agrupar trechos que tratam do mesmo tópico. Aqui, é importante ressaltar, que a aplicação do LLM deve ser o mais literal possível, evitando modificações do texto original e a criação de textos divergentes. Além disso, embora produza de altíssima qualidade semântica, o custo computacional e financeiro é significativamente maior, podendo ser proibitivo em alguns contextos.</p></li>
+</ul>
+</section>
+<section id="representando-documentos-textuais-com-embeddings" class="level4" data-number="5.1.3.3">
+<h4 data-number="5.1.3.3" class="anchored" data-anchor-id="representando-documentos-textuais-com-embeddings"><span class="header-section-number">5.1.3.3</span> Representando documentos textuais com <em>embeddings</em></h4>
+<p>Após a segmentação, cada <em>chunk</em> de texto precisa ser convertido em uma representação numérica que um computador possa entender e comparar. Por muito tempo, a busca de informações baseou-se em correspondência de palavras-chave, usando modelos como o <em>Bag-of-Words</em> (BoW), que ignoram a ordem e o contexto das palavras. Essa abordagem é limitada por problemas como sinônimos (palavras diferentes com o mesmo significado) e paráfrases (frases diferentes com a mesma intenção).</p>
+<p>Os <em>embeddings</em> textuais mitigam ou tratam diretamente esse problema. Um <em>embedding</em> é um vetor denso de números de ponto flutuante que representa o significado semântico de um pedaço de texto em um espaço de alta dimensionalidade. Esses vetores são a representação interna de um modelo de aprendizado profundo, geralmente sendo os vetores dos pesos da penúltima camada oculta (<em>hidden layer</em>). Portanto, esse significado semântico dos termos é dado na codificação dos documentos nos modelos de <em>embeddings</em>, de acordo com a proximidade e coocorrência das palavras em um determinado contexto. Nesse espaço, textos com significados semelhantes terão vetores próximos uns dos outros, medidos por métricas como a similaridade de cosseno.</p>
+<p>Esses vetores são gerados por modelos de linguagem especializados, tipicamente arquiteturas <em>encoder-only</em> como BERT, RoBERTa ou, mais comumente para RAG, modelos Sentence-BERT&nbsp;<span class="citation" data-cites="reimers-2019-sentence-bert">(<a href="../../shared/referencias/referencias.html#ref-reimers-2019-sentence-bert" role="doc-biblioref">Reimers; Gurevych, 2019</a>)</span>, que são otimizados para produzir <em>embeddings</em> de sentenças e parágrafos de alta qualidade. O processo envolve passar um <em>chunk</em> de texto pelo modelo <em>encoder</em>, que gera um <em>embedding</em> para cada <em>token</em>. Em seguida, uma técnica de <em>pooling</em> é aplicada para agregar esses <em>embeddings</em> de <em>tokens</em> em um único vetor que representa o <em>chunk</em> inteiro. As estratégias de <em>pooling</em> mais comuns são:</p>
+<ul>
+<li><p><em>Average pooling</em>: Calcular a média dos vetores de todos os <em>tokens</em>, resultando em uma representação global que suaviza as variações locais.</p></li>
+<li><p><em>Max pooling</em>: Selecionar, para cada dimensão do vetor, o valor máximo observado entre os <em>embeddings</em> dos <em>tokens</em>, destacando as características mais salientes do texto.</p></li>
+<li><p><em>Token Especial</em>: Utilizar diretamente o <em>embedding</em> associado ao <em>token</em> especial <code>CLS</code> (em modelos como o BERT), que é treinado para capturar o significado agregado de toda a sequência.</p></li>
+</ul>
+<p>Na prática e na literatura, a abordagem mais usual é fazer a média dos vetores dos <em>tokens</em> (<em>Average pooling</em>).</p>
+<p>Uma vez que todos os <em>chunks</em> foram convertidos em <em>embeddings</em>, eles precisam ser armazenados em um local que permita uma busca rápida e eficiente. Em casos de <em>embeddings</em> semânticos, é usual utilizar, por exemplo, bancos de dados vetoriais, projetados para busca rápida e eficiente em bases com milhões de vetores.</p>
+<p>Você pode se aprofundar sobre <em>embeddings</em> no <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-linguagem/cap-modelos-linguagem.html#sec-cap-modelos-linguagem" target="_blank" title="Volume 2">Modelos de linguagem</a></span> deste livro.</p>
+</section>
+<section id="mecanismo-de-recuperação" class="level4" data-number="5.1.3.4">
+<h4 data-number="5.1.3.4" class="anchored" data-anchor-id="mecanismo-de-recuperação"><span class="header-section-number">5.1.3.4</span> Mecanismo de recuperação</h4>
+<p>A etapa final do processo de recuperação é a busca em si. Existem duas famílias principais de algoritmos de recuperação, e as abordagens mais modernas as combinam.</p>
+<ul>
+<li><p>Recuperadores Esparsos (<em>Sparse Retrievers</em>): Estes são os algoritmos clássicos de recuperação de informação, baseados em representações vetoriais esparsas (onde a maioria dos valores é zero). Nessa estrutura vetorial, os documentos indexados são dados pelos vetores numéricos que geralmente indicam a frequência ou a frequência ponderada dos termos que os compõe. Um dos algoritmos mais proeminentes para este tipo de recuperação é o BM25. Ele funciona com base na correspondência de palavras-chave, dando maior peso a termos que são raros no <em>corpus</em> geral, mas frequentes em um documento específico. São excelentes para encontrar documentos que contêm palavras-chave exatas ou terminologia específica.</p></li>
+<li><p>Recuperadores Densos (<em>Dense Retrievers</em>): Estes são os recuperadores baseados nos <em>embeddings</em> semânticos discutidos anteriormente. Eles utilizam vetores densos (onde a maioria dos valores é não-zero) que, através da ocorrência em contextos similares, capturam significado conceitual dos termos que compõe o texto. Sua principal vantagem é a capacidade de encontrar documentos relevantes mesmo que não compartilhem nenhuma palavra-chave com a consulta, contanto que o significado seja semelhante. São robustos a sinônimos, paráfrases e variações de vocabulário.</p></li>
+<li><p>Busca Híbrida (<em>Hybrid Search</em>): A abordagem de estado da arte reconhece que os recuperadores esparsos e densos têm forças complementares. A busca híbrida executa ambos os tipos de busca em paralelo e, em seguida, combina os resultados. Essa combinação aproveita a precisão lexical da busca por palavras-chave e a robustez conceitual da busca semântica. Para mesclar as duas listas de resultados, que possuem pontuações em escalas diferentes, algoritmos de fusão de <em>ranking</em>, como o <em>Reciprocal Rank Fusion</em> (RRF)&nbsp;<span class="citation" data-cites="cormack2009reciprocal">(<a href="../../shared/referencias/referencias.html#ref-cormack2009reciprocal" role="doc-biblioref">Cormack et al., 2009</a>)</span>, são frequentemente utilizados para produzir uma única lista de resultados classificada de forma mais relevante.</p></li>
+</ul>
+<p>O <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol3/aplicacoes-e-dominios/cap-ir/cap-ir.html#sec-cap-ir" target="_blank" title="Volume 3">Recuperação de Informação</a></span> deste livro trata com atenção mecanismos de Recuperação de Informação.</p>
+</section>
+</section>
+<section id="sec-cap-rag-generator" class="level3" data-number="5.1.4">
+<h3 data-number="5.1.4" class="anchored" data-anchor-id="sec-cap-rag-generator"><span class="header-section-number">5.1.4</span> O componente Gerador (<em>Generator</em>)</h3>
+<p>O mecanismo central da RAG é a engenharia de <em>prompt</em> dinâmica, também conhecida como “<em>prompt stuffing</em>”. O sistema monta e preenche estruturas predefinidas no <em>prompt</em>, tornando-o mais elaborado antes do envio para a LLM. Este <em>prompt</em> aumentado normalmente segue um <em>template</em> que combina as regras de geração de resposta, a consulta original realizada pelo usuário e o contexto recuperado. Um exemplo de template poderia ser:</p>
+<div id="def-capX-quadroY" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 5.2</strong></span> Exemplo de <em>prompt</em> aumentado em um sistema RAG</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<p>Você é um assistente especializado em análise de currículos acadêmicos e profissionais. Responda à pergunta do usuário com base no trecho de currículo fornecido.<br>
+Para isso, você receberá duas informações:<br>
+1. O prompt original enviado pelo usuário (que expressa o que ele deseja saber).<br>
+2. Um trecho do currículo acadêmico (seção).</p>
+<p>Sua tarefa é:<br>
+– Analisar o trecho do currículo levando em consideração a pergunta;<br>
+– Responder com base apenas nas informações explícitas ou fortemente implícitas nesse trecho;<br>
+– Ignorar informações que não sejam pertinentes à pergunta;<br>
+– Não extrapolar para além do conteúdo disponível na seção fornecida.</p>
+<p>Apresente sua análise de forma clara, objetiva e bem estruturada.</p>
+<p><strong>Prompt do Usuário:</strong> <code>{prompt}</code><br>
+<strong>Trecho do Currículo:</strong> <code>{context}</code> </p>
+</div>
+</div>
+</div>
+</div>
+<p>O exemplo acima foi o <em>prompt</em> utilizado no LattesRex<span class="citation" data-cites="Darcio2025LattesRex">(<a href="../../shared/referencias/referencias.html#ref-Darcio2025LattesRex" role="doc-biblioref">Darcio et al., 2025</a>)</span>, um <em>chatbot</em> especialista em análises de currículos Lattes<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. No exemplo, podemos ver as instruções, nas quais são definidas a tarefa, a função do modelo e o que deve conter na resposta. Os documentos coletados e a consulta do usuário são descritas e inseridas ao final do mesmo. Assim, a cada consulta do usuário, o <em>prompt</em> é modificado dinamicamente.</p>
+<p>Este processo de aumento garante que o LLM tenha todas as informações factuais necessárias diretamente em sua janela de contexto no momento da geração.</p>
+<p>O principal objetivo do <em>prompt</em> aumentado é forçar o LLM a realizar uma “geração ancorada” (grounded generation). Ao instruir explicitamente o modelo a basear sua resposta no contexto fornecido, o risco de alucinação é drasticamente reduzido. A resposta é “ancorada” no conteúdo factual dos documentos recuperados, em vez de ser puramente uma invenção probabilística baseada no conhecimento interno do modelo.</p>
+<p>No entanto, a função do gerador vai muito além de uma simples estruturação de informação. A verdadeira habilidade de um sistema RAG sofisticado reside na capacidade do LLM de contextualizar a informação. O modelo não deve apenas repetir os trechos recuperados. Em vez disso, ele deve executar uma fusão complexa de três fontes de informação: (1) a intenção e os detalhes da consulta do usuário, (2) os fatos específicos contidos nos <em>chunks</em> recuperados, e (3) seu vasto conhecimento pré-treinado sobre gramática, estrutura, raciocínio e conhecimento geral do mundo.</p>
+<p>Considere a seguinte consulta: “Compare os prós e contras das estratégias de <em>chunking</em> fixo e semântico”. O recuperador pode retornar dois <em>chunks</em>: um descrevendo o <em>chunking</em> fixo e outro descrevendo o <em>chunking</em> semântico. O processo de geração de resposta mais simples listaria ambas as descrições como resultado. Um gerador sofisticado, no entanto, usaria sua capacidade de raciocínio para criar uma estrutura comparativa organizando os pontos fortes e fracos de cada abordagem lado a lado. Essa análise de contexto, realizando tarefas de síntese e estruturação textual, são formas de tratamento do conteúdo que apenas um LLM poderoso é capaz de executar, e é o que eleva a RAG de uma ferramenta de busca para um verdadeiro sistema de sintese de informações. Portanto, a qualidade de um sistema RAG depende não apenas da precisão do recuperador, mas também da capacidade de entendimento do contexto do gerador.</p>
+</section>
+</section>
+<section id="sec-cap-rag-rag_vs_finetuning" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sec-cap-rag-rag_vs_finetuning"><span class="header-section-number">5.2</span> RAG vs.&nbsp;<em>Fine-tuning</em></h2>
+<p>Ao buscar adaptar um LLM para resolver problemas específicos, duas soluções principais emergem: RAG e <em>fine-tuning</em> (ajuste fino). Embora possam ser usadas em conjunto, a escolha entre elas envolve um <em>trade-off</em> fundamental relacionado ao objetivo, custo e natureza dos dados.</p>
+<section id="sec-cap-rag-finetuning" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="sec-cap-rag-finetuning"><span class="header-section-number">5.2.1</span> <em>Fine-tuning</em></h3>
+<p>O <em>fine-tuning</em> consiste em continuar o treinamento de um modelo fundacional pré-treinado, utilizando um conjunto de dados específico do seu domínio. O objetivo é ajustar os pesos internos do modelo para que ele se especialize em uma tarefa ou em um estilo de comunicação particular.</p>
+<p>Essencialmente, o <em>fine-tuning</em> é ideal para ensinar ao LLM <strong>como</strong> responder, permitindo ajustar o estilo, o tom, o formato da saída e garantir que o modelo siga instruções complexas e específicas do domínio ou caso de uso. Isso se alinha a uma máxima importante na comunidade de IA: o ajuste fino serve para ensinar <strong>forma</strong>, não sendo indicado para injetar <strong>fatos</strong> ao modelo. Tentar ensinar novos conhecimentos factuais exclusivamente por este método pode levar a alucinações e não garante que o modelo recupere a informação correta no momento certo.</p>
+<p>Deste modo, o <em>fine-tuning</em> não é uma opção interessante para lidar com liberdade de escrita e as veriações textuais de determinados domínios. Entretanto, tal abordagem pode ser aplicada para atuar com fatores e conhecimentos relativamente bem definido e estáticos. O conteúdo para esses casos deve sofrer poucas mudanças de acordo com o tempo pois, após o treinamento, o conhecimento do modelo fica “congelado” até um novo processo de ajuste. Assim, o sucesso do <em>fine-tuning</em> depende criticamente da qualidade e da curadoria do conjunto de dados de treinamento e, mesmo com técnicas de otimização como o LoRA (<em>Low-Rank Adaptation</em>)<span class="citation" data-cites="hu2021loralowrankadaptationlarge">(<a href="../../shared/referencias/referencias.html#ref-hu2021loralowrankadaptationlarge" role="doc-biblioref">Hu et al., 2021</a>)</span>, o processo pode ser computacionalmente caro, exigindo recursos de hardware e tempo significativos.</p>
+</section>
+<section id="sec-cap-rag-rag" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="sec-cap-rag-rag"><span class="header-section-number">5.2.2</span> RAG</h3>
+<p>Em contraste, a RAG não modifica os pesos internos do LLM. Em vez disso, ele enriquece as consultas para maximizar a qualidade dos resultados obtidos “em tempo de execução”, fornecendo-lhe informações externas relevantes para cada consulta.</p>
+<p>A principal vantagem da RAG é sua capacidade de acessar <strong>conhecimento dinâmico</strong>. Basta atualizar a base de dados externa para que o LLM utilize as informações mais recentes, sem a necessidade de um caro e demorado re-treinamento. Ao “ancorar” a resposta do LLM em um contexto factual, a RAG reduz significativamente a probabilidade de o modelo inventar informações (alucinar).</p>
+<p>Isso torna a RAG a abordagem ideal para domínios onde a <strong>factualidade e a auditabilidade</strong> são essenciais, como em aplicações de direito, apoio ao cliente ou análise de documentos técnicos. Como a resposta é gerada a partir de fontes explícitas, é possível citá-las, aumentando a confiança do usuário. A implementação geralmente envolve a orquestração de componentes como bancos de dados vetoriais e recuperadores, frequentemente facilitada por <em>frameworks</em> como LangChain ou LlamaIndex.</p>
+<p>Em resumo, a escolha depende do problema: se o objetivo é ensinar um novo estilo ou comportamento, o <em>fine-tuning</em> é a ferramenta certa. Se o objetivo é garantir respostas factuais baseadas em um corpo de conhecimento dinâmico e específico, a RAG é a solução superior. Em muitos casos avançados, uma abordagem híbrida, onde um modelo <em>fine-tuned</em> para um determinado estilo utiliza RAG para acessar dados atualizados, pode oferecer o melhor dos dois mundos.</p>
+</section>
+<section id="abordagens-híbridas" class="level3" data-number="5.2.3">
+<h3 data-number="5.2.3" class="anchored" data-anchor-id="abordagens-híbridas"><span class="header-section-number">5.2.3</span> Abordagens híbridas</h3>
+<p>A discussão “RAG vs.&nbsp;<em>fine-tuning</em>” pode apresentar uma falsa dicotomia. Na prática, as arquiteturas de IA mais robustas não escolhem entre um ou outro, mas os combinam de forma sinérgica. É importante ao se aprofundar nas abordagens híbridas, entender que o refinamento das tarefas e a especialização dos <em>prompts</em> e modelos potencializa os resultados obtidos. Portanto, um exemplo de modelos híbridos é o uso de <em>fine-tuning</em> para otimizar o “motor” de raciocínio do LLM, enquanto a RAG fornece o “combustível” (dados) em tempo real. Essa combinação permite que o modelo não apenas acesse o conhecimento correto, mas também saiba como utilizá-lo da maneira mais eficaz.</p>
+<p>Um exemplo prático seria um assistente de IA para médicos. Primeiramente, o LLM base passaria por um <strong><em>fine-tuning</em></strong> com um conjunto de prontuários médicos anonimizados e diálogos clínicos. O objetivo não seria memorizar os prontuários, mas sim aprender a estrutura da linguagem médica, entender abreviações e saber como resumir informações clínicas. Em seguida, quando um médico perguntasse “Resuma o histórico de hipertensão do paciente João Silva”, o sistema <strong>RAG</strong> entraria em ação, recuperando os trechos relevantes do prontuário eletrônico específico daquele paciente. Por fim, o LLM, já ajustado para “pensar como um médico”, receberia esse contexto e geraria um resumo conciso e clinicamente relevante.</p>
+<p>As arquiteturas híbridas podem ser implementadas de várias maneiras, como a Sequencial (primeiro ajusta-se o modelo, depois aplica-se RAG) ou a Integrada (onde o modelo é treinado para otimizar tanto a recuperação quanto a geração), representando a vanguarda na personalização de LLMs.</p>
+</section>
+</section>
+<section id="rag---aspectos-avançados" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="rag---aspectos-avançados"><span class="header-section-number">5.3</span> RAG - Aspectos avançados</h2>
+<p>A arquitetura fundamental de RAG, que consiste em recuperar informações de uma base de conhecimento externa antes de gerar uma resposta, provou ser uma solução robusta para mitigar alucinações e superar a limitação do conhecimento estático dos modelos. No entanto, a implementação “ingênua” ou tradicional deste paradigma, caracterizada por uma busca vetorial simples seguida de uma concatenação de contexto, revela rapidamente suas próprias limitações. A qualidade da resposta final é inexoravelmente limitada pela qualidade da recuperação inicial; uma abordagem de “tamanho único” para todas as consultas é ineficiente e subótima; e o foco exclusivo em dados textuais ignora a riqueza de informações presentes em formatos estruturados e multimodais.</p>
+<p>Nesta seção aprofundaremos o ecossistema de técnicas avançadas de RAG, que transformam o <em>pipeline</em> linear e passivo em um processo de raciocínio dinâmico, adaptativo e autocrítico. A tese central é que a evolução da RAG transcende a mera recuperação de informações, movendo-se em direção a um paradigma onde o sistema introduz camadas sofisticadas de otimização, tomada de decisão inteligente, autoavaliação e raciocínio estruturado. Exploraremos como o <em>re-ranking</em> refina a precisão, como a fusão de consultas amplia o alcance da busca e como algoritmos inteligentes podem rotear, corrigir e até mesmo habilitar a autocrítica no processo de geração. Além disso, expandiremos as fronteiras da RAG para além do texto plano, investigando como grafos de conhecimento permitem o raciocínio complexo e como a multimodalidade integra visão e linguagem. Finalmente, abordaremos os desafios práticos da implementação em produção, desde as estratégias de segmentação de dados e avaliação rigorosa até as considerações éticas e de desempenho.</p>
+<section id="rag-em-duas-etapas-re-ordenando-resultados" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="rag-em-duas-etapas-re-ordenando-resultados"><span class="header-section-number">5.3.1</span> RAG em duas etapas: Re-ordenando resultados</h3>
+<p>A arquitetura de recuperação em sistemas RAG de larga escala é frequentemente projetada como um processo de duas etapas que equilibra a necessidade de velocidade em um vasto <em>corpus</em> com a exigência de alta precisão em um conjunto menor de <em>chunks</em> ou documentos candidatos. Este paradigma representa um trade-off fundamental entre a abrangência semântica e a profundidade contextual.</p>
+<p>A primeira etapa, a <strong>recuperação inicial</strong>, é otimizada para velocidade e escalabilidade. Seu objetivo é pesquisar rapidamente em milhões ou até bilhões de documentos para encontrar um conjunto de candidatos potencialmente relevantes. Para isso, são utilizados modelos <strong>bi-encoder</strong>. Esses modelos geram representações vetoriais (<em>embeddings</em>) para a consulta e para todos os documentos da base de conhecimento de forma independente e antecipada.&nbsp;<span class="citation" data-cites="khattab2020colbert">(<a href="../../shared/referencias/referencias.html#ref-khattab2020colbert" role="doc-biblioref">Khattab; Zaharia, 2020</a>)</span> No momento da consulta, a recuperação se resume a uma busca de vizinhos mais próximos (<em>Approximate Nearest Neighbor</em> - ANN) no espaço vetorial, uma operação extremamente eficiente. O <em>bi-encoder</em> lança uma rede ampla e rápida, maximizando o <em>recall</em> ao capturar todos os documentos que são semanticamente próximos da consulta em um sentido geral. No entanto, como a consulta e o documento são processados separadamente, interações mais finas e contextuais entre eles são perdidas&nbsp;<span class="citation" data-cites="khattab2020colbert">(<a href="../../shared/referencias/referencias.html#ref-khattab2020colbert" role="doc-biblioref">Khattab; Zaharia, 2020</a>)</span>.</p>
+<p>Uma vez que um subconjunto menor e mais gerenciável de documentos candidatos é recuperado (por exemplo, os 20 a 50 melhores resultados), a segunda etapa, o <strong><em>re-ranking</em></strong>, entra em ação. O objetivo aqui é mudar o foco da velocidade para a precisão. Esta etapa utiliza modelos mais poderosos e computacionalmente mais caros, como os <strong>cross-encoders</strong>, para reavaliar e reordenar a lista de candidatos. O <em>cross-encoder</em> realiza uma análise profunda e mais lenta para verificar a relevância contextual precisa, maximizando a <em>precisão</em> no conjunto restrito. Ele reordena os documentos, empurrando os mais relevantes para o topo da lista antes de serem enviados ao gerador.</p>
+<p>Essa arquitetura de duas fases é a chave para a eficiência e eficácia do <em>re-ranking</em>. O sistema não está apenas filtrando resultados; ele está mudando a própria definição de “relevância” entre as etapas. A transição ocorre de uma correspondência semântica geral e de baixo custo para uma correspondência contextual específica e de alto custo, combinando o melhor dos dois mundos para alcançar um desempenho superior que seria computacionalmente inviável com uma única abordagem.</p>
+<section id="cross-encoders" class="level4" data-number="5.3.1.1">
+<h4 data-number="5.3.1.1" class="anchored" data-anchor-id="cross-encoders"><span class="header-section-number">5.3.1.1</span> <em>Cross-Encoders</em></h4>
+<p><em>Cross encoders</em> são mais adequados à tarefa de <em>re-ranking</em> após o conjunto inicial de candidatos ser recuperado. Enquanto um <em>bi-encoder</em> mede a similaridade entre duas representações independentes, um <em>cross-encoder</em> modela diretamente o alinhamento entre a consulta e o documento.</p>
+<p>A mecânica de um <em>cross-encoder</em> funciona da seguinte maneira: o algoritmo recebe a consulta e um documento candidato como uma única sequência de entrada, tipicamente concatenados e separados por um <em>token</em> especial, como <code>[SEP]</code>. Essa sequência conjunta é então processada por um modelo Transformer. O mecanismo de auto-atenção do Transformer é aplicado a toda a sequência, permitindo que cada <em>token</em> da consulta “preste atenção” a cada <em>token</em> do documento e vice-versa, em todas as camadas do modelo. Essa interação profunda permite que o modelo capture dependências sutis, nuances contextuais e relações semânticas complexas que são impossíveis de serem modeladas quando a consulta e o documento são codificados separadamente. A saída do <em>cross-encoder</em> não são dois vetores, mas sim um único score de relevância, geralmente um valor entre 0 e 1, que representa a probabilidade de o documento ser relevante para a consulta.</p>
+<p>O treinamento desses modelos é tipicamente supervisionado, formulado como uma tarefa de classificação binária. Utilizando grandes datasets de pares (consulta, documento) rotulados como relevantes ou não relevantes, o modelo é treinado para otimizar uma função de perda como a <strong>Entropia Cruzada Binária (BCE)</strong>. Esse processo de treinamento ensina o modelo a produzir uma pontuação alta para pares relevantes e uma pontuação baixa para pares irrelevantes.</p>
+<p>O poder do <em>cross-encoder</em> vai além de simplesmente “processar juntos”. Ele reside na sua capacidade de modelar a <strong>relevância assimétrica</strong>. A relevância da informação é frequentemente direcional: um documento que descreve os efeitos colaterais de um medicamento é altamente relevante para a consulta “quais são os efeitos colaterais do medicamento X?”. No entanto, a consulta não é relevante para o documento. Os <em>bi-encoders</em>, que medem a similaridade simétrica (como a similaridade de cosseno, onde <code>sim(A, B) = sim(B, A)</code>), têm dificuldade em capturar essa nuance. No caso do <em>cross-encoder</em>, ao ser treinado com os pares de pergunta e resposta candidata, se torna um avaliador especializado nessa assimetria. Portanto,para responder à pergunta “este documento é relevante <em>para esta consulta</em>?”, o algoritmo aprende a capturar essa assimetria fundamental, o que leva a uma avaliação de relevância muito mais precisa e dependente do contexto.</p>
+<div id="def-cap-rag-comparativo-encoders" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 5.3</strong></span> Comparativo de arquiteturas de <em>Bi-Encoder</em> vs.&nbsp;<em>Cross-Encoder</em></p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Característica</strong></th>
+<th style="text-align: left;"><strong><em>Bi-Encoder</em></strong></th>
+<th style="text-align: left;"><strong><em>Cross-Encoder</em></strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Formato de Entrada</strong></td>
+<td style="text-align: left;">Consulta e Documento processados separadamente.</td>
+<td style="text-align: left;">Par (Consulta, Documento) concatenado como uma única entrada.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Processamento</strong></td>
+<td style="text-align: left;">Geração de <em>embeddings</em> independentes e comparação via função de similaridade (e.g., cosseno).</td>
+<td style="text-align: left;">Processamento conjunto com mecanismo de atenção cruzada entre os <em>tokens</em> da consulta e do documento.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Saída</strong></td>
+<td style="text-align: left;"><em>Score</em> simétrico de similaridade (e.g., -1 a 1).</td>
+<td style="text-align: left;"><em>Score</em> assimétrico de relevância (e.g., 0 a 1).</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Custo de Indexação</strong></td>
+<td style="text-align: left;">Alto: requer o pré-cálculo e armazenamento de <em>embeddings</em> para todos os documentos na base.</td>
+<td style="text-align: left;">Nulo: não há etapa de indexação.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Custo de Inferência</strong></td>
+<td style="text-align: left;">Baixo: 1 passagem do <em>encoder</em> para a consulta + busca vetorial rápida.</td>
+<td style="text-align: left;">Alto: <span class="math inline">\(N\)</span> passagens do <em>encoder</em> para re-ranquear <span class="math inline">\(N\)</span> documentos candidatos.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Caso de Uso Principal</strong></td>
+<td style="text-align: left;">Recuperação inicial em larga escala (primeira fase).</td>
+<td style="text-align: left;"><em>Re-ranking</em> de um conjunto pequeno de candidatos (segunda fase).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Vantagem Principal</strong></td>
+<td style="text-align: left;">Velocidade e escalabilidade para <em>corpus</em> massivos.</td>
+<td style="text-align: left;">Alta precisão e compreensão contextual profunda.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Desvantagem Principal</strong></td>
+<td style="text-align: left;">Menor precisão contextual, pois perde interações finas.</td>
+<td style="text-align: left;">Custo computacional alto, não escalável para a recuperação inicial.</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="expansão-de-consultas-com-rag-fusion" class="level4" data-number="5.3.1.2">
+<h4 data-number="5.3.1.2" class="anchored" data-anchor-id="expansão-de-consultas-com-rag-fusion"><span class="header-section-number">5.3.1.2</span> Expansão de consultas com RAG-Fusion</h4>
+<p>Uma limitação inerente a qualquer sistema de busca é sua dependência da formulação exata da consulta do usuário. Uma única consulta pode ser ambígua, subespecificada ou simplesmente não usar a terminologia que melhor corresponde aos documentos relevantes na base de conhecimento. A técnica <strong>RAG-Fusion</strong> aborda diretamente esse problema, reconhecendo que a intenção do usuário pode ser mais bem capturada por múltiplas perspectivas<span class="citation" data-cites="rackauckas2024rag">(<a href="../../shared/referencias/referencias.html#ref-rackauckas2024rag" role="doc-biblioref">Rackauckas, 2024</a>)</span>.</p>
+<p>O processo de RAG-Fusion funciona em três etapas principais:</p>
+<ol type="1">
+<li><p><strong>Geração de múltiplas consultas:</strong> Em vez de depender apenas da consulta original, RAG-Fusion primeiro utiliza um LLM para gerar múltiplas variações daquela consulta. Através de um <em>prompt</em> cuidadosamente elaborado, o LLM é instruído a criar diversas perguntas que abordam a mesma intenção subjacente, mas de diferentes ângulos ou com diferentes palavras-chave. Por exemplo, para a consulta “impacto da IA na economia”, o LLM poderia gerar: “como a inteligência artificial afeta o mercado de trabalho?”, “automação e crescimento do PIB” e “riscos econômicos da IA”.</p></li>
+<li><p><strong>Recuperação paralela:</strong> O sistema então realiza buscas vetoriais para cada uma dessas consultas geradas, bem como para a consulta original, em paralelo. Cada consulta atua em diferentes regiões do espaço vetorial, recuperando conjuntos de documentos que, embora todos relevantes, podem ser distintos entre si.</p></li>
+<li><p><strong>Fusão e <em>re-ranking</em>:</strong> Finalmente, os conjuntos de resultados de todas as buscas são agregados e re-ranqueados usando um algoritmo de fusão, mais comumente o <em>Reciprocal Rank Fusion</em> (RRF)&nbsp;<span class="citation" data-cites="rackauckas2024rag">(<a href="../../shared/referencias/referencias.html#ref-rackauckas2024rag" role="doc-biblioref">Rackauckas, 2024</a>)</span>, para produzir uma única lista final de documentos classificados.</p></li>
+</ol>
+<p>Essa abordagem transforma a recuperação de um ato de <em>matching</em> para um ato de <em>exploração</em>. Em essência, RAG-Fusion realiza uma forma de engenharia de <em>prompt</em> automática para a fase de recuperação. Em vez de exigir que o usuário refine sua pergunta, o sistema assume proativamente essa responsabilidade. Ele utiliza o poder generativo e a compreensão semântica do LLM para explorar o contexto ou entorno da busca realizada pelo usuário, em outras palavras, o “espaço latente de intenções”. Ao transformar uma única consulta pontual em uma distribuição de consultas, ele aumenta a área de superfície da busca, elevando significativamente a robustez e a probabilidade de encontrar documentos relevantes que uma única formulação teria perdido.</p>
+</section>
+<section id="fusão-de-diferentes-ordenações-reciprocal-rank-fusion-rrf" class="level4" data-number="5.3.1.3">
+<h4 data-number="5.3.1.3" class="anchored" data-anchor-id="fusão-de-diferentes-ordenações-reciprocal-rank-fusion-rrf"><span class="header-section-number">5.3.1.3</span> Fusão de diferentes ordenações: <em>Reciprocal Rank Fusion</em> (RRF)</h4>
+<p>Quando múltiplas listas de resultados precisam ser combinadas — seja na RAG-Fusion, que usa múltiplas consultas, ou na busca híbrida, que combina busca vetorial e busca por palavra-chave (como BM25) — surge o desafio de como fundir os <em>rankings</em> gerados por cada método. Os scores produzidos por diferentes sistemas de busca (e.g., similaridade de cosseno, <em>score</em> BM25) estão em escalas completamente diferentes e não são diretamente comparáveis&nbsp;<span class="citation" data-cites="rackauckas2024rag">(<a href="../../shared/referencias/referencias.html#ref-rackauckas2024rag" role="doc-biblioref">Rackauckas, 2024</a>)</span>. Tentar normalizá-los pode ser complexo e frágil.</p>
+<p>O <strong><em>Reciprocal Rank Fusion</em> (RRF)</strong> é um algoritmo que resolve esse problema ao ignorar completamente os scores brutos e focar apenas na posição (rank) dos documentos em cada lista. O RRF, opera como um algoritmo de <em>ensemble voting</em>, onde a ideia de voto é aplicada sob a premissa de que a posição de um documento em uma lista de resultados é um sinal de relevância mais confiável e universal do que o score numérico que o gerou. Portanto, o RRF atua como um sistema de votação ponderada pela confiança posicional.</p>
+<p>Para cada documento <span class="math inline">\(d\)</span> que aparece em uma ou mais listas de resultados <span class="math inline">\(R\)</span>, o RRF calcula uma pontuação combinada usando a seguinte fórmula [1, 10]:</p>
+<div style="transform-origin:left; scale:0.8;">
+<p> <span id="eq-cap-rag-score"><span class="math display">\[
+Score(d) = \sum_{r \in R} \frac{1}{k + rank_r(d)}
+\tag{5.1}\]</span></span> </p>
+</div>
+<p>Onde:</p>
+<ul>
+<li><p><span class="math inline">\(rank_r(d)\)</span> é a posição do documento <span class="math inline">\(d\)</span> na lista de resultados do ranqueador <span class="math inline">\(r\)</span>, começando com o rank 1 para o primeiro item.</p></li>
+<li><p><span class="math inline">\(k\)</span> é uma constante de suavização, comumente definida como 60.</p></li>
+</ul>
+<p>A pontuação final de um documento é a soma de suas pontuações RRF em todas as listas em que ele aparece. Documentos que aparecem consistentemente em posições altas em múltiplas listas recebem as maiores pontuações combinadas e, portanto, são promovidos ao topo do <em>ranking</em> final.</p>
+<p>O papel da constante <span class="math inline">\(k\)</span> é crucial. Ela amortece a contribuição dos documentos de alto escalão, garantindo que eles não sejam excessivamente dominantes, e dá mais peso a documentos de <em>ranking</em> mais baixo do que uma simples fórmula de <span class="math inline">\(1/rank\)</span> daria. Sem <span class="math inline">\(k\)</span>, a diferença de pontuação entre o rank 1 e 2 seria muito maior do que entre o rank 60 e 61. A constante <span class="math inline">\(k\)</span> suaviza essa queda, permitindo que o algoritmo considere um espectro mais amplo de resultados. Essencialmente, <span class="math inline">\(k\)</span> controla o quão cético o algoritmo é em relação às distinções de <em>ranking</em> muito altas.</p>
+<p>Ao descartar os scores, o RRF democratiza a contribuição de diferentes recuperadores. Cada sistema (vetorial, <em>keyword</em> etc.) pode “votar” nos documentos com base em sua especialidade, com o peso do voto diminuindo com a posição. O RRF troca a magnitude do score pela consistência do <em>ranking</em>, buscando um consenso entre as diferentes fontes de evidência. Um documento que é bem ranqueado, incluído entre os dez primeiros nos resultados de três recuperadores diferentes é provavelmente mais relevante do que os primeiros documentos dado como resultado no <em>ranking</em> individual de cada recuperador, mas ignorado pelos outros.</p>
+</section>
+</section>
+<section id="rag-adaptiva-e-o-modelo-agêntico" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="rag-adaptiva-e-o-modelo-agêntico"><span class="header-section-number">5.3.2</span> RAG adaptiva e o Modelo agêntico</h3>
+<p>Após otimizar a camada de recuperação, a próxima fronteira na evolução da RAG é a introdução de inteligência e tomada de decisão no próprio <em>pipeline</em>. As arquiteturas tradicionais seguem um fluxo linear e fixo, tratando todas as consultas da mesma forma. Em contraste, os sistemas avançados podem adaptar sua estratégia com base na natureza da consulta, avaliar a qualidade dos documentos recuperados e até mesmo criticar suas próprias saídas. Esta seção explora técnicas que transformam a RAG de um processo mecânico para um fluxo de trabalho de raciocínio dinâmico e resiliente.</p>
+<section id="rag-adaptativo-roteamento-dinâmico-de-consultas" class="level4" data-number="5.3.2.1">
+<h4 data-number="5.3.2.1" class="anchored" data-anchor-id="rag-adaptativo-roteamento-dinâmico-de-consultas"><span class="header-section-number">5.3.2.1</span> RAG adaptativo: Roteamento dinâmico de consultas</h4>
+<p>O princípio fundamental do <strong>RAG adaptativo</strong> é que nem todas as consultas tem as mesmas características e, portanto, não devem ser tratadas com o mesmo <em>pipeline</em> computacionalmente intensivo. Uma pergunta simples como “Olá, como vai você?” não requer uma busca em um banco de dados vetorial, enquanto uma pergunta sobre eventos recentes, como “Quem ganhou o jogo de ontem?”, não pode ser respondida por uma base de conhecimento estática&nbsp;<span class="citation" data-cites="jeong2024adaptive">(<a href="../../shared/referencias/referencias.html#ref-jeong2024adaptive" role="doc-biblioref">Jeong et al., 2024</a>)</span>.</p>
+<p>Para lidar com essa diversidade, a RAG Adaptiva introduz um componente de tomada de decisão no início do fluxo: o <strong>Query Router</strong> (Roteador de Consultas)&nbsp;<span class="citation" data-cites="yeo2025universalrag">(<a href="../../shared/referencias/referencias.html#ref-yeo2025universalrag" role="doc-biblioref">Yeo et al., 2025</a>)</span>. Este roteador é um classificador leve que analisa a consulta do usuário e a direciona para o caminho de processamento mais eficiente e apropriado. Frequentemente, este roteador é implementado usando um LLM instruído a produzir uma saída estruturada, garantindo que a decisão seja baseada na compreensão semântica da consulta, e não apenas em palavras-chave.</p>
+<p>O fluxo de trabalho típico de um RAG Adaptativo pode ter múltiplos ramos:</p>
+<ol type="1">
+<li><p><strong>Geração direta:</strong> Para consultas simples, conversacionais ou que não requerem conhecimento externo, o roteador envia a pergunta diretamente ao LLM, pulando a etapa de recuperação. Isso economiza tempo e recursos.</p></li>
+<li><p><strong>Recuperação na base de conhecimento (<em>Vector Store</em>):</strong> Para perguntas que são factuais e se enquadram no domínio coberto pela base de conhecimento interna, o roteador aciona o <em>pipeline</em> RAG padrão, realizando uma busca vetorial nos documentos indexados.</p></li>
+<li><p><strong>Busca na web ou recuperação complexa:</strong> Para perguntas sobre eventos recentes, tópicos fora do escopo da base de conhecimento ou questões complexas que podem se beneficiar de múltiplas fontes, o roteador direciona a consulta para uma ferramenta de busca na web ou aciona um fluxo mais complexo, como a RAG-Fusion.</p></li>
+</ol>
+<p>A implementação prática envolve definir um modelo de dados que especifica as rotas possíveis e fornecer um <em>prompt</em> de sistema ao LLM que o instrui a atuar como um roteador especialista.</p>
+<p>Ao introduzir essa camada de decisão, a RAG Adaptiva implementa um conceito de <strong>gerenciamento de recursos computacionais</strong> no nível da aplicação. Ele trata a recuperação de informações não como uma etapa obrigatória, mas tal qual uma ferramenta é conectada a um LLM, a recuperação é uma ferramenta a ser invocada apenas quando necessário e na intensidade apropriada. Isso otimiza não apenas a relevância da resposta, mas também a latência e o custo, transformando o <em>pipeline</em> RAG de uma arquitetura de dados estática para uma arquitetura de computação dinâmica e orientada por custos.</p>
+</section>
+<section id="corrective-rag-crag-um-framework-para-a-robustez" class="level4" data-number="5.3.2.2">
+<h4 data-number="5.3.2.2" class="anchored" data-anchor-id="corrective-rag-crag-um-framework-para-a-robustez"><span class="header-section-number">5.3.2.2</span> <em>Corrective</em> RAG (CRAG): Um <em>framework</em> para a robustez</h4>
+<p>Enquanto a RAG Adaptiva otimiza o fluxo <em>antes</em> da recuperação, o <strong>Corrective RAG (CRAG)</strong>&nbsp;<span class="citation" data-cites="yan2024corrective">(<a href="../../shared/referencias/referencias.html#ref-yan2024corrective" role="doc-biblioref">Yan et al., 2024</a>)</span> foca em lidar com o problema fundamental da RAG: o que fazer quando a recuperação falha e retorna documentos irrelevantes ou de baixa qualidade? A recuperação incorreta é uma das principais causas de alucinações, pois o LLM é forçado a gerar uma resposta com base em informações erradas.</p>
+<p>O CRAG introduz um mecanismo de auto-correção e verificação de qualidade <em>após</em> a recuperação. O componente central é um <strong>avaliador de recuperação (<em>retrieval evaluator</em>)</strong> leve, projetado para avaliar a relevância dos documentos recuperados em relação à consulta. Este avaliador, tipicamente um modelo <em>encoder</em> menor, como o T5-large. Esse modelo é escolhido com cautela, ponderando a qualidade da resposta, a latência da requisição e o tempo de resposta com o papel de avaliador. Assim, o modelo de avaliação é ajustado para prever um score de confiança para cada par (consulta, documento).</p>
+<p>Com a aplicação do avaliador, é comum o aumento da quantidade de documentos ou <em>chunks</em> recuperados. Ao definir a relevância de acordo com o contexto, o <em>score</em> de confiança também é responsável pela redução de nível de ruído e refinamento do conteúdo que efetivamente passado para a geração da resposta. Com base nesse <em>score</em> de confiança, o CRAG aciona dinamicamente uma de três ações distintas, implementando um mecanismo de <em>fallback</em> e enriquecimento em cascata:</p>
+<ol type="1">
+<li><p><strong>Confiança alta (“Correct”):</strong> Se pelo menos um documento recuperado obtiver uma pontuação acima de um limiar superior, o sistema considera a recuperação bem-sucedida. Os documentos são considerados relevantes e são usados para a geração. Opcionalmente, para aumentar ainda mais a precisão, um processo de <strong>refinamento de conhecimento</strong> pode ser aplicado. Este processo, chamado de “decompose-then-recompose”, quebra os documentos em “<em>knowledge strips</em>” (pequenos trechos de informação) e usa o mesmo avaliador para filtrar apenas os trechos mais pertinentes antes de passá-los ao gerador.</p></li>
+<li><p><strong>Confiança baixa (“Incorrect”):</strong> Se todos os documentos recuperados tiverem uma pontuação abaixo de um limiar inferior, o sistema conclui que a recuperação falhou. Os documentos recuperados são descartados para evitar a contaminação do contexto. Em vez disso, o CRAG recorre a uma fonte de conhecimento alternativa e mais ampla, como uma <strong>busca na web</strong>, para encontrar informações mais relevantes.</p></li>
+<li><p><strong>Confiança média (“Ambiguous”):</strong> Se as pontuações dos documentos ficarem entre os dois limiares, o sistema reconhece a incerteza. A recuperação não é nem claramente correta nem claramente incorreta. Nesta situação, o CRAG adota uma abordagem híbrida e robusta: ele combina o conhecimento refinado dos documentos recuperados (ação “Correct”) com o conhecimento obtido da busca na web (ação “Incorrect”), maximizando a cobertura e a probabilidade de fornecer ao LLM um contexto útil.</p></li>
+</ol>
+<p>O CRAG modela explicitamente a incerteza da recuperação. Em vez de falhar silenciosamente com informações ruins, o sistema reconhece a incerteza, quantifica-a com um score de confiança e aciona a política de mitigação mais apropriada: refinar os documentos obtidos, substituir por conteúdos mais apropriados segundo o contexto ou aumentar com informações adicionais. É um sistema de gerenciamento de risco para a recuperação de informações, aumentando significativamente a robustez e a confiabilidade do <em>pipeline</em> RAG.</p>
+</section>
+<section id="self-rag-incorporando-autonomia-com-tokens-de-reflexão" class="level4" data-number="5.3.2.3">
+<h4 data-number="5.3.2.3" class="anchored" data-anchor-id="self-rag-incorporando-autonomia-com-tokens-de-reflexão"><span class="header-section-number">5.3.2.3</span> Self-RAG: Incorporando autonomia com <em>tokens</em> de reflexão</h4>
+<p>O <strong>Self-RAG (<em>Self-Reflective Retrieval-Augmented Generation</em>)</strong>&nbsp;<span class="citation" data-cites="asai2024self">(<a href="../../shared/referencias/referencias.html#ref-asai2024self" role="doc-biblioref">Asai et al., 2024</a>)</span> representa um passo adiante na autonomia dos sistemas RAG, internalizando o <em>pipeline</em> de controle (que em CRAG e RAG Adaptativo é composto por módulos externos) dentro do próprio processo de geração de linguagem do LLM. Ele faz isso treinando o LLM gerador para produzir <strong>“<em>tokens</em> de reflexão”</strong> — <em>tokens</em> especiais, adicionados ao seu vocabulário, que controlam o processo de recuperação e autocrítica em tempo real.</p>
+<p>Esses <em>tokens</em> transformam a recuperação e a crítica de operações de <em>pipeline</em> em atos de linguagem. O LLM não está mais sendo passivamente “aumentado” por um processo externo; ele está ativamente narrando e controlando sua própria busca por conhecimento e verificação de fatos como parte integrante da tarefa de geração de texto.</p>
+<p>Os <em>tokens</em> de reflexão são categorizados em dois tipos principais:</p>
+<ol type="1">
+<li><p><strong><em>Tokens</em> de recuperação:</strong> Em cada etapa da geração, o modelo pode decidir se a recuperação de informações externas seria útil. Ele manifesta essa decisão gerando um <em>token</em> específico:</p>
+<ul>
+<li><p><code>[Retrieve]</code>: Indica que a recuperação é necessária. A geração é pausada, uma busca é realizada e os documentos recuperados são apresentados ao modelo.</p></li>
+<li><p><code>[No Retrieve]</code>: Indica que a recuperação não é necessária e o modelo pode continuar a geração com base em seu conhecimento paramétrico ou no contexto já disponível.</p></li>
+</ul>
+<p>Isso permite uma <strong>recuperação adaptativa e sob demanda</strong>, que pode ocorrer múltiplas vezes durante a geração de uma única resposta, ou não ocorrer de todo, dependendo da necessidade.</p></li>
+<li><p><strong><em>Tokens</em> de crítica:</strong> Após a recuperação (se acionada) e durante a geração, o modelo avalia a qualidade da informação e de sua própria saída:</p>
+<ul>
+<li><p><code>[Relevant]</code> / <code>[Irrelevant]</code>: O modelo avalia cada documento recuperado, gerando um <em>token</em> para indicar sua relevância para a continuação da resposta.</p></li>
+<li><p><code>[IsSupported]</code> / <code>[IsNotSupported]</code>: Ao gerar um segmento de texto baseado nos documentos recuperados, o modelo avalia se sua própria afirmação é factualmente suportada pela evidência fornecida.</p></li>
+<li><p><code>[Good]</code> / <code>[Bad]</code>: O modelo pode fazer uma avaliação holística da qualidade geral da resposta.</p></li>
+</ul></li>
+</ol>
+<p>O treinamento do Self-RAG envolve a criação de um <em>corpus</em> de treinamento onde esses <em>tokens</em> de reflexão são inseridos <em>offline</em> por um modelo “crítico” independente. Portanto, a função do modelo crítico é realizar uma anotação qualitativa dos resultados obtidos pelo fluxo principal. O LLM gerador é então treinado em um objetivo padrão de previsão do próximo <em>token</em>, aprendendo a prever tanto as palavras da resposta quanto esses <em>tokens</em> de controle.</p>
+<p>Essa internalização do controle tem consequências profundas. O processo de raciocínio do modelo torna-se explícito e controlável na inferência. Por exemplo, os desenvolvedores podem ajustar o comportamento do modelo simplesmente alterando as probabilidades de amostragem dos <em>tokens</em> de reflexão, tornando-o mais ou menos propenso a recuperar informações ou mais ou menos crítico em relação às suas fontes. Self-RAG representa um passo fundamental em direção a modelos de linguagem com meta-cognição. Nesse aspecto, os modelos não apenas processam informações, como também refinam a geração de respostas com a otimização do processo de raciocínio do modelo.</p>
+</section>
+</section>
+<section id="indo-além-do-texto" class="level3" data-number="5.3.3">
+<h3 data-number="5.3.3" class="anchored" data-anchor-id="indo-além-do-texto"><span class="header-section-number">5.3.3</span> Indo além do texto</h3>
+<p>A RAG tradicional opera em um mundo de <em>chunks</em> de texto independentes, tratando cada pedaço de informação como uma unidade isolada. Essa abordagem, embora eficaz para muitas tarefas, falha em capturar as ricas interconexões entre os conceitos e ignora a vasta quantidade de informações contidas em modalidades não textuais. Esta seção explora duas fronteiras que quebram essa limitação: GraphRAG, que introduz relações estruturadas para permitir um raciocínio mais complexo, e RAG Multimodal, que integra modalidades como imagens para criar uma compreensão mais holística do mundo.</p>
+<section id="graphrag-recuperando-informação-de-grafos-de-conhecimento" class="level4" data-number="5.3.3.1">
+<h4 data-number="5.3.3.1" class="anchored" data-anchor-id="graphrag-recuperando-informação-de-grafos-de-conhecimento"><span class="header-section-number">5.3.3.1</span> GraphRAG: Recuperando informação de grafos de conhecimento</h4>
+<p>O <strong>GraphRAG</strong>&nbsp;<span class="citation" data-cites="pan2024unifying">(<a href="../../shared/referencias/referencias.html#ref-pan2024unifying" role="doc-biblioref">Pan et al., 2024</a>)</span> aborda uma limitação fundamental da RAG baseado em vetores: a incapacidade de responder a perguntas complexas que exigem a síntese de informações de múltiplos documentos ou a compreensão de relações indiretas. Em vez de tratar os <em>chunks</em> de texto como pontos independentes em um espaço semântico, o GraphRAG constrói um <strong>grafo de conhecimento</strong> onde os nós representam entidades (como pessoas, organizações, conceitos) e as arestas representam as relações explícitas entre elas.</p>
+<p>O processo de construção do grafo a partir de dados não estruturados envolve várias etapas sofisticadas :</p>
+<ol type="1">
+<li><p><strong>Extração de entidades e relações:</strong> O <em>corpus</em> de texto é processado para extrair entidades nomeadas e as relações entre elas. Isso pode ser feito usando LLMs para gerar tripletas estruturadas do tipo (entidade1, relação, entidade2).</p></li>
+<li><p><strong>Construção do grafo:</strong> As entidades se tornam nós e as relações se tornam arestas direcionadas, formando um grafo que representa o conhecimento do <em>corpus</em> de forma estruturada.</p></li>
+<li><p><strong>Detecção de comunidades:</strong> Algoritmos de clusterização de grafos, como o algoritmo de Leiden, são aplicados para identificar “comunidades” de nós densamente conectados. Essas comunidades representam temas ou domínios de conhecimento dentro do <em>corpus</em>.</p></li>
+<li><p><strong>Geração de resumos:</strong> Para cada comunidade identificada, um LLM gera um resumo que descreve o tema central e as principais entidades e relações dentro daquele cluster. Isso cria uma visão hierárquica do conhecimento, do geral (resumos de comunidade) ao específico (nós individuais).</p></li>
+</ol>
+<p>Essa estrutura de grafo habilita o <strong>raciocínio de múltiplos saltos (<em>multi-hop reasoning</em>)</strong>, que é a capacidade de responder a perguntas atravessando múltiplas conexões no grafo. Considere a pergunta: “Como a aquisição do LinkedIn pela Microsoft impactou as tendências de networking profissional?”. Um RAG tradicional pode recuperar documentos sobre a aquisição e outros sobre networking, mas a conexão causal entre eles pode ser fraca ou inexistente nos textos recuperados. O LLM teria que inferir essa conexão, com alto risco de alucinação.</p>
+<p>O GraphRAG, por outro lado, transforma a recuperação de um problema de busca semântica para um problema de travessia de grafo. Para responder à pergunta, o sistema pode iniciar no nó <code>(Microsoft)</code>, seguir a aresta <code>[adquiriu]</code> para <code>(LinkedIn)</code>, e então seguir a aresta <code>[influencia]</code> para <code>(Networking Profissional)</code>. Ao longo desse caminho, ele coleta o contexto associado a cada nó e aresta, fornecendo ao LLM um contexto de raciocínio explícito. A recuperação não se trata mais de encontrar os melhores trechos de texto, mas sim de encontrar e aprofundar os conhecimentos sobre as entidades mais alinhadas ao contexto através do grafo de conhecimento. Isso permite que o sistema responda a perguntas sobre relações, causalidade e impacto, que estão muito além da capacidade da RAG tradicional.</p>
+<p>Uma abordagem alternativa ao GraphRAG é o <em>Recursive Abstractive Processing for Tree-Organized Retrieval</em> (RAPTOR) <span class="citation" data-cites="sarthi2024">(<a href="../../shared/referencias/referencias.html#ref-sarthi2024" role="doc-biblioref">Sarthi et al., 2024</a>)</span>. O RAPTOR apresenta uma proposta de sumarização recursiva da estrutura de clusters de documentos, definindo uma organização em árvore. Através desta árvore, é criado um raciocínio hierárquico e contextual. Ele é efetivo para assimilar contextos e reduzir a redundância das informações. Portanto, enquanto o GraphRAG tem uma informação bem-definida e relações entre os componentes de forma estruturada, os sumários do RAPTOR visam atuar em situações onde é necessário reduzir o ruído e otimizar a busca pelo contexto correto.</p>
+</section>
+<section id="rag-multimodal-integrando-visão-e-linguagem" class="level4" data-number="5.3.3.2">
+<h4 data-number="5.3.3.2" class="anchored" data-anchor-id="rag-multimodal-integrando-visão-e-linguagem"><span class="header-section-number">5.3.3.2</span> RAG multimodal: Integrando visão e linguagem</h4>
+<p>A RAG multimodal estende o paradigma para além do texto, incorporando outras modalidades de dados como imagens, áudio e vídeo. Uma das abordagens mais poderosas para alcançar isso é através do uso de modelos de <em>embedding</em> multimodais, como o <strong>CLIP (<em>Contrastive Language-Image Pre-training</em>)</strong> da OpenAI&nbsp;<span class="citation" data-cites="radford2021clip">(<a href="../../shared/referencias/referencias.html#ref-radford2021clip" role="doc-biblioref">Radford et al., 2021</a>)</span>.</p>
+<p>O CLIP é treinado em milhões de pares (imagem, texto) da internet com um objetivo de aprendizado contrastivo. O resultado é um modelo que pode projetar tanto imagens quanto textos em um <strong>espaço vetorial compartilhado</strong>. Nesse espaço, a distância entre os vetores corresponde à similaridade semântica, independentemente da modalidade original. O <em>embedding</em> da imagem de um cão estará semanticamente próximo do <em>embedding</em> do texto “uma foto de um cão”. Esse resultado é obtido com <em>embeddings</em> pois tanto o texto quanto a imagem do cão estão compartilhando o mesmo espaço vetorial, tornando essa associação possível. Consequentemente, isso permite uma busca intermodal robusta: usar uma imagem para encontrar textos relevantes, ou usar um texto para encontrar imagens relevantes.</p>
+<p>O <em>pipeline</em> de um sistema RAG multimodal usando CLIP normalmente segue estas etapas :</p>
+<ol type="1">
+<li><p><strong>Ingestão e Indexação:</strong> Todos os dados da base de conhecimento, tanto textos quanto imagens, são processados pelo <em>encoder</em> apropriado do CLIP (<em>encoder</em> multimodal de texto e imagem) para gerar <em>embeddings</em>. Esses <em>embeddings</em> multimodais são armazenados em um único banco de dados vetorial. As imagens podem também ter metadados textuais associados, como descrições, que são armazenados junto com os <em>embeddings</em>.</p></li>
+<li><p><strong>Consulta multimodal:</strong> O usuário pode fornecer uma consulta em forma de texto (e.g., “mostre-me jaquetas de couro”), uma imagem (e.g., uma foto de uma jaqueta que ele gostou), ou uma combinação de ambos. A consulta é convertida em um <em>embedding</em> usando o mesmo modelo CLIP.</p></li>
+<li><p><strong>Recuperação intermodal:</strong> O <em>embedding</em> da consulta é usado para realizar uma busca de similaridade no banco de dados vetorial. Como textos e imagens coexistem no mesmo espaço, a busca pode retornar os itens mais relevantes, apresentando resultados mistos entre os modais ou combinando imagens e textos em um único tipo de resultado.</p></li>
+<li><p><strong>Geração aumentada:</strong> Os dados recuperados (imagens e/ou textos) são então passados, juntamente com a consulta original, para um LLM multimodal (como o GPT-4 Vision). Este modelo pode então raciocinar sobre as informações visuais e textuais para gerar uma resposta rica e fundamentada.</p></li>
+</ol>
+<p>Essa abordagem não está apenas recuperando imagens; ela está realizando uma tradução entre espaços de representações. O espaço de <em>embedding</em> compartilhado do CLIP atua como um intermediário para conceitos abstratos. Quando um usuário busca por “um vestido vermelho elegante”, o sistema não está fazendo uma correspondência de pixels ou palavras-chave; ele está buscando o conceito abstrato de “vestido vermelho elegante” no espaço vetorial, que pode ser representado tanto por uma imagem quanto por um texto. Isso permite que o conhecimento e a semântica dos <em>embeddings</em> sejam passados para o raciocínio realizado pelo LLM. Com isso, o LLM fundamenta a resposta gerada em correspondência textual e visual concretas. A resposta gerada, portanto, é resultante de uma composição rica e com evidências das imagens e nos textos da etapa de recuperação.</p>
+</section>
+</section>
+<section id="avaliando-rag" class="level3" data-number="5.3.4">
+<h3 data-number="5.3.4" class="anchored" data-anchor-id="avaliando-rag"><span class="header-section-number">5.3.4</span> Avaliando RAG</h3>
+<p>A avaliação de um sistema RAG é uma tarefa complexa que não pode ser capturada por uma única métrica. Uma avaliação robusta deve analisar os dois componentes principais do <em>pipeline</em> de forma independente e conjunta: a <strong>Recuperação</strong> e a <strong>Geração</strong>&nbsp;<span class="citation" data-cites="es2024ragas">(<a href="../../shared/referencias/referencias.html#ref-es2024ragas" role="doc-biblioref">Es et al., 2024</a>)</span>.</p>
+<section id="métricas-de-recuperação" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="métricas-de-recuperação">Métricas de Recuperação:</h4>
+<p>Estas métricas avaliam a eficácia do componente recuperador em encontrar os documentos mais relevantes.</p>
+<ul>
+<li><p><strong>Métricas clássicas:</strong> <code>Precision@k</code> (proporção de documentos relevantes entre os k primeiros recuperados), <code>Recall@k</code> (proporção de todos os documentos relevantes que foram encontrados nos k primeiros) e <code>Mean Reciprocal Rank (MRR)</code> (média do inverso do rank do primeiro documento relevante) são padrões da área de recuperação de informação.</p></li>
+<li><p><strong>Métricas baseadas em LLM:</strong> <em>Frameworks</em> modernos introduzem métricas mais sofisticadas que usam um LLM como juiz.</p>
+<ul>
+<li><p><strong>Precisão contextual (Contextual Precision)</strong> Esta métrica mede a proporção de <em>chunks</em> recuperados que são de fato relevantes para a pergunta do usuário. Em suma, ela responde: “O contexto que recuperamos está livre de ruído e focado no assunto da pergunta?” Uma baixa precisão contextual significa que o modelo está sendo sobrecarregado com informações irrelevantes, o que pode fazer a LLM geradora vincular informações de diferentes contextos ou divergir do contexto apresentado pelo usuário. A precisão contextual pode ser computada através da média da relevância dos <em>chunks</em> recuperados, onde a relevância normalmente é avaliada por uma LLM-como-juiz.</p></li>
+<li><p><strong>Recall contextual (Contextual Recall)</strong> Esta métrica mede a capacidade do sistema de recuperar toda a informação necessária para responder à pergunta. O Recall Contextual compara o conteúdo factual do contexto recuperado com uma resposta ideal (<em>ground truth</em>) e verifica se as informações contidas nessa resposta ideal também estão presentes no contexto que o sistema encontrou. Um recall baixo significa que o módulo de recuperação falhou em encontrar todos os fatos que fundamentam o conteúdo da resposta ideal. Isso é calculado verificando quantas sentenças da resposta “ground truth” podem ser atribuídas ou inferidas a partir do contexto recuperado.</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="métricas-de-geração" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="métricas-de-geração">Métricas de Geração:</h4>
+<p>Estas métricas avaliam a qualidade da resposta final gerada pelo LLM, dado o contexto recuperado.</p>
+<ul>
+<li><p><strong>Fidelidade (<em>Faithfulness</em>):</strong> Esta métrica mede o nível de “alucinação” na resposta gerada. A fidelidade avalia se a resposta gerada é factualmente consistente e fundamentada exclusivamente nas informações fornecidas pelo contexto recuperado. Uma resposta terá uma baixa pontuação de fidelidade se apresentar a criação de informações por parte da LLM, de forma a contradizer o contexto introduzindo detalhes externos e não solicitados. A fidelidade é calculada dividindo a resposta gerada em sentenças individuais e verificando quantas delas são diretamente suportadas pelo contexto.</p></li>
+<li><p><strong>Relevância da resposta (<em>Answer Relevancy</em>):</strong> Esta métrica avalia se a resposta gerada de fato aborda a pergunta original do usuário. É possível uma resposta ser totalmente fiel ao contexto (alta fidelidade), factualmente precisa, mas completamente irrelevante para a pergunta. A relevância da resposta captura esse nível de falha. Ela mede o quão direto ao ponto é a resposta. Esta métrica é frequentemente calculada usando um LLM-como-juiz para dar uma pontuação de relevância entre a pergunta e a resposta.</p></li>
+<li><p><strong>Utilização do contexto (<em>Context Utilization</em>):</strong> Esta métrica avalia o quão eficientemente a resposta gerada utilizou o contexto fornecido. Ela mede a proporção das informações relevantes do contexto que foram de fato incorporadas na resposta. Uma baixa utilização pode indicar que o contexto recuperado era ruidoso (baixa precisão contextual), o gerador não utilizou como deveria o contextou ou ignorou partes importantes do mesmo. Para computar, mede-se quantas sentenças ou ideias principais do contexto recuperado foram usadas ou referenciadas na resposta gerada.</p></li>
+</ul>
+<p><strong><em>Frameworks</em> de avaliação:</strong> A ascensão de <em>frameworks</em> de avaliação automatizada marca a transição da RAG de uma área de pesquisa para uma disciplina de engenharia.</p>
+<ul>
+<li><p><strong>RAGAS (<em>Retrieval-Augmented Generation Assessment</em>):</strong>&nbsp;<span class="citation" data-cites="es2024ragas">(<a href="../../shared/referencias/referencias.html#ref-es2024ragas" role="doc-biblioref">Es et al., 2024</a>)</span> Um <em>framework</em> open-source focado especificamente na avaliação de <em>pipelines</em> RAG. Ele popularizou a abordagem “LLM-como-juiz” e oferece um conjunto de métricas principais (Faithfulness, Answer Relevancy, Contextual Recall, Contextual Precision) que podem ser combinadas em um “RAGAs score” geral. É ideal para benchmarking, depuração e monitoramento contínuo de sistemas RAG.</p></li>
+<li><p><strong>DeepEval:</strong>&nbsp;<span class="citation" data-cites="Ip_deepeval_2025">(<a href="../../shared/referencias/referencias.html#ref-Ip_deepeval_2025" role="doc-biblioref">Ip; Vongthongsri, 2025</a>)</span> Um <em>framework</em> de avaliação mais amplo que se posiciona como um “Pytest para LLMs”. Ele adota uma mentalidade de testes unitários, permitindo que os desenvolvedores criem casos de teste para validar os outputs do LLM em <em>pipelines</em> de CI/CD. Oferece mais de 14 métricas, incluindo as de RAG (muitas vezes integrando o próprio RAGAS), além de testes de viés, toxicidade e outros aspectos. É adequado para garantir a robustez e prevenir regressões em ambientes de produção.</p></li>
+</ul>
+<p>A abordagem “LLM-como-juiz” é uma inovação chave que permite a avaliação em escala de qualidades semânticas que antes exigiam o processo de anotação manual do humano, produzindo avaliações de forma lenta e cara. No entanto, isso introduz um novo desafio de calibração e confiança: como garantir que o LLM-juiz é ele mesmo imparcial, consistente e preciso? A engenharia de RAG está, portanto, se tornando inseparável da engenharia de seus sistemas de avaliação.</p>
+<p>É importante ressaltar que, com o advento das LLMs, as tarefas gerativas se tornam cada vez mais complexas e cada vez mais específicas. Isso reflete na necessidade de avaliações cada vez mais complexas e específicas também. Deste modo, para uma avaliação ativa e funcional de RAG, devem ser implementadas métricas específicas para o contexto de uso. Bem como ao adotar um <em>framework</em> genérico de avaliação ou apenas aplicar métricas clássicas será pouco efetivo para dizer como está a performance do sistema em questão. Portanto, a combinação dessas métricas de forma objetiva e personalizada deve indicar uma maneira mais direta e objetiva de apontar quais módulos RAG precisam de melhorias.</p>
+<p>Você pode ler mais sobre avaliação de LLMs em <span class="citation" data-cites="RealCarvalhoSilva_AvaliacaoLLMs">(<a href="../../shared/referencias/referencias.html#ref-RealCarvalhoSilva_AvaliacaoLLMs" role="doc-biblioref">Real et al., 2024</a>)</span>.</p>
+</section>
+</section>
+<section id="otimização-de-desempenho-latência-e-escalabilidade" class="level3" data-number="5.3.5">
+<h3 data-number="5.3.5" class="anchored" data-anchor-id="otimização-de-desempenho-latência-e-escalabilidade"><span class="header-section-number">5.3.5</span> Otimização de desempenho: Latência e Escalabilidade</h3>
+<p>Em um ambiente de produção, o desempenho de um sistema RAG é medido não apenas pela qualidade de suas respostas, mas também pela sua velocidade (latência) e capacidade de lidar com carga (escalabilidade). A latência de ponta a ponta é cumulativa, somando o tempo de cada etapa do <em>pipeline</em>: <em>embedding</em> da consulta, busca vetorial, <em>re-ranking</em> (se houver) e a inferência do LLM.</p>
+<p>A otimização de RAG em produção é um exercício de balanceamento multidimensional entre <strong>Qualidade, Custo e Velocidade</strong>. Cada decisão de arquitetura move o sistema ao longo desse triângulo de trade-offs.</p>
+<ul>
+<li><p><strong>Tamanho do <em>embedding</em>:</strong> A dimensionalidade dos vetores é uma configuração crucial. Menos dimensões resultam em vetores menores, o que leva a buscas mais rápidas, menor consumo de memória e maior QPS (Queries Per Second). No entanto, essa compressão pode levar a uma perda de nuances semânticas, potencialmente sacrificando a qualidade da recuperação. Como regra geral, deve-se escolher a menor dimensionalidade que preserve a qualidade da recuperação para o caso de uso específico. Reduzir a dimensionalidade pela metade pode tipicamente melhorar o QPS em cerca de 1.5x e reduzir a latência em 20%. Nesse cenário, o <em>Matryoshka Quantitization</em> <span class="citation" data-cites="nair2025">(<a href="../../shared/referencias/referencias.html#ref-nair2025" role="doc-biblioref">Nair et al., 2025</a>)</span> é um método que visa exatamente a redução de dimensionalidade de modelos avaliando perdas significativas de informação.</p></li>
+<li><p><strong>Tamanho e tipo do índice vetorial:</strong> O desempenho da busca vetorial é mais alto quando o índice cabe em uma única unidade de computação (Vector Search Unit). À medida que o índice cresce e precisa ser distribuído por múltiplas unidades, a latência tende a aumentar e o QPS a diminuir. Provedores de busca vetorial também oferecem diferentes tipos de índices e unidades de processamento, como os otimizados para armazenamento (mais baratos por vetor, mas com maior latência) versus os otimizados para latência (mais caros, mas mais rápidos), permitindo um ajuste fino entre custo e desempenho.</p></li>
+<li><p><strong>Manutenção e Ingestão de dados:</strong> Para aplicações que lidam com dados dinâmicos, a arquitetura deve suportar a ingestão e atualização de grandes volumes de dados em tempo real ou quase real. Isso requer <em>pipelines</em> de dados robustos para processar, segmentar, gerar <em>embeddings</em> e indexar novos documentos de forma eficiente, sem degradar o desempenho do serviço de busca.</p></li>
+<li><p><strong>Confiabilidade e Disponibilidade da API de geração (LLM):</strong> O desempenho de um sistema RAG é duplamente dependente: da eficiência da recuperação e da confiabilidade da geração. A dependência de APIs proprietárias para o LLM introduz um ponto crítico, passível de falha. Historicamente, provedores de grande escala sofrem frequentemente com instabilidade, alta latência, limites de taxa (<em>rate limits</em>) estritos e picos de indisponibilidade de serviço. Esses limites de taxa podem ser dados pela quantidade de requisições ou pelo número de caracteres, <em>tokens</em> ou palavras enviadas pela API. É comum, em aplicações reais, o sistema gerador estar fora do ar justamente no momento de maior uso do agente. Em cenários de alta demanda, a API de geração pode se tornar o principal gargalo do sistema, independentemente da otimização da busca vetorial. Isso força a implementação de arquiteturas de alta disponibilidade, como balanceamento de carga entre múltiplas <em>endpoints</em>, uso de redundância das APIs ou até mesmo a configuração de <em>fallbacks</em> para provedores de LLM alternativos, aumentando significativamente a complexidade da engenharia de software. Adicionalmente, em casos onde a decisão é executar a LLM em um servidor próprio, ainda temos uma infraestrutura de alta complexidade e um nível de demanda muito alto para compensar os custos de operação.</p></li>
+</ul>
+<p>Não existe uma “configuração ótima” universal. O trabalho do engenheiro de RAG em produção é calibrar continuamente esses parâmetros, usando os <em>frameworks</em> de avaliação para medir o impacto de cada mudança e encontrar o ponto de equilíbrio ideal no espaço de Qualidade-Custo-Velocidade que atenda aos requisitos do produto.</p>
+</section>
+<section id="ética-em-rag-viés-privacidade-e-responsabilidade" class="level3" data-number="5.3.6">
+<h3 data-number="5.3.6" class="anchored" data-anchor-id="ética-em-rag-viés-privacidade-e-responsabilidade"><span class="header-section-number">5.3.6</span> Ética em RAG: Viés, privacidade e responsabilidade</h3>
+<p>A implementação de sistemas RAG introduz um conjunto complexo de desafios éticos que vão além da precisão técnica. A capacidade do sistema de acessar e apresentar informações de bases de conhecimento privadas ou públicas acarreta uma grande responsabilidade.</p>
+<ul>
+<li><p><strong>Viés e Desinformação:</strong> A RAG ancora as respostas do LLM nas fontes fornecidas, o que mitiga a alucinação, mas não resolve o problema do viés. Se a base de conhecimento subjacente contiver vieses históricos, estereótipos ou desinformação, o sistema RAG irá herdar, amplificar e apresentar esses conteúdos como fatos, com a autoridade adicional de uma citação. Por exemplo, um sistema treinado em dados médicos históricos pode perpetuar diagnósticos incorretos para grupos demográficos sub-representados.</p></li>
+<li><p><strong>Privacidade e Segurança:</strong> Em ambientes corporativos, bem como na área da saúde, a base de conhecimento pode conter informações sensíveis, confidenciais ou dados pessoais (PII). É imperativo implementar um controle de acesso granular no nível da recuperação, garantindo que o sistema RAG respeite as permissões de cada usuário e só recupere documentos que ele está autorizado a ver. Além disso, existe o risco de ataques de injeção de <em>prompt</em>. A injeção de <em>prompt</em> é o processo em que o <em>prompt</em> é preenchido com informações maliciosas inseridas pela mensagem do usuário ou pelos documentos coletados na base de dados. As informações maliciosas podem forçar respostas incorretas, realizar uma alteração irregular nos dados ou até causar danos no sistema em execução. Assim, através de conteúdos maliciosos é possível manipular o comportamento de todo o sistema e, em especial, da LLM.</p></li>
+<li><p><strong>Transparência e Responsabilidade:</strong> Para que os usuários confiem no sistema, a transparência é crucial. A <strong>atribuição de fontes</strong>, ou seja, citar explicitamente os documentos usados para gerar cada parte da resposta, é uma característica fundamental dos sistemas RAG responsáveis. É a verificação factual que permite aos usuários a validação das informações apresentadas pelo sistema. Ao tempo que, para a equipe de desenvolvimento, essa validação gera materialidade para refinamento de cada um dos módulos RAG e da base de conhecimento.</p></li>
+</ul>
+<p>A RAG transforma o problema ético da IA. Ele desloca o foco do <em>viés algorítmico interno</em> do LLM para uma questão de <em>governança de dados e curadoria de conhecimento</em>. A responsabilidade pela justiça e veracidade do sistema é compartilhada entre o criador do modelo e o curador da base de conhecimento. Portanto, a implementação de RAG não é apenas um desafio técnico, mas também um desafio organizacional que exige políticas claras de governança de dados, auditoria de conteúdo e um compromisso com a transparência e a explicabilidade.</p>
+</section>
+</section>
+<section id="rag-no-mundo-real-estudos-de-caso-por-indústria" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="rag-no-mundo-real-estudos-de-caso-por-indústria"><span class="header-section-number">5.4</span> RAG no mundo real: Estudos de caso por indústria</h2>
+<p>A flexibilidade e o poder da arquitetura RAG permitiram sua aplicação em uma vasta gama de setores, resolvendo problemas de negócios concretos onde o acesso rápido a conhecimento preciso e contextualizado é fundamental. Esta seção explora estudos de caso específicos nos setores financeiro, de saúde e jurídico, demonstrando o impacto transformador da RAG.</p>
+<section id="setor-financeiro-conformidade-regulatória-e-análise-de-risco" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="setor-financeiro-conformidade-regulatória-e-análise-de-risco"><span class="header-section-number">5.4.1</span> Setor financeiro: Conformidade regulatória e Análise de risco</h3>
+<p>No setor financeiro, onde a precisão, a conformidade e a auditabilidade são primordiais, a RAG se destaca por sua capacidade de fornecer respostas baseadas em fontes verificáveis.</p>
+<ul>
+<li><p><strong>NuBank (Fintech):</strong> Em um banco com quase 10 mil colaboradores, manter o acesso de todos à informação atualizada é um grande desafio, especialmente na área de finanças, na qual respeitar as regulamentações é indispensável e nada trivial. Para isso, o NuBank criou uma solução interna baseada em RAG, a AskNu<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. O AskNu é uma ferramenta que possibilita os colaboradores do Nubank a pesquisarem, via Slack, em sua própria documentação interna.</p></li>
+<li><p><strong>Análise fundamentalista de ações:</strong> O trabalho de <span class="citation" data-cites="Nepomuceno2025FundamentalistAgents">Nepomuceno et al. (<a href="../../shared/referencias/referencias.html#ref-Nepomuceno2025FundamentalistAgents" role="doc-biblioref">2025</a>)</span> é um exemplo de aplicação de RAG ao domínio financeiro. Os autores investigam o uso de LLMs integrados a <em>frameworks</em> agênticos para realizar análises fundamentalistas de ações no mercado financeiro brasileiro. O estudo enfatiza o papel da arquitetura RAG como componente central da arquitetura dos agentes. O módulo de Recuperação da Informação (<em>Retrieval</em>) indexa relatórios trimestrais e fornece os trechos mais relevantes em relação a uma query. Então, o módulo gerador cria respostas fundamentadas e atualizadas, superando limitações de conhecimento estático.</p></li>
+</ul>
+<p>Nestes casos, o principal valor da RAG não é a geração de texto criativo, mas o fato da informação ser <strong>auditável</strong>. Assim, em um setor altamente regulamentado, como o setor bancário, fornecer recomendações e apontar regras é algo transformador. Isso ocorre porque consumir, extrair informação e gerar justificativas de cunho legal, sejam regulamentos específicos ou políticas internas é algo complexo. Nessa linha, a RAG transforma a conformidade de um processo de verificação reativa e manual para um processo de consulta proativa e em tempo real.</p>
+</section>
+<section id="saúde-e-ciências-da-vida-suporte-à-decisão-clínica" class="level3" data-number="5.4.2">
+<h3 data-number="5.4.2" class="anchored" data-anchor-id="saúde-e-ciências-da-vida-suporte-à-decisão-clínica"><span class="header-section-number">5.4.2</span> Saúde e Ciências da vida: Suporte à decisão clínica</h3>
+<p>Na área da saúde, o volume de novas pesquisas médicas cresce exponencialmente, tornando impossível para os médicos se manterem completamente atualizados. A RAG atua como uma ponte, conectando a prática clínica diária com as evidências científicas mais recentes.</p>
+<ul>
+<li><p><strong>Saúde da mulher:</strong> IaraMed é um <em>chatbot</em> médico em português voltado à saúde da mulher, que utiliza RAG para gerar respostas precisas e verificáveis. O sistema integra um modelo de linguagem com um mecanismo de busca semântica, permitindo que cada resposta seja fundamentada em textos médicos revisados. A equipe construiu uma base de conhecimento especializada a partir de 80 artigos do portal <em>Tua Saúde</em> e cerca de 150 livros de ginecologia e obstetrícia, totalizando 2,5 milhões de palavras. Essa base serve como fonte confiável para o módulo de recuperação, que fornece evidências contextuais antes da geração da resposta. O uso da RAG reduziu alucinações e elevou a precisão das respostas a mais de 95%, mostrando o potencial dessa abordagem para aplicações médicas em português&nbsp;<span class="citation" data-cites="iara">(<a href="../../shared/referencias/referencias.html#ref-iara" role="doc-biblioref">Färber et al., 2025</a>)</span>.</p></li>
+<li><p><strong><em>Chatbot</em> oftamológico:</strong> O trabalho de <span class="citation" data-cites="oftalmo">Passinato et al. (<a href="../../shared/referencias/referencias.html#ref-oftalmo" role="doc-biblioref">2024</a>)</span> desenvolve um <em>chatbot</em> médico especializado em oftalmologia, utilizando LLMs abertas e a arquitetura RAG, visando evitar o alto custo e as limitações de privacidade de soluções comerciais. O sistema busca informações em uma base de 714 textos médicos e responde perguntas simulando interações com pacientes. O estudo indica que a RAG melhora a precisão e a relevância das respostas em relação ao uso de LLMs generalistas.</p></li>
+</ul>
+<p>A RAG na saúde atua como um <strong>acelerador da tradução do conhecimento</strong>. Leva anos para que novas descobertas publicadas em periódicos se tornem prática padrão. Um sistema RAG, conectado a bases de dados médicas, pode colocar essas descobertas nas mãos dos médicos e pacientes, combatendo a obsolescência do conhecimento clínico e permitindo o acesso generalizado a base de dados confiáveis.</p>
+</section>
+<section id="setor-jurídico-revolucionando-a-pesquisa-e-a-due-diligence" class="level3" data-number="5.4.3">
+<h3 data-number="5.4.3" class="anchored" data-anchor-id="setor-jurídico-revolucionando-a-pesquisa-e-a-due-diligence"><span class="header-section-number">5.4.3</span> Setor jurídico: Revolucionando a pesquisa e a <em>Due Diligence</em></h3>
+<p>A prática jurídica é intensiva em conhecimento, dependendo da análise de vastos volumes de jurisprudência, estatutos e documentos de casos. A RAG automatiza e acelera muitas dessas tarefas, além de trazer mais confiabilidade aos textos gerados.</p>
+<ul>
+<li><p><strong>Jusbrasil (<em>startup</em> de IA jurídica):</strong> Grandes escritórios de advocacia possuem décadas de conhecimento institucional trancado em arquivos de casos, memorandos e milhares de documentos normativos. A Jusbrasil utiliza RAG para transformar esse conhecimento fragmentado em uma base de conhecimento pesquisável. Um advogado pode fazer uma pergunta em linguagem natural e o sistema recupera precedentes internos, pareceres e documentos relevantes, permitindo que a empresa aproveite coletivamente sua experiência passada. O uso de RAG neste contexto é motivado por reduzir alucinações e aumentar a confiabilidade das citações, desafios dos mais relevantes para a aplicação de IA do domínio jurídico&nbsp;<span class="citation" data-cites="Moreira2025Jusbrasil">(<a href="../../shared/referencias/referencias.html#ref-Moreira2025Jusbrasil" role="doc-biblioref">Moreira; Vianna, 2025</a>)</span>.</p></li>
+<li><p><strong>Thomson Reuters (agência de advocacia):</strong> Ainda na linha de aumentar a confiabilidade das respostas de um agente de IA, a Thomson Reuters, uma das maiores empresas de IA para o Direito, também usa a arquitetura RAG como forma de integrar conhecimento de domínio em seus produtos<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p></li>
+</ul>
+<p>No setor jurídico, a RAG funciona como uma <strong>memória institucional ativa</strong>. Ele agrega o conhecimento disperso, vindo de diversas fontes, como diferentes tribunais, permitindo que os advogados evitem consultar diferentes sistemas durante suas tarefas diárias e se concentrem em tarefas de maior valor, como estratégia e argumentação, em vez de pesquisa manual.</p>
+</section>
+<section id="contexto-científico-rastreabilidade-da-informação" class="level3" data-number="5.4.4">
+<h3 data-number="5.4.4" class="anchored" data-anchor-id="contexto-científico-rastreabilidade-da-informação"><span class="header-section-number">5.4.4</span> Contexto científico: Rastreabilidade da informação</h3>
+<p>No contexto científico, arquiteturas de RAG têm se mostrado particularmente promissoras para lidar com a crescente complexidade, volume e heterogeneidade da produção acadêmica. Diferentemente de domínios altamente estruturados, a ciência apresenta desafios específicos relacionados à diversidade de formatos textuais, à rápida obsolescência do conhecimento e à necessidade de rastreabilidade e fundamentação das informações recuperadas. Nesse cenário, sistemas baseados em RAG podem apoiar pesquisadores em tarefas como revisão de literatura, análise de tendências científicas, recuperação de evidências empíricas e interpretação contextualizada de resultados, ao combinar modelos generativos com mecanismos de busca sobre bases especializadas, como artigos, preprints, currículos acadêmicos e repositórios institucionais. Essa abordagem reduz o risco de alucinações, ao mesmo tempo em que permite respostas contextualizadas e ancoradas em fontes verificáveis.</p>
+<ul>
+<li><p><strong>LattesRex:</strong> O trabalho de <span class="citation" data-cites="Darcio2025LattesRex">Darcio et al. (<a href="../../shared/referencias/referencias.html#ref-Darcio2025LattesRex" role="doc-biblioref">2025</a>)</span> explora o uso de RAG para apoiar a análise currículos disponíveis na Plataforma Lattes<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. Nesse caso, o mecanismo de recuperação permite acessar informações semiestruturadas disponíveis nos currículos, como produção acadêmica, formação, colaborações e áreas de atuação, enquanto o componente generativo possibilita a síntese desses dados em linguagem natural. Tal abordagem é particularmente útil para tarefas como caracterização de perfis de pesquisadores, identificação de expertises, análise de redes de colaboração e apoio à avaliação científica.</p></li>
+<li><p><strong><em>Chatbot</em> acadêmico:</strong> O trabalho desenvolvido por <span class="citation" data-cites="rag_amaral">Amaral et al. (<a href="../../shared/referencias/referencias.html#ref-rag_amaral" role="doc-biblioref">2025</a>)</span> na Universidade Federal de Santa Maria (UFSM) propõe um <em>chatbot</em> acadêmico baseado em RAG com verificação factual orientada por ontologias. O sistema integra a recuperação de documentos científicos com estruturas ontológicas de domínio para validar semanticamente as respostas geradas, aumentando a aderência conceitual e reduzindo inconsistências. Essa abordagem é aplicada no contexto institucional da UFSM para apoiar consultas sobre produção acadêmica e conhecimento científico, evidenciando como arquiteturas RAG podem ser combinadas com modelos formais de conhecimento para oferecer suporte confiável à pesquisa e à gestão da informação científica.</p></li>
+</ul>
+<p>Assim, o uso de RAG no contexto científico evidencia o potencial dessas arquiteturas como ferramentas de apoio à pesquisa, promovendo maior acessibilidade ao conhecimento, transparência nos processos de síntese e novas formas de interação entre pesquisadores e grandes volumes de informação acadêmica.</p>
+</section>
+</section>
+<section id="o-futuro-da-rag" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="o-futuro-da-rag"><span class="header-section-number">5.5</span> O futuro da RAG</h2>
+<p>À medida que os Grandes Modelos de Linguagem continuam a evoluir a um ritmo vertiginoso, uma questão existencial paira sobre a RAG: a rápida expansão das janelas de contexto dos LLMs (<em>Large Context Windows</em> - LCWs), que já alcançam milhões de <em>tokens</em>, tornará a recuperação explícita obsoleta? Se um modelo pode processar um livro inteiro em um único <em>prompt</em>, por que precisaríamos de um recuperador? Esta seção final argumenta que o futuro não levará a uma obsolescencia de RAG, mas sim uma maior sinergia com estas janelas de contextos mais amplas.</p>
+<section id="o-debate-rag-vs.-janelas-de-contexto-amplas-lcw" class="level3" data-number="5.5.1">
+<h3 data-number="5.5.1" class="anchored" data-anchor-id="o-debate-rag-vs.-janelas-de-contexto-amplas-lcw"><span class="header-section-number">5.5.1</span> O debate: RAG vs.&nbsp;Janelas de contexto amplas (LCW)</h3>
+<p>A discussão sobre RAG versus LCW pode ser resumida em uma série de trade-offs entre complexidade, custo, desempenho e funcionalidade. O <a href="#def-cap-rag-debate" class="quarto-xref">Quadro&nbsp;<span>5.4</span></a> expande os argumentos para cada abordagem.</p>
+<div id="def-cap-rag-debate" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 5.4</strong></span> Argumentos sobre a relevância contínua da RAG versus Janelas de contexto amplas (LCW)</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 49%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Argumentos para a relevância contínua da RAG</strong></th>
+<th style="text-align: left;"><strong>Argumentos para relevância reduzida (pró-LCW)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Custo e Latência:</strong> RAG é mais barato e rápido. Recuperar alguns <em>chunks</em> de 4KB é ordens de magnitude mais eficiente do que processar milhões de <em>tokens</em> em cada chamada de API.</td>
+<td style="text-align: left;"><strong>Simplicidade:</strong> LCW elimina a necessidade de um <em>pipeline</em> complexo de RAG (<em>chunking</em>, <em>embeddings</em>, banco de dados vetorial, <em>re-ranking</em> etc.), simplificando a arquitetura.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Informações específicas:</strong> LLMs com LCWs sofrem do problema de “agulha no palheiro”, onde o desempenho na recuperação de fatos específicos degrada quando o conteúdo relevante para a busca está circundado de um contexto massivo que não tem relação com a mesma. RAG apresenta a informação de forma concisa e proeminente.</td>
+<td style="text-align: left;"><strong>Compreensão holística:</strong> Ao ter acesso a todo o <em>corpus</em> de uma vez, o LLM pode, teoricamente, identificar e raciocinar sobre conexões sutis e de longo alcance entre documentos que um recuperador RAG, focado em similaridade local, poderia perder.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Dados dinâmicos e em tempo real:</strong> RAG pode se conectar a bases de dados que mudam a cada segundo, garantindo informações atualizadas. Assim, na navegação na base de conhecimento, o modelo opera de forma a controlar cada requisição.</td>
+<td style="text-align: left;"><strong>Menor risco de falha na recuperação:</strong> A LCW elimina um ponto de falha crítico: o recuperador. Se a RAG não conseguir encontrar o documento certo, o sistema falha. Com a LCW, toda a informação está, por definição, “recuperada”.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Escala e Acessibilidade:</strong> RAG pode, em teoria, pesquisar em um <em>corpus</em> de tamanho ilimitado, como uma busca Web. A janela de contexto, embora grande, ainda é finita e não pode conter bases de conhecimento de escala empresarial ou da Web.</td>
+<td style="text-align: left;"><strong>Preservação do contexto completo:</strong> A LCW evita o problema de perda de contexto causado pelo <em>chunking</em>, permitindo que o modelo navegue por parágrafos, seções ou documentos inteiros em seu estado original.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Segurança e Controle de acesso:</strong> RAG permite o controle de acesso no nível do documento durante a recuperação. Torna-se mais prático realizar qualquer restrição de acesso em uma requisição para delimitar quais bases de dados serão acessadas. Em contraste, gerenciar permissões durante a etapa de geração, sobretudo operando com janelas de contexto extensas e respostas de alta sensibilidade, torna-se um desafio de segurança significativamente maior.</td>
+<td style="text-align: left;">–</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+<p>O debate RAG vs.&nbsp;LCW é, em muitos aspectos, uma falsa dicotomia. As duas abordagens não são mutuamente exclusivas e resolvem problemas em diferentes escalas. A RAG é uma solução para o problema de seleção de conhecimento em um universo de dados vasto ou infinito. A LCW é uma solução para o problema de raciocínio sobre o conhecimento uma vez que ele foi selecionado. Sob um certo ponto de vista, janelas de contexto maiores <strong>aumentam</strong> a relevância de RAG: Sem restrição de tamanho, muito mais informação pode ser recuperada de diferentes fontes.</p>
+</section>
+<section id="rag-como-um-mecanismo-de-atenção-inteligente" class="level3" data-number="5.5.2">
+<h3 data-number="5.5.2" class="anchored" data-anchor-id="rag-como-um-mecanismo-de-atenção-inteligente"><span class="header-section-number">5.5.2</span> RAG como um mecanismo de atenção inteligente</h3>
+<p>O consenso emergente na comunidade de IA é que o futuro mais provável não é a vitória de uma abordagem sobre a outra, mas sim uma sinergia híbrida. Neste paradigma, a RAG não é substituído, mas sim reposicionado para atuar como uma camada de “atenção” ou um filtro inteligente para LLMs com grandes janelas de contexto.</p>
+<p>O fluxo de trabalho de um sistema híbrido pode conter as etapas a seguir:</p>
+<blockquote class="blockquote">
+<p><strong>Etapa 1.</strong> Um usuário faz uma pergunta a um sistema que tem acesso a uma ou mais bases de conhecimento massivas.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Etapa 2.</strong> O componente RAG do sistema realiza uma primeira passagem. Usando técnicas como busca híbrida (vetorial + <em>keyword</em>) e RAG-Fusion, ele recupera não apenas alguns pequenos <em>chunks</em>, mas um conjunto maior de documentos ou seções de documentos inteiros que são considerados altamente relevantes para a consulta.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Etapa 3.</strong> Este contexto pré-selecionado e de alta qualidade é então inserido na janela de contexto ampla de um LLM de ponta.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Etapa 4.</strong> O LLM, agora equipado com um subconjunto rico e focado do conhecimento total, realiza seu raciocínio profundo sobre esses documentos para sintetizar uma resposta abrangente e precisa.</p>
+</blockquote>
+<p>Neste futuro híbrido, a RAG evolui de um mero “recuperador de fatos” para um orquestrador de contexto. Sua função principal não é mais encontrar a resposta final, mas sim encontrar o melhor subproblema para o LLM resolver. O sistema RAG se torna o mecanismo que seleciona e organiza o “espaço de trabalho” cognitivo (a janela de contexto) para o LLM, garantindo que o poderoso, mas caro, raciocínio do modelo seja aplicado ao conjunto de informações mais promissor, em vez de ser desperdiçado em um mar de dados irrelevantes. Por outro lado, esse aumento considerável do uso de <em>tokens</em> e modelos de raciocínio complexo permitiu também o aumento da contextualização da aplicação e do usuário, bem como a tarefa executada e o resultado esperado. Isso aumenta a capacidade da RAG, mantendo esta como uma ferramenta refinada e poderosa na formação de respostas. Portanto, longe de se tornar obsoleta, a evolução da RAG será acelerada, e não interrompida, pelas janelas de contexto amplas, solidificando seu papel como um componente indispensável na arquitetura de sistemas de IA de próxima geração.</p>
+</section>
+</section>
+<section id="agradecimentos" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="agradecimentos">Agradecimentos</h2>
+<p>Agradecemos a Marcos Spalenza (UFES) pela revisão cuidadosa deste texto. Eventuais erros são de responsabilidade dos autores. Agradecemos também a Jusbrasil por fomentar essa pesquisa através do Programa de Pósdoutorado UFAM/Jusbrasil concedido a Livy Real; ao CNPq. através dos INCTs IAIA (406417/2022-9) e TILD-IAR (408490/2024-1); e fomento individual a Altigran da Silva (301925/2025-9); a CAPES (código de financiamento 001); e o apoio da FAPEAM pelo Programa POSGRAD 2024.</p>
+
+
+<div id="refs" class="references csl-bib-body" data-entry-spacing="1" role="list" style="display: none">
+<div id="ref-rag_amaral" class="csl-entry" role="listitem">
+AMARAL, V. DO et al. <strong>A RAG-Powered Academic Chatbot with Ontology-Driven Factual Verification</strong>. Anais Estendidos do XL Simpósio Brasileiro de Bancos de Dados. <strong>Anais</strong>...Porto Alegre, RS, Brasil: SBC, 2025. Disponível em: &lt;<a href="https://sol.sbc.org.br/index.php/sbbd_estendido/article/view/37615">https://sol.sbc.org.br/index.php/sbbd_estendido/article/view/37615</a>&gt;
+</div>
+<div id="ref-asai2024self" class="csl-entry" role="listitem">
+ASAI, A. et al. Self-rag: Learning to retrieve, generate, and critique through self-reflection. 2024.
+</div>
+<div id="ref-cheng2024dated" class="csl-entry" role="listitem">
+CHENG, J. et al. <strong>Dated Data: Tracing Knowledge Cutoffs in Large Language Models</strong>., 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2403.12958">https://arxiv.org/abs/2403.12958</a>&gt;
+</div>
+<div id="ref-cormack2009reciprocal" class="csl-entry" role="listitem">
+CORMACK, G. V.; CLARKE, C. L.; BUETTCHER, S. <strong>Reciprocal rank fusion outperforms condorcet and individual rank learning methods</strong>. Proceedings of the 32nd international ACM SIGIR conference on Research and development in information retrieval. <strong>Anais</strong>...2009.
+</div>
+<div id="ref-Darcio2025LattesRex" class="csl-entry" role="listitem">
+DARCIO, L. et al. <strong>LattesRex: Building ChatBots for Semi-Structured Documents</strong>. Proceedings of the 14th Brazilian Symposium in Information and Human Language Technology (STIL 2025). <strong>Anais</strong>...Brazil: 2025. Disponível em: &lt;<a href="https://github.com/Lucas-Darcio/LattesRex">https://github.com/Lucas-Darcio/LattesRex</a>&gt;
+</div>
+<div id="ref-es2024ragas" class="csl-entry" role="listitem">
+ES, S. et al. <strong>Ragas: Automated evaluation of retrieval augmented generation</strong>. Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics: System Demonstrations. <strong>Anais</strong>...2024.
+</div>
+<div id="ref-iara" class="csl-entry" role="listitem">
+FÄRBER, F. et al. <strong>IaraMed: A Women’s Healthcare Chatbot for Portuguese Speakers</strong>. Anais do XXV Simpósio Brasileiro de Computação Aplicada à Saúde. <strong>Anais</strong>...Porto Alegre, RS, Brasil: SBC, 2025. Disponível em: &lt;<a href="https://sol.sbc.org.br/index.php/sbcas/article/view/35558">https://sol.sbc.org.br/index.php/sbcas/article/view/35558</a>&gt;
+</div>
+<div id="ref-hu2021loralowrankadaptationlarge" class="csl-entry" role="listitem">
+HU, E. J. et al. <strong><span>LoRA: Low-Rank Adaptation of Large Language Models</span></strong>., 2021. Disponível em: &lt;<a href="https://arxiv.org/abs/2106.09685">https://arxiv.org/abs/2106.09685</a>&gt;
+</div>
+<div id="ref-huang2024survey" class="csl-entry" role="listitem">
+HUANG, L. et al. <a href="https://doi.org/10.1145/3703155">A Survey on Hallucination in Large Language Models: Principles, Taxonomy, Challenges, and Open Questions</a>. <strong>ACM Transactions on Information Systems</strong>, v. 43, n. 2, p. 1–58, 2024.
+</div>
+<div id="ref-Ip_deepeval_2025" class="csl-entry" role="listitem">
+IP, J.; VONGTHONGSRI, K. <strong><span>deepeval</span></strong>., ago. 2025. Disponível em: &lt;<a href="https://github.com/confident-ai/deepeval">https://github.com/confident-ai/deepeval</a>&gt;
+</div>
+<div id="ref-jeong2024adaptive" class="csl-entry" role="listitem">
+JEONG, S. et al. Adaptive-rag: Learning to adapt retrieval-augmented large language models through question complexity. <strong>arXiv preprint arXiv:2403.14403</strong>, 2024.
+</div>
+<div id="ref-kalai2025" class="csl-entry" role="listitem">
+KALAI, A. T. et al. <strong>Why language models hallucinate</strong>. [s.l.] OpenAI, 2025.
+</div>
+<div id="ref-khattab2020colbert" class="csl-entry" role="listitem">
+KHATTAB, O.; ZAHARIA, M. <strong>ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT</strong>., 2020. Disponível em: &lt;<a href="https://arxiv.org/abs/2004.12832">https://arxiv.org/abs/2004.12832</a>&gt;
+</div>
+<div id="ref-DBLP:conf/nips/LewisPPPKGKLYR020" class="csl-entry" role="listitem">
+LEWIS, P. S. H. et al. <strong>Retrieval-Augmented Generation for Knowledge-Intensive <span>NLP</span> Tasks</strong>. (H. Larochelle et al., Eds.)Advances in Neural Information Processing Systems 33: Annual Conference on Neural Information Processing Systems 2020, NeurIPS 2020, December 6-12, 2020, virtual. <strong>Anais</strong>...2020. Disponível em: &lt;<a href="https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html">https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html</a>&gt;
+</div>
+<div id="ref-lita2024chunking" class="csl-entry" role="listitem">
+LITA, A.-C.; COSTEA, C.-E.; IONESCU, B. <strong>Chunking for <span>RAG</span>: A Comprehensive Evaluation of Chunking Strategies for Retrieval-Augmented Generation</strong>. Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing. <strong>Anais</strong>...2024.
+</div>
+<div id="ref-Moreira2025Jusbrasil" class="csl-entry" role="listitem">
+MOREIRA, J.; VIANNA, D. <strong>Challenges of Generative <span>AI</span> in Legal Practice: A <span>Jusbrasil</span> Perspective</strong>. Proceedings of the 40th Brazilian Symposium on Databases (<span>SBBD</span> 2025). <strong>Anais</strong>...Brazil: Brazilian Computer Society (SBC), 2025. Disponível em: &lt;<a href="https://sbbd.org.br/2025/wp-content/uploads/2025/10/SBBD25-Jusbrasil.pdf">https://sbbd.org.br/2025/wp-content/uploads/2025/10/SBBD25-Jusbrasil.pdf</a>&gt;
+</div>
+<div id="ref-nair2025" class="csl-entry" role="listitem">
+NAIR, P. A. et al. <strong>Matryoshka Quantization</strong>. Sparsity in LLMs (SLLM): Deep Dive into Mixture of Experts, Quantization, Hardware, and Inference. <strong>Anais</strong>...2025.
+</div>
+<div id="ref-Nepomuceno2025FundamentalistAgents" class="csl-entry" role="listitem">
+NEPOMUCENO, J. et al. <strong>Agentic AI Meets Fundamentalist Financial Analysis: Limits and Possibilities</strong>. Proceedings of the 14th Brazilian Conference on Intelligent Systems (BRACIS 2025). <strong>Anais</strong>...2025.
+</div>
+<div id="ref-pan2024unifying" class="csl-entry" role="listitem">
+PAN, S. et al. Unifying large language models and knowledge graphs: A roadmap. <strong>IEEE Transactions on Knowledge and Data Engineering</strong>, v. 36, n. 7, p. 3580–3599, 2024.
+</div>
+<div id="ref-oftalmo" class="csl-entry" role="listitem">
+PASSINATO, E.; RIOS, W.; FILHO, A. G. <strong>Integração de Modelos de Linguagem e RAG na Criação de Chatbots Oftalmológicos</strong>. Anais do XXIV Simpósio Brasileiro de Computação Aplicada à Saúde. <strong>Anais</strong>...Porto Alegre, RS, Brasil: SBC, 2024. Disponível em: &lt;<a href="https://sol.sbc.org.br/index.php/sbcas/article/view/28831">https://sol.sbc.org.br/index.php/sbcas/article/view/28831</a>&gt;
+</div>
+<div id="ref-rackauckas2024rag" class="csl-entry" role="listitem">
+RACKAUCKAS, Z. Rag-fusion: a new take on retrieval-augmented generation. <strong>arXiv preprint arXiv:2402.03367</strong>, 2024.
+</div>
+<div id="ref-radford2021clip" class="csl-entry" role="listitem">
+RADFORD, A. et al. <strong>Learning Transferable Visual Models From Natural Language Supervision</strong>., 2021. Disponível em: &lt;<a href="https://arxiv.org/abs/2103.00020">https://arxiv.org/abs/2103.00020</a>&gt;
+</div>
+<div id="ref-RealCarvalhoSilva_AvaliacaoLLMs" class="csl-entry" role="listitem">
+REAL, L.; CARVALHO, A.; SILVA, A. DA. <a href="https://brasileiraspln.com/livro-pln/3a-edicao/">Avalia<span>ç</span><span>ã</span>o de Grandes Modelos de Linguagem: Fundamentos, M<span>é</span>todos Tradicionais e Desafios Atuais</a>. Em: CASELI, H. M.; NUNES, M. G. V. (Eds.). <strong>Processamento de Linguagem Natural: Conceitos, T<span>é</span>cnicas e Aplica<span>ç</span><span>õ</span>es em Portugu<span>ê</span>s</strong>. 3. ed. [s.l.] BPLN, 2024.
+</div>
+<div id="ref-reimers-2019-sentence-bert" class="csl-entry" role="listitem">
+REIMERS, N.; GUREVYCH, I. <strong>Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks</strong>. Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing. <strong>Anais</strong>...Association for Computational Linguistics, nov. 2019. Disponível em: &lt;<a href="https://arxiv.org/abs/1908.10084">https://arxiv.org/abs/1908.10084</a>&gt;
+</div>
+<div id="ref-sarthi2024" class="csl-entry" role="listitem">
+SARTHI, P. et al. <strong>RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval</strong>. International Conference on Learning Representations (ICLR). <strong>Anais</strong>...2024.
+</div>
+<div id="ref-yan2024corrective" class="csl-entry" role="listitem">
+YAN, S.-Q. et al. <strong>Corrective Retrieval Augmented Generation</strong>., 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2401.15884">https://arxiv.org/abs/2401.15884</a>&gt;
+</div>
+<div id="ref-yeo2025universalrag" class="csl-entry" role="listitem">
+YEO, W. et al. UniversalRAG: Retrieval-Augmented Generation over Corpora of Diverse Modalities and Granularities. <strong>arXiv preprint arXiv:2504.20734</strong>, 2025.
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>O termo “modelos de fundação” foi criado pelo <em>Stanford Institute for Human-Centered Artificial Intelligence</em> (HAI)&nbsp;<a href="https://hai.stanford.edu/news/introducing-center-research-foundation-models-crfm" class="uri">https://hai.stanford.edu/news/introducing-center-research-foundation-models-crfm</a> em 2021, para designar os algoritmos de redes neurais profundas treinados para atender tarefas gerais.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://www.databricks.com/discover/state-of-data-ai" class="uri">https://www.databricks.com/discover/state-of-data-ai</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><a href="https://news.microsoft.com/source/latam/features/ia-pt-br/ignite-2024-por-que-quase-70-da-fortune-500-agora-usam-o-microsoft-365-copilot/" class="uri">https://news.microsoft.com/source/latam/features/ia-pt-br/ignite-2024-por-que-quase-70-da-fortune-500-agora-usam-o-microsoft-365-copilot/</a><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><a href="https://github.com/Lucas-Darcio/LattesRex/" class="uri">https://github.com/Lucas-Darcio/LattesRex/</a><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p><a href="https://building.nubank.com/pt-br/solucao-de-ia-para-busca/" class="uri">https://building.nubank.com/pt-br/solucao-de-ia-para-busca/</a><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p><a href="https://legal.thomsonreuters.com/blog/retrieval-augmented-generation-in-legal-tech/" class="uri">https://legal.thomsonreuters.com/blog/retrieval-augmented-generation-in-legal-tech/</a><a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p><a href="https://lattes.cnpq.br/" class="uri">https://lattes.cnpq.br/</a><a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" class="pagination-link" aria-label="Avaliação de Grandes Modelos de Linguagem">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" class="pagination-link" aria-label="Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://brasileiraspln.com/">
+<p>Brasileiras em PLN, 2026. Todos os direitos reservados</p>
+</a>
+  </li>  
+</ul>
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

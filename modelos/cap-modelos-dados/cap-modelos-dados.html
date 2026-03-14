@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Miguel de Mello Carpi">
+<meta name="author" content="Felipe Ribas Serras">
+<meta name="author" content="Mariana Lourenço Sturzeneker">
+<meta name="author" content="Mayara Feliciano Palma">
+<meta name="author" content="Gabriela Alves Lachi">
+<meta name="author" content="Aline Silva Costa">
+<meta name="author" content="Maria Clara Paixão de Sousa">
+<meta name="author" content="Cristiane Namiuti">
+<meta name="author" content="Vanessa Martins do Monte">
+<meta name="author" content="Marcelo Finger">
+
+<title>2&nbsp; O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem – Processamento de Linguagem Natural</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 1em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" rel="next">
+<link href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-8676d8d0f01772f2903466dda9733bcf.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Sem resultados",
+    "search-matching-documents-text": "Resultados encontrados",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<!-- Google tag (gtag.js) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-111J572WMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-111J572WMR');
+</script>
+
+
+<link rel="stylesheet" href="../../shared/bpln.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-dados/cap-modelos-dados.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../../index.html" class="sidebar-logo-link">
+      <img src="../../shared/logos/bpln.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Processamento de Linguagem Natural</a> 
+        <div class="sidebar-tools-main">
+    <a href="../../Livro_PLN_BPLN_4ed_vol2.pdf" title="Baixar PDF" class="quarto-navigation-tool px-1" aria-label="Baixar PDF"><i class="bi bi-file-pdf"></i></a>
+    <div class="dropdown">
+      <a href="" title="Compartilhar" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Compartilhar"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sobre o Volume 2</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Modelos de Linguagem</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Modelos de linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-dados/cap-modelos-dados.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-rag/cap-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-agentes-conversacionais/cap-agentes-conversacionais.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ChatGPT, MariTalk e outros agentes de conversação</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../shared/referencias/referencias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Referências</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../autores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>Sobre as/os autoras/es</strong></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Conteúdo</h2>
+   
+  <ul>
+  <li><a href="#sec-cap-modelos-dados-intro" id="toc-sec-cap-modelos-dados-intro" class="nav-link active" data-scroll-target="#sec-cap-modelos-dados-intro"><span class="header-section-number">2.1</span> Introdução</a></li>
+  <li><a href="#sec-cap-modelos-dados-quando" id="toc-sec-cap-modelos-dados-quando" class="nav-link" data-scroll-target="#sec-cap-modelos-dados-quando"><span class="header-section-number">2.2</span> Por que e quando pré-treinar?</a></li>
+  <li><a href="#sec-cap-modelos-dados-datasets" id="toc-sec-cap-modelos-dados-datasets" class="nav-link" data-scroll-target="#sec-cap-modelos-dados-datasets"><span class="header-section-number">2.3</span> Conjuntos de dados para pré-treinamento em português</a>
+  <ul class="collapse">
+  <li><a href="#recursos-gerais" id="toc-recursos-gerais" class="nav-link" data-scroll-target="#recursos-gerais"><span class="header-section-number">2.3.1</span> Recursos gerais</a></li>
+  <li><a href="#recursos-para-o-português" id="toc-recursos-para-o-português" class="nav-link" data-scroll-target="#recursos-para-o-português"><span class="header-section-number">2.3.2</span> Recursos para o português</a></li>
+  </ul></li>
+  <li><a href="#sec-cap-modelos-dados-curadoria" id="toc-sec-cap-modelos-dados-curadoria" class="nav-link" data-scroll-target="#sec-cap-modelos-dados-curadoria"><span class="header-section-number">2.4</span> A importância da curadoria de dados</a></li>
+  <li><a href="#sec-cap-modelos-dados-qualidade" id="toc-sec-cap-modelos-dados-qualidade" class="nav-link" data-scroll-target="#sec-cap-modelos-dados-qualidade"><span class="header-section-number">2.5</span> O impacto da qualidade dos dados</a>
+  <ul class="collapse">
+  <li><a href="#o-custo-da-qualidade" id="toc-o-custo-da-qualidade" class="nav-link" data-scroll-target="#o-custo-da-qualidade"><span class="header-section-number">2.5.1</span> O custo da qualidade</a></li>
+  <li><a href="#considerações-finais-desta-seção" id="toc-considerações-finais-desta-seção" class="nav-link" data-scroll-target="#considerações-finais-desta-seção"><span class="header-section-number">2.5.2</span> Considerações finais desta seção</a></li>
+  </ul></li>
+  <li><a href="#sec-cap-modelos-dados-diversidade" id="toc-sec-cap-modelos-dados-diversidade" class="nav-link" data-scroll-target="#sec-cap-modelos-dados-diversidade"><span class="header-section-number">2.6</span> O impacto da diversidade dos dados</a></li>
+  <li><a href="#sec-cap-modelos-dados-proveniencia" id="toc-sec-cap-modelos-dados-proveniencia" class="nav-link" data-scroll-target="#sec-cap-modelos-dados-proveniencia"><span class="header-section-number">2.7</span> A questão da proveniência dos dados</a></li>
+  <li><a href="#sec-cap-modelos-dados-carolina" id="toc-sec-cap-modelos-dados-carolina" class="nav-link" data-scroll-target="#sec-cap-modelos-dados-carolina"><span class="header-section-number">2.8</span> O <em>corpus</em> Carolina como um estudo de caso</a></li>
+  <li><a href="#considerações-finais" id="toc-considerações-finais" class="nav-link" data-scroll-target="#considerações-finais"><span class="header-section-number">2.9</span> Considerações finais</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-dados/cap-modelos-dados.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-cap-modelos-dados" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading"></div>
+    <div class="quarto-title-meta-contents">
+             <p>Miguel de Mello Carpi </p>
+             <p>Felipe Ribas Serras </p>
+             <p>Mariana Lourenço Sturzeneker </p>
+             <p>Mayara Feliciano Palma </p>
+             <p>Gabriela Alves Lachi </p>
+             <p>Aline Silva Costa </p>
+             <p>Maria Clara Paixão de Sousa </p>
+             <p>Cristiane Namiuti </p>
+             <p>Vanessa Martins do Monte </p>
+             <p>Marcelo Finger </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Publicado em:</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">13/04/2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+
+</div>
+<div>
+<div class="callout-body-container callout-body">
+<p>Este capítulo também está disponível em <a href="cap-modelos-dados.pdf">PDF</a>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" aria-expanded="false" data-bs-target=".callout-cite-contents" data-bs-toggle="collapse" aria-label="Toggle callout" aria-controls="callout-cite">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Como citar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end">
+<i class="callout-toggle"></i>
+</div>
+</div>
+<div id="callout-cite" class="callout-cite-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="sourceCode" id="cb1"><pre class="sourceCode latex code-with-copy"><code class="sourceCode latex"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>@InCollection{BPLN_livro_cap-modelos-dados:2026,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    author    = {Carpi, Miguel de Mello and Serras, Felipe Ribas and Sturzeneker, Mariana Lourenço and Palma, Mayara Feliciano and Lachi, Gabriela Alves and Costa, Aline Silva and Sousa, Maria Clara Paixão de and Namiuti, Cristiane and Monte, Vanessa Martins do and Finger, Marcelo},</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    title     = {O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    booktitle = {Processamento de Linguagem Natural: Conceitos, Técnicas e Aplicações em Português},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    publisher = {BPLN},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    year      = {2026},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    editor    = {Caseli, H. M. and Nunes, M. G. V.},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    type      = {Book Chapter},</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    chapter   = {2},</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    edition   = {4},</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    volume    = {2},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    isbn      = {XXXXXXXXXXXXXXXX},</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    url       = {https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>“Em suma, tanto naquelas leituras se enfrascou, que as noites se lhe passavam a ler desde o sol posto até à alvorada, e os dias, desde o amanhecer até fim da tarde. E assim, do pouco dormir e do muito ler se lhe secou o cérebro, de maneira que chegou a perder o juízo.</p>
+<p>Encheu-se-lhe a fantasia de tudo que achava nos livros, assim de encantamentos, como pendências, batalhas, desafios, feridas, requebros, amores, tormentas, e disparates impossíveis; e assentou-se-lhe de tal modo na imaginação ser verdade toda aquela máquina de sonhadas invenções que lia, que para ele não havia história mais certa no mundo.”</p>
+<p>— <em>Dom Quixote de La Mancha</em>, Miguel de Cervantes <span class="citation" data-cites="cervantes1605_pt">(<a href="../../shared/referencias/referencias.html#ref-cervantes1605_pt" role="doc-biblioref">Cervantes, 1605</a>)</span></p>
+</blockquote>
+<section id="sec-cap-modelos-dados-intro" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="sec-cap-modelos-dados-intro"><span class="header-section-number">2.1</span> Introdução</h2>
+<p>As palavras que iniciam este capítulo foram extraídas do célebre romance espanhol <em>Dom Quixote de la Mancha</em>, no qual Miguel de Cervantes narra a vida do fidalgo Alonso Quixano, um homem nobre de meia idade, que, de tanto ler romances de cavalaria, acreditou-se ele próprio um cavaleiro e engajou-se nas mais insanas desventuras.</p>
+<p>Com sua obra, Cervantes nos alerta sobre o poder que a informação que consumimos tem sobre nós e sobre como, providos dos contextos certos (ou errados), podemos tomar um moinho por um gigante ou um gigante por um moinho.</p>
+<p>Guardadas as devidas proporções, alguém interessado em treinar um grande modelo de linguagem, se depara com o mesmo problema: de que forma o enorme volume de textos usado no processo de treinamento pode afetar o modelo resultante? Quais aspectos desses textos influenciarão o modelo e suas capacidades? O que podemos (ou não) fazer em relação a isso?</p>
+<p>Os grandes modelos de linguagem que temos a nossa disposição atualmente — baseados na tecnologia Transformer e suas variantes — possuem, pelo menos, duas etapas principais de treinamento: o <strong>pré-treinamento</strong> e o <strong>ajuste fino</strong>.</p>
+<p>O <strong>ajuste fino</strong> corresponde ao processo que usualmente visualizamos, quando pensamos em treinar alguém para a realização de uma tarefa: a exposição do aluno a um conjunto representativo de exemplos de como realizar aquela tarefa corretamente.</p>
+<p>Mas, para podermos ensinar a um ser humano uma tarefa específica, usualmente pressupomos que ele possua um amplo arcabouço de capacidades gerais prévias, inclusive as que permitam a ele se comunicar conosco e aprender a realizar tarefa em si.</p>
+<p>Quando falamos de grandes modelos de linguagem, essas informações contextuais básicas são adquiridas na fase do <strong>pré-treinamento</strong>. É nessa fase que o modelo será exposto a grandes volumes de dados de linguagem — não anotados para uma tarefa específica, mas sim amostras abrangentes de como a linguagem humana funciona.</p>
+<p>Durante o pré-treinamento, o modelo obtém valores para os seus parâmetros internos que vão permitir a ele usar palavras de acordo com seu significado apropriado, formar sentenças seguindo as regras sintáticas da língua, imitar estratégias discursivas como as usadas pelos seres humanos.</p>
+<p>Muito mais do que isso, entretanto, os parâmetros dos modelos passam a encapsular, também, os vieses e conhecimento de mundo presentes nos textos, as estruturas das inferências neles realizadas, a maneira como eles se estruturam, variam, se adaptam, e as estratégias segundo as quais os textos armazenam, fornecem e transformam a informação neles contida.</p>
+<p>Para o bem ou para o mal, as surpreendentes capacidades que os modelos de linguagem têm demonstrado nos últimos anos, são testemunhos de que eles aproximam — não só a gramática de uma língua e de como gerá-la — mas uma gramática de mundo, uma gramática das operações linguísticas que realizamos sobre a realidade e que a realidade realiza sobre a nossa língua.</p>
+<p>Neste capítulo focamos, justamente, nessa fase do pré-treinamento de um grande modelo de linguagem. Tentamos, de forma breve, fornecer uma noção geral de como os dados usados influenciam no processo de pré-treinamento, nos modelos resultantes e nas suas capacidades e características. Como no restante do livro, daremos um foco especial para a língua portuguesa e para recursos para ela disponíveis.</p>
+<p>Para tal, começaremos discutindo em que situações o pré-treinamento de um modelo se faz necessário (<span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-quando" target="_blank" title="Volume 2">Por que e quando pré-treinar?</a></span>), apresentando em seguida os principais conjuntos de dados disponíveis para o pré-treinamento em português (<span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-datasets" target="_blank" title="Volume 2">Conjuntos de dados para pré-treinamento em português</a></span>). Iniciaremos então discussões acerca da natureza dos dados e quais principais aspectos devemos considerar na sua seleção, incluindo tópicos como a importância da curadoria (<span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-curadoria" target="_blank" title="Volume 2">A importância da curadoria de dados</a></span>), da qualidade (<span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-qualidade" target="_blank" title="Volume 2">O impacto da qualidade dos dados</a></span>) e da diversidade (<span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-diversidade" target="_blank" title="Volume 2">O impacto da diversidade dos dados</a></span>) dos dados usados no pré-treinamento, além das principais problemáticas referentes à proveniência dos dados (<span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-proveniencia" target="_blank" title="Volume 2">A questão da proveniência dos dados</a></span>). Por fim, apresentaremos brevemente o <em>corpus</em> Carolina, como um estudo de caso de como tratar várias dessas questões em tempo de montagem de um <em>corpus</em> ou <em>dataset</em> para treinamento de modelos de linguagem (<span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-carolina" target="_blank" title="Volume 2">O <em>corpus</em> Carolina como um estudo de caso</a></span>).</p>
+<p>Para acompanhar o texto, recomendamos a leitura prévia ou complementar do Capítulo X, que apresenta os modelos de linguagem e como eles funcionam, do <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/dados/cap-dataset-corpus/cap-dataset-corpus.html#sec-cap-dataset-corpus" target="_blank" title="Volume 1">Conjunto de dados, <em>dataset</em> e <em>corpus</em></a></span>, que versa sobre <em>corpora</em> e <em>datasets</em> anotados para tarefas específicas — muitas vezes usados na etapa posterior do ajuste fino desses modelos — e do <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-pratica/cap-modelos-pratica.html#sec-cap-modelos-pratica" target="_blank" title="Volume 2">Treinamento de Grandes Modelos de Linguagem na prática</a></span>, que se aprofunda em técnicas e detalhes do treinamento e como essas podem impactar os produtos finais.</p>
+</section>
+<section id="sec-cap-modelos-dados-quando" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="sec-cap-modelos-dados-quando"><span class="header-section-number">2.2</span> Por que e quando pré-treinar?</h2>
+<p>Como mencionado anteriormente, no paradigma vigente, o treinamento é constituído de dois estágios principais: o estágio do <strong>pré-treinamento</strong> envolve treinar uma grande rede neural em um conjunto vasto de textos de domínios e origens diversas — usualmente extraídos da web — para que o modelo aprenda a estrutura da língua (ou das línguas), além de obter conhecimento geral do mundo&nbsp;<span class="citation" data-cites="radfordImprovingLanguageUnderstandinga">(<a href="../../shared/referencias/referencias.html#ref-radfordImprovingLanguageUnderstandinga" role="doc-biblioref">Radford et al., 2018</a>)</span>. O segundo estágio, do <strong>ajuste fino</strong>, envolve adaptar o modelo geral obtido para uma tarefa específica — como análise de sentimentos&nbsp;<span class="citation" data-cites="sunAmuroCharAnalyzing2025">(<a href="../../shared/referencias/referencias.html#ref-sunAmuroCharAnalyzing2025" role="doc-biblioref">Sun; Dredze, 2025</a>)</span> — usando dados anotados para aquela tarefa.</p>
+<p>A decisão de pré-treinar um modelo de linguagem do zero ou de realizar o ajuste fino de um modelo pré-treinado já existente é uma das mais importantes no desenvolvimento de modelos de linguagem baseados em grandes redes neurais. Essa decisão representa uma troca entre eficiência e eficácia, já que o pré-treinamento de um modelo requer grandes volumes de dados e <em>clusters</em> de GPUs para processá-los, ao passo que o ajuste fino requer menos dados e menos processamento, a custa do controle sobre o modelo pré-treinado e o conteúdo usado para tal.</p>
+<p>Em algumas situações, uma solução intermediária entre pré-treinar um modelo do zero e apenas ajustar um modelo já pré-treinado, é a de realizar um <strong>pré-treinamento continuado</strong>. Como o nome sugere, o pré-treinamento continuado consiste em continuar com o tipo de pré-treinamento inicial, mas com dados de linguagem mais específicos para a tarefa fim&nbsp;<span class="citation" data-cites="kernerDomainSpecificPretrainingLanguage2024">(<a href="../../shared/referencias/referencias.html#ref-kernerDomainSpecificPretrainingLanguage2024" role="doc-biblioref">Kerner, 2024</a>)</span>. É pouco provável, por exemplo, que um modelo pré-treinado com dados da internet tenha recebido um vasto conhecimento de literatura biomédica, dessa forma se o objetivo final é classificar textos biomédicos, faz sentido, antes, apresentar ao modelo textos desse domínio. Entretanto, há possíveis desafios na introdução dessa nova etapa: ao treinar o modelo com novos dados ele pode acabar se esquecendo do conteúdo já aprendido, um fenômeno conhecido como esquecimento catastrófico&nbsp;<span class="citation" data-cites="mecklenburgInjectingNewKnowledge2024">(<a href="../../shared/referencias/referencias.html#ref-mecklenburgInjectingNewKnowledge2024" role="doc-biblioref">Mecklenburg et al., 2024</a>)</span>; além disso, o tokenizador, peça fundamental para o modelo conseguir ler os textos, pode não estar ajustado para o léxico do domínio em questão, sendo necessário adaptá-lo primeiro, o que pode culminar na necessidade de um pré-treinamento completo&nbsp;<span class="citation" data-cites="guDomainSpecificLanguageModel2021">(<a href="../../shared/referencias/referencias.html#ref-guDomainSpecificLanguageModel2021" role="doc-biblioref">Gu et al., 2021</a>)</span>.</p>
+<p>Além da incapacidade de se adaptar o léxico, outra possível razão para realizar o pré-treinamento ocorre quando você precisa que o seu modelo seja executado utilizando baixos recursos computacionais, inferiores aos exigidos pelos modelos pré-treinados disponíveis, o que leva a necessidade de escolher uma arquitetura neural que ainda não foi nem pré-treinada para o idioma escolhido e muito menos adaptada para a tarefa desejada&nbsp;<span class="citation" data-cites="yaoNLPScratchLargeScale2022">(<a href="../../shared/referencias/referencias.html#ref-yaoNLPScratchLargeScale2022" role="doc-biblioref">Yao et al., 2022</a>)</span>.</p>
+<p>Uma situação semelhante surge quando a tarefa fim ou a arquitetura do modelo são fundamentalmente novas. O ajuste fino é um processo de adaptação, não de criação; ele refina comportamentos existentes, mas dificilmente consegue instilar capacidades inteiramente novas. Estudos mostram, por exemplo, que modelos pré-treinados podem ter dificuldades com tarefas que exigem raciocínio lógico complexo, como operações <em>booleanas</em>, mesmo após o ajuste fino, enquanto modelos treinados do zero para aquela tarefa específica podem apresentar um desempenho superior&nbsp;<span class="citation" data-cites="jensenFinetuningVsScratch2022">(<a href="../../shared/referencias/referencias.html#ref-jensenFinetuningVsScratch2022" role="doc-biblioref">Jensen; Plank, 2022</a>)</span>.</p>
+<p>A própria estrutura dos dados da tarefa pode, também, justificar um novo pré-treinamento. Pesquisas recentes demonstram que alinhar os dados de pré-treinamento com os da tarefa final desde o início é computacionalmente mais eficiente, podendo atingir o mesmo desempenho com uma fração dos recursos&nbsp;<span class="citation" data-cites="mizrahiLanguageModelsImprove2025">(<a href="../../shared/referencias/referencias.html#ref-mizrahiLanguageModelsImprove2025" role="doc-biblioref">Mizrahi et al., 2025</a>)</span>.</p>
+<p>O pré-treinamento do zero também se justifica quando é necessário alterar a <strong>arquitetura</strong> para comportar parametrizações distintas, como um contexto maior, por exemplo&nbsp;<span class="citation" data-cites="liComparativeStudyPretrained2023">(<a href="../../shared/referencias/referencias.html#ref-liComparativeStudyPretrained2023" role="doc-biblioref">Li et al., 2022</a>)</span>. Além da arquitetura, os próprios <strong>objetivos de treino</strong> podem justificar um novo pré-treinamento. Os objetivos padrão mais comuns são o <strong>MLM (<em>Masked Language Model</em>, ou Modelo de Linguagem Mascarado)</strong>, no qual o modelo aprende a prever <em>tokens</em> que foram aleatoriamente ocultados (mascarados) no texto de entrada, e o <strong>CLM (<em>Causal Language Model</em>, ou Modelo de Linguagem Causal)</strong>, onde o modelo é treinado para prever o próximo <em>token</em> em uma sequência. Se a tarefa ou o domínio exigir um objetivo de treino fundamentalmente novo, que não se encaixe nesses moldes, o pré-treinamento do zero pode ser a única opção viável.</p>
+<p>Talvez a razão mais comum e empiricamente validada para o pré-treinamento, no entanto, seja a incompatibilidade fundamental entre o domínio da aplicação e o conhecimento contido nos modelos de propósito geral. Um caso de estudo exemplar é o do PubMedBERT, um modelo pré-treinado do zero exclusivamente com textos da literatura biomédica. O primeiro problema que ele resolve é o da tokenização: modelos gerais quebram termos técnicos como “naloxona” em múltiplos fragmentos sem significado ([na, ##lo, ##xon, ##a]), diluindo sua representação semântica. Com um vocabulário próprio, o PubMedBERT trata “naloxona” como um único <em>token</em>, aprendendo uma representação mais rica e eficiente. Além disso, o conhecimento de um domínio geral pode ser irrelevante ou até mesmo prejudicial em um contexto especializado, um fenômeno conhecido como “transferência negativa”. Em uma vasta gama de tarefas de processamento de linguagem natural biomédica, o PubMedBERT superou não apenas os modelos de domínio geral, mas também modelos que passaram por pré-treinamento continuado, demonstrando o valor de construir uma nova base de conhecimento quando o domínio é suficientemente distinto&nbsp;<span class="citation" data-cites="guDomainSpecificLanguageModel2021">(<a href="../../shared/referencias/referencias.html#ref-guDomainSpecificLanguageModel2021" role="doc-biblioref">Gu et al., 2021</a>)</span>.</p>
+<p>Nas demais situações, a realização de um ajuste fino para a tarefa fim, com ou sem a etapa intermediária do pré-treinamento continuado, tende a ser a escolha mais razoável. Resumindo a discussão desta seção, o <a href="#def-cap-modelos-dados-pre-train" class="quarto-xref">Quadro&nbsp;<span>2.1</span></a> apresenta os principais critérios para ajudar na decisão de pré-treinar ou não.</p>
+<p>Se o leitor se encontrar numa situação onde o pré-treinamento é necessário, ele se deparará com um novo desafio: o da seleção de quais conjuntos de dados usar no pré-treinamento e de quais aspectos levar em conta para essa seleção. Para ajudar nesse processo, apresentamos, na seção seguinte alguns dos principais conjuntos de dados disponíveis para o pré-treinamento em português e, nas seções seguintes, discutimos quais aspectos levar em conta nessa seleção.</p>
+<div id="def-cap-modelos-dados-pre-train" class="theorem definition">
+<p><span class="theorem-title"><strong>Quadro 2.1</strong></span> Guia para avaliação se o pré-treinamento é necessário ou não.</p>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 34%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Critérios de avaliação</strong></th>
+<th style="text-align: left;"><strong>Ajuste fino / pré-treinamento continuado</strong></th>
+<th style="text-align: left;"><strong>Pré-treinar do zero</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>1. Domínio e Dados</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1.1 Vocabulário</td>
+<td style="text-align: left;">Linguagem padrão, jargão limitado. Tokenizador existente funciona bem.</td>
+<td style="text-align: left;">Léxico vasto, único e especializado. Tokenizador padrão não fragmenta bem os termos.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1.2 Dados disponíveis</td>
+<td style="text-align: left;"><em>Dataset</em> rotulado pequeno/médio.</td>
+<td style="text-align: left;"><em>Corpus</em> com pelo menos 1B <em>tokens</em>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1.3 Conhecimento geral</td>
+<td style="text-align: left;">Conhecimento de mundo é útil.</td>
+<td style="text-align: left;">Conhecimento de mundo não é necessário.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>2. Tarefa e Capacidades</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2.1 Novidade da tarefa</td>
+<td style="text-align: left;">Tarefa padrão de PLN em um novo domínio.</td>
+<td style="text-align: left;">Tarefa exige raciocínio novo e complexo. Conhecimento médico, jurídico, ou matemático.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2.2 Teto de desempenho</td>
+<td style="text-align: left;">Ajuste fino gera um desempenho “bom o suficiente”.</td>
+<td style="text-align: left;">Ajuste fino gera modelos que falham em casos essenciais.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>3. Arquitetura e Tecnologia</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3.1 Adequação da arquitetura</td>
+<td style="text-align: left;">Arquitetura Transformer padrão é suficiente.</td>
+<td style="text-align: left;">Requer uma arquitetura para desafios específicos.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3.2 Objetivos de treino</td>
+<td style="text-align: left;">Objetivos padrão (MLM, CLM) são suficientes.</td>
+<td style="text-align: left;">Requer novos objetivos para o domínio.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>4. Recursos e Estratégia</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4.1 Orçamento e prazo</td>
+<td style="text-align: left;">Orçamento e tempo limitados (dias/semanas).</td>
+<td style="text-align: left;">Orçamento alto e bastante tempo (meses). Acesso a cluster de GPUs.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4.2 Importância estratégica</td>
+<td style="text-align: left;">Desempenho “bom o suficiente” é aceitável. Será necessário realizar mais de uma tarefa.</td>
+<td style="text-align: left;">Dominar o nicho é um objetivo central. O modelo é um ativo estratégico chave.</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-cap-modelos-dados-datasets" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="sec-cap-modelos-dados-datasets"><span class="header-section-number">2.3</span> Conjuntos de dados para pré-treinamento em português</h2>
+<p>Nesta seção, apresentaremos alguns dos conjuntos de dados disponíveis que podem ser usados para o pré-treinamento de modelos em português. Nossa apresentação visa fornecer um panorama geral ao leitor, sem pretender ser uma revisão exaustiva dos recursos disponíveis. Com esse objetivo, dividimos a apresentação em duas grandes categorias, acompanhando a criação de recursos para a língua portuguesa em diferentes momentos ao longo dos últimos vinte anos: (i) recursos gerais de conjuntos de dados multilíngues, com parte dos dados disponíveis em português; (ii) <em>datasets</em> desenvolvidos especificamente em – e para o – português.</p>
+<section id="recursos-gerais" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="recursos-gerais"><span class="header-section-number">2.3.1</span> Recursos gerais</h3>
+<p>Atualmente existem vários recursos multilíngues de propósito geral que podem ser usados para o pré-treinamento de grandes modelos de linguagem e aplicações similares. Eles podem ser úteis para pesquisadores interessados em treinar modelos multilíngues, mas também para aqueles que desejam focar em uma língua específica – no nosso caso, o português –, bastando extrair a parte dos dados referentes ao idioma de interesse. A seguir, apresentamos brevemente os seguintes recursos desse tipo: <strong><em>Common Crawl</em></strong>, <strong>OSCAR</strong>, <strong>HPLT</strong>, e os recursos da <strong><em>TenTen Corpus Family</em></strong>.</p>
+<p>A partir dos anos 2000, vimos um esforço de projetos voltados ao acesso a dados da web. Um dos principais representantes dessa categoria, o <strong><em>Common Crawl</em></strong> <span class="citation" data-cites="commoncrawl">(<a href="../../shared/referencias/referencias.html#ref-commoncrawl" role="doc-biblioref">Common Crawl, [s.d.]</a>)</span>, fornece um repositório aberto com “fotografias” do conteúdo de páginas web desde 2008, chegando a <em>petabytes</em> de dados. A ideia é disponibilizar o conteúdo da maneira como foi publicado, focando especificamente em preservar o código HTML das fontes, e disponibilizá-lo no formato WARC (<em>Web ARChive</em>) para que informações sobre a requisição e seus metadados estejam também acessíveis, armazenando inclusive as interações entre o servidor e o(s) <em>web crawlers</em>. A organização geral desses dados não é orientada pela língua em que estão escritos, mas pelo ano em que determinado <em>batch</em> foi coletado da internet.</p>
+<p>De 2013, o <strong><em>TenTen Corpus Family</em></strong> <span class="citation" data-cites="jakubicek2013tenten">(<a href="../../shared/referencias/referencias.html#ref-jakubicek2013tenten" role="doc-biblioref">Jakubček et al., 2013</a>)</span> é uma família de <em>corpora</em> que também parte da proposta da coleta de uma grande quantidade de dados disponíveis na web, mas com o diferencial de incorporar apenas conteúdo com valor linguístico para mais de 50 línguas. O <em>corpus</em> voltado para o português inclui as variedades europeia e brasileira e possui quase 17 bilhões de palavras coletadas entre agosto de 2020 e novembro de 2023. Além da anotação morfossintática (<em>part-of-speech</em>), possui também anotação de gêneros do discurso e classificação em tópicos. Diferente do <em>Common Crawl</em>, não é um <em>corpus</em> aberto, sua versão completa pode ser acessada mediante pagamento.</p>
+<p>Com sua primeira publicação em 2019, o <strong>OSCAR (<em>Open Super-large Crawled Aggregated coRpus</em>)</strong> <span class="citation" data-cites="abadji2022cleanerdocumentorientedmultilingualcrawled">(<a href="../../shared/referencias/referencias.html#ref-abadji2022cleanerdocumentorientedmultilingualcrawled" role="doc-biblioref">Abadji et al., 2022</a>)</span> também é um grande projeto de coleta de dados da web por meio de <em>crawlers</em>. Trata-se de um <em>corpus</em> multilíngue de código aberto, voltado para aplicações em inteligência artificial e aprendizado de máquina. O OSCAR busca dar especial atenção a comunidades linguísticas com poucos recursos disponíveis e atualmente disponibiliza dados em 166 línguas, incluindo o português.</p>
+<p>O projeto <strong><em>High Performance Language Technologies (HPLT)</em></strong> <span class="citation" data-cites="burchell-etal-2025-expanded">(<a href="../../shared/referencias/referencias.html#ref-burchell-etal-2025-expanded" role="doc-biblioref">Burchell et al., 2025</a>)</span>, que teve sua primeira publicação de <em>datasets</em> em 2024, tem como objetivo reunir um grande volume de dados em diversas línguas para computação de alta performance, visando produzir modelos de linguagem e tradução. A versão mais recente de seus conjuntos de dados está disponível sob a licença <em>Creative Commons CC0</em> e conta com 4,5 <em>petabytes</em> de dados da web comprimidos, majoritariamente advindos do <em>Internet Archive</em> e <em>Common Crawl</em>. O foco da nova versão está na maior qualidade dos textos para treinamento de modelos, buscando diminuir ruído e duplicação. Dados em português estão disponíveis no <em>dataset</em> monolíngue do <em>HPLT</em>, <em>monoHPLT-PT</em>, contando com 470,63 milhões de documentos e 203,71 bilhões de palavras no subconjunto deduplicado e 237,81 milhões de documentos e 146,27 bilhões de palavras no subconjunto deduplicado e com artefatos ruidosos removidos.</p>
+</section>
+<section id="recursos-para-o-português" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="recursos-para-o-português"><span class="header-section-number">2.3.2</span> Recursos para o português</h3>
+<p>Agora, apresentaremos <em>corpora</em> desenvolvidos exclusivamente para a língua portuguesa. Apesar de não cobrirem outras línguas, eles oferecem um panorama muito mais diverso do próprio português. Assim como nos recursos gerais, passaremos brevemente por recursos construídos ao longo dos últimos anos, como a <strong>Linguateca</strong>, o <strong><em>Corpus</em> do Português</strong>, o <strong>brWaC</strong> e o <strong>BlogSET-BR</strong>, para depois mencionarmos recursos mais recentes, que já surgem em resposta à revolução dos grandes modelos de linguagem.</p>
+<p>A <strong>Linguateca</strong> <span class="citation" data-cites="Santos2000PCP">(<a href="../../shared/referencias/referencias.html#ref-Santos2000PCP" role="doc-biblioref">Santos, 2000</a>)</span> é uma organização virtual que concentra recursos disponíveis para o processamento computacional da língua portuguesa. Por ser um conjunto bastante diverso de recursos, destacaremos aqui apenas alguns dos <em>subcorpora</em> mais relevantes no que tange ao volume de dados:</p>
+<ul>
+<li><p>O <strong><em>Corpus</em> do Português</strong> é um <em>corpus</em> anotado que permite buscas por palavra, frase, classe de palavra (part-of-speech), entre outros, e se divide em três <em>subcorpora</em>: (1) “<em>Genre / Historical</em>” é o braço histórico, criado em 2006, com textos de 1200 a 1900 e 45 milhões de palavras; (2) “<em>Web / Dialects</em>” <span class="citation" data-cites="davies2016corpus">(<a href="../../shared/referencias/referencias.html#ref-davies2016corpus" role="doc-biblioref">Davies; Ferreira, 2016</a>)</span> contém 1 bilhão de palavras obtidas a partir de páginas da web de quatro países lusófonos, seu diferencial sendo a possibilidade de comparar dialetos; (3) “<em>NOW (2012 - 2019)</em>” <span class="citation" data-cites="davies2018corpus">(<a href="../../shared/referencias/referencias.html#ref-davies2018corpus" role="doc-biblioref">Davies; Ferreira, 2018</a>)</span> tem textos dos mesmos países, mas cobrindo o período de 2012 a 2019.</p></li>
+<li><p>O <strong><em>Corpus</em> Brasileiro</strong> <span class="citation" data-cites="sardinha2010manual">(<a href="../../shared/referencias/referencias.html#ref-sardinha2010manual" role="doc-biblioref">Sardinha et al., 2010</a>)</span> é um conjunto de aproximadamente um bilhão de palavras do português brasileiro escrito e falado, com anotação sintática e alguma anotação semântica, além de atributos de gênero discursivo.</p></li>
+</ul>
+<p>O <strong><em>Brazilian Portuguese Web as Corpus</em> (brWaC)</strong> <span class="citation" data-cites="wagner-filho-etal-2018-brwac">(<a href="../../shared/referencias/referencias.html#ref-wagner-filho-etal-2018-brwac" role="doc-biblioref">Wagner Filho et al., 2018</a>)</span> é um <em>corpus</em> construído seguindo a estrutura <em>WaCky</em>. O <em>WaCky</em> (<em>The Web-As-Corpus Kool Yinitiative</em>) consitui ferramentas e interfaces que facilitam o uso de <em>web crawlers</em> por linguistas, para processar, indexar e pesquisar dados disponíveis na web. Na sua versão mais recente, disponibilizada em Janeiro de 2017 e disponível para download e navegação no <em>NoSketch Engine</em> (versão aberta do <em>Sketch Engine</em>), o brWaC possui 3,53 milhões de documentos e 2,68 bilhões de <em>tokens</em>, com anotação de 134 atributos textuais diferentes e classificação de acordo com o nível de legibilidade feito por modelos de aprendizagem de máquina.</p>
+<p>O <strong>BlogSET-BR</strong> <span class="citation" data-cites="SANTOS18.10">(<a href="../../shared/referencias/referencias.html#ref-SANTOS18.10" role="doc-biblioref">Santos et al., 2018</a>)</span> é um <em>dataset</em> para o português brasileiro, voltado para a linguagem gerada por usuários para o ambiente virtual: é uma grande coleção de publicações feitas em <em>blogs</em>, com 2,1 bilhão de palavras extraídas de 7,4 milhões de publicações em mais de 808 <em>blogs</em> brasileiros. Um diferencial desse <em>corpus</em> é a informação sobre autoria vinculada aos textos.</p>
+<p>Os conjuntos de dados listados até aqui, são conjuntos mais clássicos, desenvolvidos ao longo das últimas décadas, que permaneceram relevantes até os dias de hoje. Com a revolução dos grandes modelos baseados na tecnologia Transformer, entretanto, cresceram também os recursos disponíveis para o português. Nesse sentido, diversos conjuntos têm sido desenvolvidos voltados especificamente para o treinamento desses tipos de modelos, entre as contribuições mais recentes destacamos:</p>
+<ul>
+<li><p><strong>Carolina</strong> <span class="citation" data-cites="crespo2023carolina carolinaResource">(<a href="../../shared/referencias/referencias.html#ref-crespo2023carolina" role="doc-biblioref">Crespo et al., 2023</a>; <a href="../../shared/referencias/referencias.html#ref-carolinaResource" role="doc-biblioref">Finger et al., 2020</a>)</span>: um <em>corpus</em> aberto do português contemporâneo (1970-2021) com informações de procedência e tipologia. A versão mais recente, 2.0 Bea, possui 2,1 milhões de documentos e 1,2 bilhões de <em>tokens</em>. O <em>corpus</em> busca construir uma base de dados a partir de critérios definidos previamente, com controle sobre as fontes, gêneros textuais, data de publicação e metadados associados. Falaremos do Carolina com um pouco mais de profundidade nas próximas seções.</p></li>
+<li><p><strong>Aroeira</strong> <span class="citation" data-cites="bracis2024aroeira">(<a href="../../shared/referencias/referencias.html#ref-bracis2024aroeira" role="doc-biblioref">Lira et al., 2024</a>)</span>: um <em>corpus</em> curado, que contém 35,5 milhões de documentos e mais de 15,1 bilhões de <em>tokens</em>, com foco na qualidade dos dados, a serem usados para a tarefa de treinamento de modelos;</p></li>
+<li><p><strong>GigaVerbo</strong> <span class="citation" data-cites="correa2025tucanoadvancingneuraltext">(<a href="../../shared/referencias/referencias.html#ref-correa2025tucanoadvancingneuraltext" role="doc-biblioref">Corrêa et al., 2025</a>)</span>: um <em>dataset</em> que contém 145 milhões de documentos e concatena uma grande quantidade de outros <em>corpora</em>, inclusive alguns mencionados ao longo deste texto. Foi desenvolvido especificamente para o treinamento dos modelos da Família Tucano;</p></li>
+<li><p><strong>LegalPT</strong> <span class="citation" data-cites="EduardoPROPOR2024RoBERTaLexPT">(<a href="../../shared/referencias/referencias.html#ref-EduardoPROPOR2024RoBERTaLexPT" role="doc-biblioref">Garcia et al., 2024</a>)</span>: é um agregador de <em>datasets</em> jurídicos disponíveis publicamente em português, com 24.194.918 documentos em sua versão atual, que se difere dos demais por essa especialização em documentos jurídicos. Vemos também, em decorrência dessa especialização, o esforço de endereçar a questão da repetição dos documentos em corpora jurídicos com a construção de sua versão deduplicada, o LegalPT <em>(deduplicated)</em>.</p></li>
+</ul>
+</section>
+</section>
+<section id="sec-cap-modelos-dados-curadoria" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="sec-cap-modelos-dados-curadoria"><span class="header-section-number">2.4</span> A importância da curadoria de dados</h2>
+<p>Na seção anterior, apresentamos alguns dos principais conjuntos de dados disponíveis atualmente para o pré-treinamento em português. Dependendo da aplicação de interesse, um pesquisador pode adotar uma ou mais dessas fontes, ou desenvolver um conjunto de dados próprio, que pode incluí-las ou não. Em qualquer um desses casos, é importante refletir sobre o processo de curadoria de dados que serão usados, adaptando-o ao uso ou projeto específico. Vale, portanto, pararmos para discutir, mesmo que brevemente, como entendemos a curadoria de dados e qual a sua importância.</p>
+<p>A construção de conjuntos de dados para o português é uma etapa essencial no desenvolvimento de tecnologias de processamento da linguagem, como discutido no <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/dados/cap-dataset-corpus/cap-dataset-corpus.html#sec-cap-dataset-corpus" target="_blank" title="Volume 1">Conjunto de dados, <em>dataset</em> e <em>corpus</em></a></span>. No entanto, mais do que simplesmente acumular grandes volumes de texto, é fundamental considerar a curadoria desses dados. A promessa de uma curadoria cuidadosa é justamente a de garantir não apenas quantidade, mas também qualidade, diversidade e representatividade nos <em>corpora</em> utilizados para treinar e avaliar modelos.</p>
+<p>Embora seja tecnicamente possível extrair textos em grande escala da internet, esse caminho apresenta uma série de desafios. A coleta bruta de dados traz consigo artefatos ruidosos (como <em>tags HTML</em> no meio do texto), duplicação, vieses negativos, problemas de direitos autorais e excessos ou lacunas linguísticas que podem comprometer a confiabilidade do conjunto final — o que, por sua vez, levanta questões sobre qualquer modelo treinado sobre ele.</p>
+<p>Além disso, a ausência de filtros rigorosos pode fazer com que textos de baixa qualidade ou pouco relevantes ocupem espaço significativo no <em>corpus</em> resultante da coleta, prejudicando análises e aplicações práticas, além de acarretar maiores custos de desenvolvimento e manutenção.</p>
+<p>Nos dias de hoje, entretanto, essa preocupação vai além dos problemas imediatos de qualidade e ganha contornos ainda mais críticos com descobertas recentes: um estudo publicado em julho 2024 na revista Nature <span class="citation" data-cites="shumailov2024ai">(<a href="../../shared/referencias/referencias.html#ref-shumailov2024ai" role="doc-biblioref">Shumailov et al., 2024</a>)</span> analisou os impactos de treinar ferramentas de Inteligência Artificial com dados gerados a partir delas. Conduzido por pesquisadores de instituições dos EUA, Reino Unido e Canadá, o trabalho mostrou que, após alguns ciclos de treinamento com esse tipo de dado, os modelos começam a cometer erros significativos e, em estágios mais avançados, passam a produzir informações incoerentes, num processo denominado “colapso” do modelo.</p>
+<p>Segundo Ilia Shumailov <span class="citation" data-cites="shumailov2024ai">(<a href="../../shared/referencias/referencias.html#ref-shumailov2024ai" role="doc-biblioref">Shumailov et al., 2024</a>)</span>, isso ocorre porque os dados não “compreendidos” pelo modelo original ficam sub-representados na linguagem gerada, então esse fenômeno de sub-representação vai se propagando, até que os erros se multiplicam a ponto de inutilizar os modelos. Esse risco ilustra a gravidade de se trabalhar com <em>corpora</em> não controlados, já que qualquer aplicação que faça uso desses dados pode estar comprometida. Em especial, com a massificação do acesso a ferramentas de IA gerativa, torna-se cada vez mais difícil garantir que os textos coletados sejam de autoria exclusivamente humana — sobretudo aqueles produzidos a partir de 2022.</p>
+<p>A curadoria atua, então, como um mecanismo de controle da qualidade dos dados: assegura a representatividade dos diferentes registros do português, reduz a presença de ruídos e vieses, e garante que os textos utilizados respeitem critérios éticos e metodológicos. Mais do que um simples repositório, o conjunto de dados se torna um recurso confiável para pesquisa e desenvolvimento em PLN.</p>
+<p>Os fatores mencionados demonstram que, no cenário atual, a curadoria meticulosa não é um luxo, mas uma condição fundamental para o avanço da área. Nas seções seguintes nos aprofundamos em alguns desses aspectos.</p>
+</section>
+<section id="sec-cap-modelos-dados-qualidade" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="sec-cap-modelos-dados-qualidade"><span class="header-section-number">2.5</span> O impacto da qualidade dos dados</h2>
+<p>Na <span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-quando" target="_blank" title="Volume 2">Por que e quando pré-treinar?</a></span>, discutimos como o pré-treinamento de um modelo de linguagem de ponta requer uma grande quantidade de dados textuais que, como visto na <span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-dados/cap-modelos-dados.html#sec-cap-modelos-dados-datasets" target="_blank" title="Volume 2">Conjuntos de dados para pré-treinamento em português</a></span>, é muitas vezes proveniente da web. Sabemos que a web abriga conteúdos diversos, produzidos por diferentes públicos para diferentes fins e pode conter informações contraditórias ou desnecessárias para um determinado objetivo. Logo, no processo de preparação dos dados, é necessário garantir a qualidade dos textos que serão usados para treinar os modelos.</p>
+<p>Mas o que é exatamente um texto de qualidade? Para os objetivos desta seção consideramos que um texto de qualidade é um texto escrito por um ser humano e que passou por um processo de seleção <span class="citation" data-cites="albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>)</span>. A seleção, por sua vez, costuma se orientar em três dimensões principais: a de <strong>relevância</strong>, a de <strong>eficiência</strong>, e a de <strong>segurança</strong>.</p>
+<p>Essas dimensões de qualidade podem ser avaliadas tanto de forma <strong>extrínseca</strong> quanto <strong>intrínseca</strong>. A avaliação extrínseca mede o impacto dos dados no desempenho de um modelo já treinado, como, por exemplo, avaliar se um modelo treinado nesse <em>corpus</em> se torna mais propenso a gerar textos tóxicos. Já a avaliação intrínseca analisa características diretas do <em>corpus</em>; por exemplo, calcular a porcentagem de documentos duplicados (uma medida de eficiência) ou a frequência de termos de uma lista de bloqueio (uma medida de segurança). Nesta seção, focaremos apenas nas formas intrínsecas, que melhor se encaixam no escopo deste capítulo.</p>
+<p>A primeira dimensão de qualidade é a da relevância. Um texto é dito relevante se ele está relacionado com a distribuição da tarefa a ser desempenhada pelo modelo, e se ele pode aumentar a sua capacidade. No contexto médico, uma lista de nomes de medicamentos pode apresentar termos que estão na distribuição desejada, porém ter somente o nome deles dificilmente aumentará a capacidade do modelo. Textos onde os nomes dos medicamentos aparecem acompanhados de uma descrição de efeitos colaterais são melhores já que apresentam mais informação relevante. Da mesma forma, um texto extraído da internet pode conter trechos de rodapé, de cabeçalho, de margens, ou de botões que não tem nada a ver com o conteúdo principal. E, antes de tudo isso, o texto está escrito em português?</p>
+<p>Boa parte da adequação de idioma pode ser feita por meio dos metadados. Com eles é possível filtrar documentos cujo endereço pertença a um país lusófono, como feito no brWaC <span class="citation" data-cites="wagner-filho-etal-2018-brwac">(<a href="../../shared/referencias/referencias.html#ref-wagner-filho-etal-2018-brwac" role="doc-biblioref">Wagner Filho et al., 2018</a>)</span>. De maneira alternativa ou complementar, classificadores automáticos podem ser utilizados <span class="citation" data-cites="albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>)</span>, como o FastText <span class="citation" data-cites="joulinBagTricksEfficient2017">(<a href="../../shared/referencias/referencias.html#ref-joulinBagTricksEfficient2017" role="doc-biblioref">Joulin et al., 2017</a>)</span>, usado na construção do <em>corpus</em> Aroeira <span class="citation" data-cites="bracis2024aroeira">(<a href="../../shared/referencias/referencias.html#ref-bracis2024aroeira" role="doc-biblioref">Lira et al., 2024</a>)</span>. Já para garantir que não há ruído semântico, pode-se utilizar heurísticas <span class="citation" data-cites="albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>)</span> como a presença de textos comuns em cabeçalhos e rodapés (ex: “Leia mais...”), a razão entre símbolos e palavras, o comprimento das sentenças e dos parágrafos, ou a repetição de <em>n-gramas</em> <span class="citation" data-cites="weberRedPajamaOpenDataset">(<a href="../../shared/referencias/referencias.html#ref-weberRedPajamaOpenDataset" role="doc-biblioref">Weber et al., 2024</a>)</span>.</p>
+<p>Além das heurísticas, a relevância semântica também pode ser avaliada com modelos. Uma abordagem comum é treinar um classificador para distinguir entre documentos de um <em>corpus</em> de referência de alta qualidade (com um “sinal positivo”) e documentos de um <em>corpus</em> mais ruidoso (com um “sinal negativo”) <span class="citation" data-cites="wenzekCCNetExtractingHigh2020 albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-wenzekCCNetExtractingHigh2020" role="doc-biblioref">Wenzek et al., 2020</a>)</span>. Outra alternativa é usar um modelo de linguagem para medir a perplexidade do texto <span class="citation" data-cites="touvronLLaMAOpenEfficient2023">(<a href="../../shared/referencias/referencias.html#ref-touvronLLaMAOpenEfficient2023" role="doc-biblioref">Touvron et al., 2023</a>)</span>, uma medida de quão surpreendente ele é, dado o conhecimento prévio de como os elementos linguísticos usualmente se distribuem dentro de um texto naquela língua. Nesse modelo, parágrafos com baixa perplexidade (menos surpreendentes) são considerados de maior qualidade <span class="citation" data-cites="wenzekCCNetExtractingHigh2020">(<a href="../../shared/referencias/referencias.html#ref-wenzekCCNetExtractingHigh2020" role="doc-biblioref">Wenzek et al., 2020</a>)</span>.</p>
+<p>Na segunda dimensão, a de eficiência, o objetivo é garantir que o conjunto dos dados torne o treinamento mais eficaz possível por meio do controle da redundância dos dados. Para isso costuma-se remover textos duplicados e trechos muito frequentes. Essa remoção faz com que o tempo de treinamento seja melhor usado, focando em conteúdo não-repetido <span class="citation" data-cites="leeDeduplicatingTrainingData2022a">(<a href="../../shared/referencias/referencias.html#ref-leeDeduplicatingTrainingData2022a" role="doc-biblioref">Lee et al., 2022</a>)</span> e, crucialmente, reduz a contaminação entre os conjuntos de treinamento e de teste <span class="citation" data-cites="longpreResponsibleFoundationModel2025">(<a href="../../shared/referencias/referencias.html#ref-longpreResponsibleFoundationModel2025" role="doc-biblioref">Longpre et al., 2025</a>)</span>, o que permite uma avaliação mais robusta do modelo.</p>
+<p>Há várias maneiras de remover conteúdo duplicado. Para uma remoção exata, o <em>hashing</em> pode ser utilizado para acelerar a computação <span class="citation" data-cites="wenzekCCNetExtractingHigh2020">(<a href="../../shared/referencias/referencias.html#ref-wenzekCCNetExtractingHigh2020" role="doc-biblioref">Wenzek et al., 2020</a>)</span>. Também é possível utilizar o número de <em>n-gramas</em> em comum, e até mesmo a similaridade semântica calculada com modelos já treinados para remover documentos “quase idênticos”&nbsp;<span class="citation" data-cites="leeDeduplicatingTrainingData2022a albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-leeDeduplicatingTrainingData2022a" role="doc-biblioref">Lee et al., 2022</a>)</span>.</p>
+<p>Por fim, a terceira dimensão, a de segurança, tem como objetivo garantir que o modelo final siga os padrões de observância designados <span class="citation" data-cites="albalakSurveyDataSelection2024 longpreResponsibleFoundationModel2025">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-longpreResponsibleFoundationModel2025" role="doc-biblioref">Longpre et al., 2025</a>)</span>. A ideia é que um modelo é tão seguro quanto os dados utilizados para treiná-lo. As principais motivações estão em garantir que o conteúdo proteja a privacidade, siga padrões de observância, e que não seja tóxico. Aqui diremos que é tóxico qualquer conteúdo rude, desrespeitoso ou que contenha linguajar que faça uma pessoa desistir de um diálogo <span class="citation" data-cites="longprePretrainersGuideTraining2024 longpreResponsibleFoundationModel2025 raeScalingLanguageModels2022a">(<a href="../../shared/referencias/referencias.html#ref-longprePretrainersGuideTraining2024" role="doc-biblioref">Longpre et al., 2024</a>, <a href="../../shared/referencias/referencias.html#ref-longpreResponsibleFoundationModel2025" role="doc-biblioref">2025</a>; <a href="../../shared/referencias/referencias.html#ref-raeScalingLanguageModels2022a" role="doc-biblioref">Rae et al., 2022</a>)</span>. Já o conteúdo explícito pode incluir material pornográfico, violento, discriminatório, ou com viés de gênero e racial&nbsp;<span class="citation" data-cites="albalakSurveyDataSelection2024 bracis2024aroeira">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-bracis2024aroeira" role="doc-biblioref">Lira et al., 2024</a>)</span>.</p>
+<p>As formas mais comuns para remover conteúdos indesejados consistem na utilização de listas de bloqueio de endereços web (fontes conhecidas por esse tipo de conteúdo) ou listas de bloqueio de palavras e expressões <span class="citation" data-cites="albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>)</span>. Esta última contém termos que, se presentes no texto, farão com que o documento inteiro seja descartado, como feito no T5&nbsp;<span class="citation" data-cites="raffelExploringLimitsTransfer2023">(<a href="../../shared/referencias/referencias.html#ref-raffelExploringLimitsTransfer2023" role="doc-biblioref">Raffel et al., 2023</a>)</span> e no Aroeira&nbsp;<span class="citation" data-cites="bracis2024aroeira">(<a href="../../shared/referencias/referencias.html#ref-bracis2024aroeira" role="doc-biblioref">Lira et al., 2024</a>)</span>. Como para as outras dimensões, também é possível utilizar aqui classificadores automáticos treinados para identificar toxicidade&nbsp;<span class="citation" data-cites="albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>)</span>. Já para garantir a privacidade, há ferramentas para remoção de nomes próprios, de endereço postal ou de e-mail, e de números de identificação pessoal.</p>
+<section id="o-custo-da-qualidade" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1" class="anchored" data-anchor-id="o-custo-da-qualidade"><span class="header-section-number">2.5.1</span> O custo da qualidade</h3>
+<p>É importante ressaltar que a busca por qualidade dos dados não é absoluta e nem deve ser. Esta busca apresenta dois desafios centrais: a impossibilidade prática de uma filtragem perfeita, e o fato de que a remoção total de certos fenômenos pode ser indesejável para os objetivos do modelo.</p>
+<section id="quanto-à-impossibilidade" class="level4" data-number="2.5.1.1">
+<h4 data-number="2.5.1.1" class="anchored" data-anchor-id="quanto-à-impossibilidade"><span class="header-section-number">2.5.1.1</span> Quanto à impossibilidade</h4>
+<p>Em primeiro lugar, independente do nível de esforço dos desenvolvedores, todas as etapas de tratamento mencionadas utilizam modelos computacionais propensos a falhar, em especial quando estamos falando de um volume de textos tão imenso e diverso, que não pode ser verificado manualmente.</p>
+<p>Pensando em heurísticas, um filtro que elimina textos com linhas muito curtas pode fazer com que textos como canções e poemas sejam descartados erroneamente <span class="citation" data-cites="abadji2022cleanerdocumentorientedmultilingualcrawled albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-abadji2022cleanerdocumentorientedmultilingualcrawled" role="doc-biblioref">Abadji et al., 2022</a>; <a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>)</span>. Já listas de bloqueio de palavras podem fazer com que conteúdos legítimos de domínios como jurídico, médico ou produzido pela comunidade LGBTQIAPN+ sejam removidos por não levar em conta o contexto no qual as palavras aparecem <span class="citation" data-cites="kreutzerQualityGlanceAudit2022 xuDetoxifyingLanguageModels2021">(<a href="../../shared/referencias/referencias.html#ref-kreutzerQualityGlanceAudit2022" role="doc-biblioref">Kreutzer et al., 2022</a>; <a href="../../shared/referencias/referencias.html#ref-xuDetoxifyingLanguageModels2021" role="doc-biblioref">Xu et al., 2021</a>)</span>.</p>
+<p>Os classificadores automáticos também podem cometer erros de classificação. Um modelo para reconhecer português, por exemplo, pode acabar descartando um texto regional caso não tenha sido treinado com dados da região em questão <span class="citation" data-cites="albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>)</span>, ou seja, se os textos apresentarem uma distribuição linguística distinta daquela dos dados de treinamento <span class="citation" data-cites="blodgettLanguageTechnologyPower2020a">(<a href="../../shared/referencias/referencias.html#ref-blodgettLanguageTechnologyPower2020a" role="doc-biblioref">Blodgett et al., 2020</a>)</span>.</p>
+</section>
+<section id="quanto-à-totalidade" class="level4" data-number="2.5.1.2">
+<h4 data-number="2.5.1.2" class="anchored" data-anchor-id="quanto-à-totalidade"><span class="header-section-number">2.5.1.2</span> Quanto à totalidade</h4>
+<p>Em segundo lugar, como discutimos anteriormente, quando estamos falando de pré-treinamento, estamos falando sobre ensinar a um modelo como a língua é usada, para que depois ele possa usar essa habilidade básica na resolução de tarefas específicas. Repetições e redundâncias são em algum nível parte da linguagem humana e, muitas vezes, nós mesmos usamos esse tipo de fenômeno para entender quais frases e expressões são mais comuns em determinados contextos e devem ser utilizadas em contextos similares. Há evidências de que manter um certo nível de duplicação é importante para o desempenho do modelo <span class="citation" data-cites="leeDeduplicatingTrainingData2022a albalakSurveyDataSelection2024">(<a href="../../shared/referencias/referencias.html#ref-albalakSurveyDataSelection2024" role="doc-biblioref">Albalak et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-leeDeduplicatingTrainingData2022a" role="doc-biblioref">Lee et al., 2022</a>)</span>.</p>
+<p>De forma análoga, quando o objetivo final do modelo é uma tarefa específica, a remoção total de certos dados pode ser contraproducente. Se estivermos interessados em desenvolver um modelo que seja capaz de detectar textos tóxicos, a presença de amostras desse tipo de texto no pré-treinamento pode ser útil <span class="citation" data-cites="longprePretrainersGuideTraining2024 longpreResponsibleFoundationModel2025">(<a href="../../shared/referencias/referencias.html#ref-longprePretrainersGuideTraining2024" role="doc-biblioref">Longpre et al., 2024</a>, <a href="../../shared/referencias/referencias.html#ref-longpreResponsibleFoundationModel2025" role="doc-biblioref">2025</a>)</span>. Isso permitiria ao modelo aprender os padrões de linguagem associados à toxicidade, que ele poderá usar posteriormente para aprender a detectar esse tipo de texto.</p>
+</section>
+</section>
+<section id="considerações-finais-desta-seção" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2" class="anchored" data-anchor-id="considerações-finais-desta-seção"><span class="header-section-number">2.5.2</span> Considerações finais desta seção</h3>
+<p>Nesta seção, foram abordadas algumas dimensões referentes à qualidade dos dados. Em resumo, um dado de qualidade é aquele que é relevante, eficiente, e seguro, mas qual o nível de relevância, eficiência e segurança que podemos garantir pode variar bastante em função dos objetivos e das ferramentas que temos à disposição. No processo de falar sobre qualidade, acabamos tocando em tópicos relacionados a diversidade e a proveniência dos dados. Discutiremos esses aspectos nas próximas seções.</p>
+</section>
+</section>
+<section id="sec-cap-modelos-dados-diversidade" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="sec-cap-modelos-dados-diversidade"><span class="header-section-number">2.6</span> O impacto da diversidade dos dados</h2>
+<p>Além da qualidade dos dados e suas várias dimensões, que discutimos na seção anterior, outro aspecto importante de considerarmos ao selecionar <em>datasets</em> ou <em>corpora</em> para o pré-treinamento de modelos de linguagem é o da diversidade linguística.</p>
+<p>Muitas vezes, quando falamos de diversidade linguística, a primeira coisa que nos vem à mente são as diferenças entre línguas, como a inglesa e a portuguesa, ou de forma mais ampla, entre famílias linguísticas distintas, como a indo-europeia — que contém as línguas inglesa e portuguesa — e a família afro-asiática — que inclui línguas como o hebraico e o egípcio.</p>
+<p>Por conta dessa intuição, podemos tomar a preocupação com diversidade linguística como um problema restrito a modelos multilinguísticos, treinados com dados de diversas línguas simultaneamente.</p>
+<p>De fato, essa é uma questão fundamental no desenho e construção de modelos multilinguísticos, entretanto também o é na construção dos modelos monolinguísticos, voltados para uma língua específica, como no caso dos modelos especializados em português.</p>
+<p>Isso porque o que entendemos como a língua portuguesa é, na verdade, um conjunto bastante diverso de manifestações linguísticas distintas que — apesar de encontrarem coesão nas regras básicas do português — estão submetidas a padrões e convenções significativamente diferentes.</p>
+<p>Essas variações da língua podem se dar sobre diferentes dimensões. É comum que as pessoas deem maior atenção às dimensões de variação que elas entendam como marcas que as distinguam de outros grupos de usuários da língua. Esse é o caso de variações em função da distribuição geográfica, do grupo social e do período histórico (ver <span class="citation" data-cites="WOLFRAM2006">Wolfram (<a href="../../shared/referencias/referencias.html#ref-WOLFRAM2006" role="doc-biblioref">2006</a>)</span>).</p>
+<p>Contudo, esse tipo de variação representa apenas uma parte do potencial de variação linguística de um idioma. Algumas dimensões de variação são mais dinâmicas, de forma que um único falante usualmente alterna entre variedades para fins distintos: esse é o caso da variação em <strong>registro</strong>, <strong>gênero</strong> e <strong>estilo</strong>, que definimos de acordo com <span class="citation" data-cites="BIBERFINEGAN1994">Biber; Finegan (<a href="../../shared/referencias/referencias.html#ref-BIBERFINEGAN1994" role="doc-biblioref">1994</a>)</span> e <span class="citation" data-cites="BIBERCONRAD2009">Biber; Conrad (<a href="../../shared/referencias/referencias.html#ref-BIBERCONRAD2009" role="doc-biblioref">2009</a>)</span>:</p>
+<ul>
+<li><p><strong>Registro</strong>: variação segundo a situação em que a linguagem é produzida, refletindo situações comunicativas que se repetem de forma regular dentro de uma estrutura social (Exemplos são: registro da conversação pessoal, registro da comunicação em fóruns virtuais, registro da escrita em livros didáticos).</p></li>
+<li><p><strong>Gênero</strong>: variação segundo o tipo de mensagem e as convenções associadas à como aquele tipo de mensagem é construído (Exemplos são: entrada de enciclopédia, carta, manual, receita culinária.)</p></li>
+<li><p><strong>Estilo</strong>: variação segundo as preferências estéticas de quem produz, ou consome a linguagem, podendo essas preferências serem mais ou menos coletivamente alinhadas (Exemplos são: o estilo da terceira fase do romantismo, o estilo pessoal de Machado de Assis)</p></li>
+</ul>
+<p>Quando olhamos com atenção, vemos que uma pessoa usa a linguagem de forma bem diferente quando no tribunal , ou quando conversando com os amigos num bar (variação em registro); quando está escrevendo uma carta formal ou uma receita de bolo (variação em gênero); quando procura escrever um poema árcade ou cubista (variação em estilo).</p>
+<p>O mais interessante é que, em todos esses casos, a linguagem não apenas varia de forma dinâmica, mas exerce um papel contextual. Basta percebermos como usar a linguagem apropriada para um dos contextos mencionados em outro desses contextos causaria estranhamento.</p>
+<p>Do mesmo modo que um ser humano precisa ser capaz de alternar entre essas diversas variedades, de forma a cumprir tarefas de naturezas distintas com as quais ele se depara no seu dia a dia, um modelo de linguagem — que tenha o propósito geral de auxiliar os seres humanos nessas mesmas tarefas corriqueiras — precisa, também ele, apresentar essa plasticidade linguística, e utilizar-se da capacidade de reconhecer e produzir a variedade da linguagem apropriada para o contexto em que ela será usada, com funções, convenções e marcadores estéticos apropriados.</p>
+<p>O leitor pode, entretanto, concordar conosco em nosso argumento sobre a importância de expor um modelo de linguagem a esses níveis de variação linguística, mas se perguntar se o pré-treinamento é a fase apropriada para tal. Afinal, o pré-treinamento é o momento em que o modelo deveria capturar as estruturas linguísticas gerais do idioma e, para realizar tarefas específicas — como por exemplo, redigir uma petição jurídica — ele passará, posteriormente, por um ajuste fino específico para essa tarefa.</p>
+<p>De fato, para a realização de uma tarefa-alvo, os modelos precisam passar por essa etapa de ajuste fino com dados específicos para aquela tarefa, como discutimos nas seções anteriores. E, quando falamos de tarefas voltadas para contextos bastante particulares — como é o caso do exemplo mencionado da escrita da petição jurídica — é de se esperar que o ajuste fino também forneça um direcionamento ao modelo sobre o uso específico da linguagem para a realização daquela tarefa.</p>
+<p>Contudo, essa etapa de ajuste fino dificilmente será suficiente para a adequação da linguagem, sem que tenha havido representação dessa forma de usar a língua durante o pré-treinamento. Isso porque, as diferenças entre tais variedades intralinguísticas podem ser bastante sutis e pervasivas.</p>
+<p><span class="citation" data-cites="SARDINHAETAL2014">Sardinha et al. (<a href="../../shared/referencias/referencias.html#ref-SARDINHAETAL2014" role="doc-biblioref">2014</a>)</span> realizaram uma análise da variação da língua portuguesa em nível de registro, sobre um conjunto diverso de propriedades gramaticais anotadas de forma semi-automática, baseados na metodologia de <span class="citation" data-cites="BIBER1988">Biber (<a href="../../shared/referencias/referencias.html#ref-BIBER1988" role="doc-biblioref">1988</a>)</span>. Sua análise identificou que os registros no português variam ao longo de seis dimensões funcionais distintas, caracterizadas por propriedades como uso de pronomes, preposições e artigos, classes verbais, nominalização do sujeito, entre outras.</p>
+<p>Já <span class="citation" data-cites="SERRAS2024a">Serras et al. (<a href="../../shared/referencias/referencias.html#ref-SERRAS2024a" role="doc-biblioref">2024</a>)</span> investigaram a diferenciabilidade de domínios discursivos do português brasileiro, realizando uma análise estatística individual sobre as distribuições de várias propriedades, incluindo propriedades morfológicas, sintáticas e semânticas. Eles observaram que, apesar de alto grau de sobreposição, várias das propriedades estudadas eram estatisticamente distintivas entre os diferentes domínios discursivos analisados.</p>
+<p>Resultados como esses são testemunhos empíricos de que a língua portuguesa não é um corpo homogêneo, mas sim, um conjunto de manifestações distintas com funções e histórias específicas, que se sobrepõe em diferentes graus para constituir o que entendemos como o nosso idioma. Essa heterogeneidade é muitas vezes sutil, mas transversal a diferentes níveis de análise, estando entranhada em diversas propriedades que definem a estrutura gramatical da língua.</p>
+<p>Se o pré-treinamento é a etapa em que o modelo cria uma representação interna da língua e da gramática que a rege, é sim fundamental que essa etapa inclua um nível de diversidade linguística apropriado. É isso que permitirá encapsular nessa representação os elementos das várias sublínguas que compõe o idioma a ser dominado, elementos esses que estão entranhados em vários níveis da gramática da língua e que poderão ser posteriormente aproveitados pelo modelo na construção de habilidades específicas para contextos particulares.</p>
+</section>
+<section id="sec-cap-modelos-dados-proveniencia" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="sec-cap-modelos-dados-proveniencia"><span class="header-section-number">2.7</span> A questão da proveniência dos dados</h2>
+<p>Proveniência, é o processo de rastreamento dos dados, ou seja, de suas origens e histórico de processamento<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Muitas vezes, em grandes <em>corpora</em>, é difícil de identificar de qual fonte um texto foi retirado, principalmente se os dados foram extraídos da web e processados em larga escala. Isso pode não só gerar um descumprimento acidental de direitos autorais dos textos originais, mas também uma dificuldade de manipulação desses dados por parte dos usuários. Ou seja, se por exemplo alguém não quiser utilizar textos de algum <em>website</em> específico ou tenha detectado um viés no modelo treinado, é mais difícil encontrar e retirar essas fontes indesejadas do conjunto textual caso não haja dados de proveniência marcados no <em>corpus</em>.</p>
+<p>A questão dos direitos autorais e do respeito às licenças dos textos tem se tornado cada vez mais importante nos últimos anos, em especial depois da emergência de <em>chatbots</em> baseados em LLMs tão eficientes, como o ChatGPT, o Gemini e outras alternativas. Se antes os frutos desse desenvolvimento tecnológico tinham um papel mais restrito e indireto na vida das pessoas, eles passaram a estar presentes no dia-a-dia, gerar grandes receitas e ameaçar a substituição de muitos ofícios.</p>
+<p>Essa possibilidade gerou um sentimento geral e justo de questionamento acerca dos impactos dessas tecnologias e da adequação da coleta de dados para seu desenvolvimento e treinamento. As questões envolvendo autoria de dados gerados por inteligência artificial e o uso adequado dos dados de treinamento invadiram tanto os tribunais como as mesas de bar.</p>
+<p>É de se esperar que nos próximos anos, a sociedade encontre uma solução para esses debates. Até lá, o cuidado com a proveniência dos dados deve ser redobrado, tanto no sentido de garantir que os dados utilizados no treinamento tenham uma licença apropriada para a utilização a ser feita do modelo, como que sua fonte e licença sejam conhecidas, caso seja necessário remover esses dados no futuro, em função da evolução do nosso entendimento coletivo acerca de como tais dados podem ou não ser utilizados.</p>
+<p>Um outro debate importante é o da licença dos próprios modelos produzidos a partir desses dados. Apesar de restrições diversas, os desenvolvedores de um modelo para fins de pesquisa usualmente têm a oportunidade de escolher a licença sob a qual o modelo será distribuído. Embora um debate nesse sentido esteja fora do escopo deste capítulo, recomendamos que os desenvolvedores de tais modelos pensem nessa questão com esmero, e sempre que possível, priorizem licenças de uso abertas que, ao mesmo tempo, visem coibir quaisquer usos nocivos.</p>
+<p>Além disso, outra questão importante que vem à tona com o uso de textos da web para treinamento de modelos é o problema relacionado a dados pessoais e sensíveis e como tratá-los. Essa questão se tornou ainda mais relevante com o advento da Lei Geral de Proteção de Dados Pessoais (LGPD)<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, que busca justamente regulamentar o tratamento desses dados. Apesar de não conseguirmos abordar com profundidade essa discussão neste capítulo<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, vale destacar que a proveniência também se torna relevante nestas questões, pois sabendo de onde os dados vêm, é mais fácil identificar quais são os processos que precisam ser realizados para garantir a anonimização e remoção de dados pessoais dos textos.</p>
+</section>
+<section id="sec-cap-modelos-dados-carolina" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="sec-cap-modelos-dados-carolina"><span class="header-section-number">2.8</span> O <em>corpus</em> Carolina como um estudo de caso</h2>
+<p>Nas seções anteriores, apresentamos diversos aspectos a serem considerados na construção de um conjunto de dados visando o pré-treinamento de modelos de linguagem. Gostaríamos de encerrar o capítulo fazendo uma breve apresentação do <em>corpus</em> Carolina. Esse é um <em>corpus</em> dual, construído visando tanto o treinamento de modelos de linguagem quanto a pesquisa linguística. Ele é uma tentativa destes autores e de seus colaboradores de conjugar vários dos aspectos discutidos neste capítulo na construção de um bom conjunto de dados. Essa não é uma empreitada fácil, já que muitas dessas restrições e objetivos competem entre si — vide como pode ser difícil garantir diversidade linguística e se ater a dados de licença aberta ao mesmo tempo — entretanto, acreditamos que o Carolina tem se tornado tanto um recurso útil por si só, como um protótipo para a construção de futuros recursos semelhantes.</p>
+<p>O <em>corpus</em> Carolina<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> (Córpus Geral do Português Brasileiro com Informações de Procedência e Tipologia) é um <em>corpus</em> aberto, desenvolvido por uma equipe multidisciplinar de Linguistas e Cientistas da Computação, que faz parte do desafio de NLP2<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> do C4AI (Center for Artificial Intelligence)<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. O Carolina está em construção contínua desde setembro de 2020, sendo lançadas anualmente novas versões com melhorias desde março de 2022, data da publicação da versão 1.0 (Ada). A versão atual, 2.0 (Bea), é composta por mais de 2 milhões de textos e cerca de 1,3 bilhões de <em>tokens</em>. Todos os textos do <em>corpus</em> foram extraídos da web e são posteriores a 1970.</p>
+<p>O <em>corpus</em> Carolina foi criado com o intuito de preservar informações de proveniência e de tipologia textual. Para alcançar esse objetivo, apresentamos um cabeçalho com metadados anotados em lotes de textos<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>, que conservam o máximo de informações que podemos obter de nossas fontes<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> e seguem o padrão TEI (<em>Text Encoding Initiative</em>) <span class="citation" data-cites="TEI2021">(<a href="../../shared/referencias/referencias.html#ref-TEI2021" role="doc-biblioref">TEI Consortium, 2021</a>)</span>.</p>
+<p>Assim, informações como a licença e URL da fonte são obrigatoriamente anotadas de modo a garantir a rastreabilidade dos textos originais, bem como a conformidade com os direitos autorais de cada um. Na <a href="#fig-cap-modelos-dados-proveniencia" class="quarto-xref">Figura&nbsp;<span>2.1</span></a> a <em>tag</em> “&lt;license&gt;” contém as informações da licença da fonte e “&lt;media&gt;” a URL do texto.</p>
+<div id="fig-cap-modelos-dados-proveniencia" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-modelos-dados-proveniencia-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;2.1: Alguns metadados contendo informações de proveniência textual.
+</figcaption>
+<div aria-describedby="fig-cap-modelos-dados-proveniencia-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/cabecalho_prov.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+</figure>
+</div>
+<p>Também anotamos informações das duas tipologias textuais do <em>corpus</em>, a Tipologia Ampla, ou Tipologia do Carolina, que organiza os textos dentro da estrutura do <em>corpus</em> e a Tipologia da Fonte, que contém os termos utilizados pelas próprias fontes para se referirem aos seus textos. Além disso, anotamos o Domínio de cada texto, que entendemos como a esfera em que circulam (por exemplo: Acadêmico, Pedagógico, Comercial etc.). Na <a href="#fig-cap-modelos-dados-tipologia" class="quarto-xref">Figura&nbsp;<span>2.2</span></a> as <em>tags</em> “&lt;catRef&gt;” contêm os tipos amplos e da fonte e “&lt;domain&gt;” apresenta o domínio. Esses metadados nos fornecem informações importantes acerca do registro dos textos que compõem o Carolina e podem ser usados para mensurar sua diversidade linguística.</p>
+<div id="fig-cap-modelos-dados-tipologia" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-cap-modelos-dados-tipologia-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;2.2: Alguns metadados contendo informações de tipologia textual.
+</figcaption>
+<div aria-describedby="fig-cap-modelos-dados-tipologia-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="media/cabecalho_tip.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+</figure>
+</div>
+</section>
+<section id="considerações-finais" class="level2" data-number="2.9">
+<h2 data-number="2.9" class="anchored" data-anchor-id="considerações-finais"><span class="header-section-number">2.9</span> Considerações finais</h2>
+<p>Neste capítulo, apresentamos uma discussão acerca do papel dos dados no pré-treinamento de grandes modelos de linguagem. Discutimos as situações em que o pré-treinamento se faz necessário, alguns dos principais conjuntos de dados disponíveis para o pré-treinamento em português e os principais aspectos que alguém deve considerar tanto ao selecionar um conjunto de dados, quanto ao construir um conjunto de dados para pré-treinamento.</p>
+<p>Esperamos que os pontos apresentados sejam úteis aos leitores que estejam interessados em desbravar essa árdua tarefa do pré-treinamento dos grandes modelos de linguagem. Se em algum momento você obtiver um modelo cheio de alucinações, apesar de todo o seu esforço na seleção de dados, não perca a esperança: lembre-se que até Dom Quixote acabou são no final.</p>
+<!--## Agradecimentos {#agradecimentos .unnumbered}-->
+
+
+<div id="refs" class="references csl-bib-body" data-entry-spacing="1" role="list" style="display: none">
+<div id="ref-abadji2022cleanerdocumentorientedmultilingualcrawled" class="csl-entry" role="listitem">
+ABADJI, J. et al. <strong>Towards a Cleaner Document-Oriented Multilingual Crawled Corpus</strong>., 2022. Disponível em: &lt;<a href="https://arxiv.org/abs/2201.06642">https://arxiv.org/abs/2201.06642</a>&gt;
+</div>
+<div id="ref-albalakSurveyDataSelection2024" class="csl-entry" role="listitem">
+ALBALAK, A. et al. <strong>A Survey on Data Selection for Language Models</strong>., 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2402.16827">https://arxiv.org/abs/2402.16827</a>&gt;
+</div>
+<div id="ref-BIBER1988" class="csl-entry" role="listitem">
+BIBER, D. <strong>Variation across Speech and Writing</strong>. Cambridge: Cambridge University Press, 1988.
+</div>
+<div id="ref-BIBERCONRAD2009" class="csl-entry" role="listitem">
+BIBER, D.; CONRAD, S. <strong>Register, Genre, and Style</strong>. Cambridge: Cambridge University Press, 2009.
+</div>
+<div id="ref-BIBERFINEGAN1994" class="csl-entry" role="listitem">
+BIBER, D.; FINEGAN, E. <strong><a href="https://doi.org/10.1093/oso/9780195083644.001.0001">Sociolinguistic Perspectives On Register</a></strong>. [s.l.] Oxford University Press, 1994.
+</div>
+<div id="ref-blodgettLanguageTechnologyPower2020a" class="csl-entry" role="listitem">
+BLODGETT, S. L. et al. <strong>Language (Technology) is Power: A Critical Survey of <span>“Bias”</span> in <span>NLP</span></strong>. (D. Jurafsky et al., Eds.)Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics. <strong>Anais</strong>...Online: Association for Computational Linguistics, jul. 2020. Disponível em: &lt;<a href="https://aclanthology.org/2020.acl-main.485/">https://aclanthology.org/2020.acl-main.485/</a>&gt;
+</div>
+<div id="ref-burchell-etal-2025-expanded" class="csl-entry" role="listitem">
+BURCHELL, L. et al. <strong>An Expanded Massive Multilingual Dataset for High-Performance Language Technologies (<span>HPLT</span>)</strong>. (W. Che et al., Eds.)Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). <strong>Anais</strong>...Vienna, Austria: Association for Computational Linguistics, jul. 2025. Disponível em: &lt;<a href="https://aclanthology.org/2025.acl-long.854/">https://aclanthology.org/2025.acl-long.854/</a>&gt;
+</div>
+<div id="ref-cervantes1605_pt" class="csl-entry" role="listitem">
+CERVANTES, M. DE. <strong><a href="http://www.dominiopublico.gov.br/download/texto/eb00008a.pdf">D. Quixote de La Mancha — Primeira Parte</a></strong>. [s.l.] eBooksBrasil, 1605.
+</div>
+<div id="ref-commoncrawl" class="csl-entry" role="listitem">
+COMMON CRAWL. <strong>Common Crawl – Open Repository of Web Crawl Data</strong>. <a href="https://commoncrawl.org" class="uri">https://commoncrawl.org</a>, [s.d.].
+</div>
+<div id="ref-correa2025tucanoadvancingneuraltext" class="csl-entry" role="listitem">
+CORRÊA, N. K. et al. <a href="https://doi.org/10.1016/j.patter.2025.101325"><span>Tucano: Advancing Neural Text Generation for Portuguese</span></a>. <strong>Patterns</strong>, 2025.
+</div>
+<div id="ref-crespo2023carolina" class="csl-entry" role="listitem">
+CRESPO, M. C. R. M. et al. <strong>Carolina: a General Corpus of Contemporary Brazilian Portuguese with Provenance, Typology and Versioning Information</strong>., 2023. Disponível em: &lt;<a href="https://arxiv.org/abs/2303.16098">https://arxiv.org/abs/2303.16098</a>&gt;
+</div>
+<div id="ref-davies2016corpus" class="csl-entry" role="listitem">
+DAVIES, M.; FERREIRA, M. J. <strong>Corpus do Portugu<span>ê</span>s: Web/Dialects</strong>. <a href="https://www.corpusdoportugues.org/web-dial/" class="uri">https://www.corpusdoportugues.org/web-dial/</a>, 2016.
+</div>
+<div id="ref-davies2018corpus" class="csl-entry" role="listitem">
+DAVIES, M.; FERREIRA, M. J. <strong>Corpus do Portugu<span>ê</span>s: NOW</strong>. <a href="https://www.corpusdoportugues.org/now/" class="uri">https://www.corpusdoportugues.org/now/</a>, 2018.
+</div>
+<div id="ref-carolinaResource" class="csl-entry" role="listitem">
+FINGER, M. et al. <strong>Carolina: General Corpus of Contemporary Brazilian Portuguese with Provenance and Typology Information</strong>., 2020. Disponível em: &lt;<a href="https://c4ai.inova.usp.br/portal/carolina">https://c4ai.inova.usp.br/portal/carolina</a>&gt;
+</div>
+<div id="ref-EduardoPROPOR2024RoBERTaLexPT" class="csl-entry" role="listitem">
+GARCIA, E. A. S. et al. <strong><span>R</span>o<span>BERT</span>a<span>L</span>ex<span>PT</span>: A Legal <span>R</span>o<span>BERT</span>a Model pretrained with deduplication for <span>P</span>ortuguese</strong>. (P. Gamallo et al., Eds.)Proceedings of the 16th International Conference on Computational Processing of Portuguese - Vol. 1. <strong>Anais</strong>...Santiago de Compostela, Galicia/Spain: Association for Computational Lingustics, mar. 2024. Disponível em: &lt;<a href="https://aclanthology.org/2024.propor-1.38">https://aclanthology.org/2024.propor-1.38</a>&gt;
+</div>
+<div id="ref-guDomainSpecificLanguageModel2021" class="csl-entry" role="listitem">
+GU, Y. et al. <a href="https://doi.org/10.1145/3458754">Domain-Specific Language Model Pretraining for Biomedical Natural Language Processing</a>. <strong>ACM Trans. Comput. Healthcare</strong>, v. 3, n. 1, out. 2021.
+</div>
+<div id="ref-jakubicek2013tenten" class="csl-entry" role="listitem">
+JAKUBČEK, M. et al. <strong>The TenTen corpus family</strong>. Proceedings of the 7th International Corpus Linguistics Conference (CL). <strong>Anais</strong>...2013.
+</div>
+<div id="ref-jensenFinetuningVsScratch2022" class="csl-entry" role="listitem">
+JENSEN, K. N.; PLANK, B. <strong>Fine-tuning vs From Scratch: Do Vision <span>&amp;</span> Language Models Have Similar Capabilities on Out-of-Distribution Visual Question Answering?</strong> (N. Calzolari et al., Eds.)Proceedings of the Thirteenth Language Resources and Evaluation Conference. <strong>Anais</strong>...Marseille, France: European Language Resources Association, jun. 2022. Disponível em: &lt;<a href="https://aclanthology.org/2022.lrec-1.161/">https://aclanthology.org/2022.lrec-1.161/</a>&gt;
+</div>
+<div id="ref-joulinBagTricksEfficient2017" class="csl-entry" role="listitem">
+JOULIN, A. et al. <strong>Bag of Tricks for Efficient Text Classification</strong>. (M. Lapata, P. Blunsom, A. Koller, Eds.)Proceedings of the 15th Conference of the <span>E</span>uropean Chapter of the Association for Computational Linguistics: Volume 2, Short Papers. <strong>Anais</strong>...Valencia, Spain: Association for Computational Linguistics, abr. 2017. Disponível em: &lt;<a href="https://aclanthology.org/E17-2068/">https://aclanthology.org/E17-2068/</a>&gt;
+</div>
+<div id="ref-kernerDomainSpecificPretrainingLanguage2024" class="csl-entry" role="listitem">
+KERNER, T. <strong>Domain-Specific Pretraining of Language Models: A Comparative Study in the Medical Field</strong>., 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2407.14076">https://arxiv.org/abs/2407.14076</a>&gt;
+</div>
+<div id="ref-kreutzerQualityGlanceAudit2022" class="csl-entry" role="listitem">
+KREUTZER, J. et al. <a href="https://doi.org/10.1162/tacl_a_00447">Quality at a Glance: An Audit of Web-Crawled Multilingual Datasets</a>. <strong>Transactions of the Association for Computational Linguistics</strong>, v. 10, p. 50–72, jan. 2022.
+</div>
+<div id="ref-LazzariniMoretti_MalteseZuffo_2025" class="csl-entry" role="listitem">
+LAZZARINI MORETTI, J.; MALTESE ZUFFO, M. <a href="https://doi.org/10.23925/2526-6284/2023.v13n13.69370">LGPD e inteligência artificial: Um estudo comparado</a>. <strong>Revista de Direito Internacional e Globalização Econômica</strong>, v. 13, n. 13, p. 21–42, 2025.
+</div>
+<div id="ref-leeDeduplicatingTrainingData2022a" class="csl-entry" role="listitem">
+LEE, K. et al. <strong>Deduplicating Training Data Makes Language Models Better</strong>., 2022. Disponível em: &lt;<a href="https://arxiv.org/abs/2107.06499">https://arxiv.org/abs/2107.06499</a>&gt;
+</div>
+<div id="ref-liComparativeStudyPretrained2023" class="csl-entry" role="listitem">
+LI, Y. et al. <a href="https://doi.org/10.1093/jamia/ocac225">A comparative study of pretrained language models for long clinical text</a>. <strong>Journal of the American Medical Informatics Association</strong>, v. 30, n. 2, p. 340–347, nov. 2022.
+</div>
+<div id="ref-bracis2024aroeira" class="csl-entry" role="listitem">
+LIRA, T. et al. <strong>Aroeira: A Curated Corpus for the Portuguese Language with a Large Number of Tokens</strong>. Anais da XXXIV Brazilian Conference on Intelligent Systems. <strong>Anais</strong>...Porto Alegre, RS, Brasil: SBC, 2024. Disponível em: &lt;<a href="https://sol.sbc.org.br/index.php/bracis/article/view/33560">https://sol.sbc.org.br/index.php/bracis/article/view/33560</a>&gt;
+</div>
+<div id="ref-longprePretrainersGuideTraining2024" class="csl-entry" role="listitem">
+LONGPRE, S. et al. <strong>A Pretrainer<span>’</span>s Guide to Training Data: Measuring the Effects of Data Age, Domain Coverage, Quality, <span>&amp;</span> Toxicity</strong>. (K. Duh, H. Gomez, S. Bethard, Eds.)Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers). <strong>Anais</strong>...Mexico City, Mexico: Association for Computational Linguistics, jun. 2024. Disponível em: &lt;<a href="https://aclanthology.org/2024.naacl-long.179/">https://aclanthology.org/2024.naacl-long.179/</a>&gt;
+</div>
+<div id="ref-longpreResponsibleFoundationModel2025" class="csl-entry" role="listitem">
+LONGPRE, S. et al. <strong>The Responsible Foundation Model Development Cheatsheet: A Review of Tools &amp; Resources</strong>., 2025. Disponível em: &lt;<a href="https://arxiv.org/abs/2406.16746">https://arxiv.org/abs/2406.16746</a>&gt;
+</div>
+<div id="ref-mecklenburgInjectingNewKnowledge2024" class="csl-entry" role="listitem">
+MECKLENBURG, N. et al. <strong>Injecting New Knowledge into Large Language Models via Supervised Fine-Tuning</strong>., 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2404.00213">https://arxiv.org/abs/2404.00213</a>&gt;
+</div>
+<div id="ref-mizrahiLanguageModelsImprove2025" class="csl-entry" role="listitem">
+MIZRAHI, D. et al. <strong>Language Models Improve When Pretraining Data Matches Target Tasks</strong>., 2025. Disponível em: &lt;<a href="https://arxiv.org/abs/2507.12466">https://arxiv.org/abs/2507.12466</a>&gt;
+</div>
+<div id="ref-radfordImprovingLanguageUnderstandinga" class="csl-entry" role="listitem">
+RADFORD, A. et al. <strong>Improving <span>Language Understanding</span> by <span>Generative Pre-Training</span></strong>., 2018. Disponível em: &lt;<a href="https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf">https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf</a>&gt;
+</div>
+<div id="ref-raeScalingLanguageModels2022a" class="csl-entry" role="listitem">
+RAE, J. W. et al. <strong>Scaling Language Models: Methods, Analysis &amp; Insights from Training Gopher</strong>., 2022. Disponível em: &lt;<a href="https://arxiv.org/abs/2112.11446">https://arxiv.org/abs/2112.11446</a>&gt;
+</div>
+<div id="ref-raffelExploringLimitsTransfer2023" class="csl-entry" role="listitem">
+RAFFEL, C. et al. <strong>Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer</strong>., 2023. Disponível em: &lt;<a href="https://arxiv.org/abs/1910.10683">https://arxiv.org/abs/1910.10683</a>&gt;
+</div>
+<div id="ref-Santos2000PCP" class="csl-entry" role="listitem">
+SANTOS, D. <strong><span>O</span> projecto <span>P</span>rocessamento <span>C</span>omputacional do <span>P</span>ortuguês: <span>B</span>alanço e perspectivas</strong>. (M. das Graças Volpe Nunes, Ed.)<span>V</span> <span>E</span>ncontro para o processamento computacional da língua portuguesa escrita e falada (<span>PROPOR</span> 2000). <strong>Anais</strong>...São Paulo: ICMC/USP, 2000. Disponível em: &lt;<a href="https://www.linguateca.pt/Diana/download/SantosPROPOR2000.pdf">https://www.linguateca.pt/Diana/download/SantosPROPOR2000.pdf</a>&gt;
+</div>
+<div id="ref-SANTOS18.10" class="csl-entry" role="listitem">
+SANTOS, H.; WOLOSZYN, V.; VIEIRA, R. <strong><span>B</span>log<span>S</span>et-<span>BR</span>: A <span>B</span>razilian <span>P</span>ortuguese Blog Corpus</strong>. (N. Calzolari et al., Eds.)Proceedings of the Eleventh International Conference on Language Resources and Evaluation (<span>LREC</span> 2018). <strong>Anais</strong>...Miyazaki, Japan: European Language Resources Association (ELRA), 2018. Disponível em: &lt;<a href="https://aclanthology.org/L18-1105/">https://aclanthology.org/L18-1105/</a>&gt;
+</div>
+<div id="ref-sardinha2010manual" class="csl-entry" role="listitem">
+SARDINHA, T. B.; FILHO, J. L. M.; ALAMBERT, E. <strong><a href="https://www.linguateca.pt/Repositorio/manual_cb.pdf">Manual Corpus Brasileiro</a></strong>. [s.l: s.n.].
+</div>
+<div id="ref-SARDINHAETAL2014" class="csl-entry" role="listitem">
+SARDINHA, T. B.; KAUFFMANN, C.; ACUNZO, C. M. <a href="https://doi.org/10.3366/cor.2014.0059">A multi-dimensional analysis of register variation in Brazilian Portuguese</a>. <strong>Corpora</strong>, v. 9, n. 2, p. 239–271, 2014.
+</div>
+<div id="ref-SERRAS2024a" class="csl-entry" role="listitem">
+SERRAS, F. R. et al. <strong>Exploring Computational Discernibility of Discourse Domains in <span>B</span>razilian <span>P</span>ortuguese within the <span>C</span>arolina Corpus</strong>. (P. Gamallo et al., Eds.)Proceedings of the 16th International Conference on Computational Processing of Portuguese - Vol. 1. <strong>Anais</strong>...Santiago de Compostela, Galicia/Spain: Association for Computational Lingustics, mar. 2024. Disponível em: &lt;<a href="https://aclanthology.org/2024.propor-1.26/">https://aclanthology.org/2024.propor-1.26/</a>&gt;
+</div>
+<div id="ref-shumailov2024ai" class="csl-entry" role="listitem">
+SHUMAILOV, I. et al. <a href="https://doi.org/10.1038/s41586-024-07566-y">AI models collapse when trained on recursively generated data</a>. <strong>Nature</strong>, v. 631, n. 8022, p. 755–759, 2024.
+</div>
+<div id="ref-sturzeneker2022carolina" class="csl-entry" role="listitem">
+STURZENEKER, M. et al. <strong>Carolina’s Methodology: building a large corpus with provenance and typology information.</strong> (C. Trojahn et al., Eds.)<span>Proceedings of the Second Workshop on Digital Humanities and Natural Language Processing (2nd DHandNLP 2022) co-located with International Conference on the Computational Processing of Portuguese (PROPOR 2022)</span>. <strong>Anais</strong>...Fortaleza, Brazil: 2022. Disponível em: &lt;<a href="https://ceur-ws.org/Vol-3128/paper4.pdf">https://ceur-ws.org/Vol-3128/paper4.pdf</a>&gt;
+</div>
+<div id="ref-sunAmuroCharAnalyzing2025" class="csl-entry" role="listitem">
+SUN, K.; DREDZE, M. <strong>Amuro <span>&amp;</span> Char: Analyzing the Relationship between Pre-Training and Fine-Tuning of Large Language Models</strong>. (V. Adlakha et al., Eds.)Proceedings of the 10th Workshop on Representation Learning for NLP (RepL4NLP-2025). <strong>Anais</strong>...Albuquerque, NM: Association for Computational Linguistics, 2025. Disponível em: &lt;<a href="https://aclanthology.org/2025.repl4nlp-1.11/">https://aclanthology.org/2025.repl4nlp-1.11/</a>&gt;
+</div>
+<div id="ref-TEI2021" class="csl-entry" role="listitem">
+TEI CONSORTIUM. <strong><a href="https://tei-c.org/release/doc/tei-p5-doc/en/Guidelines.pdf"><span>TEI P5: Guidelines for Electronic Text Encoding and Interchange</span></a></strong>. [s.l.] Retrieved May 20, 2021, 2021.
+</div>
+<div id="ref-touvronLLaMAOpenEfficient2023" class="csl-entry" role="listitem">
+TOUVRON, H. et al. <strong>LLaMA: Open and Efficient Foundation Language Models</strong>., 2023. Disponível em: &lt;<a href="https://arxiv.org/abs/2302.13971">https://arxiv.org/abs/2302.13971</a>&gt;
+</div>
+<div id="ref-wagner-filho-etal-2018-brwac" class="csl-entry" role="listitem">
+WAGNER FILHO, J. A. et al. <strong>The br<span>W</span>a<span>C</span> Corpus: A New Open Resource for <span>B</span>razilian <span>P</span>ortuguese</strong>. (N. Calzolari et al., Eds.)Proceedings of the Eleventh International Conference on Language Resources and Evaluation (<span>LREC</span> 2018). <strong>Anais</strong>...Miyazaki, Japan: European Language Resources Association (ELRA), 2018. Disponível em: &lt;<a href="https://aclanthology.org/L18-1686">https://aclanthology.org/L18-1686</a>&gt;
+</div>
+<div id="ref-weberRedPajamaOpenDataset" class="csl-entry" role="listitem">
+WEBER, M. et al. <strong>RedPajama: an Open Dataset for Training Large Language Models</strong>., 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2411.12372">https://arxiv.org/abs/2411.12372</a>&gt;
+</div>
+<div id="ref-wenzekCCNetExtractingHigh2020" class="csl-entry" role="listitem">
+WENZEK, G. et al. <strong><span>CCN</span>et: Extracting High Quality Monolingual Datasets from Web Crawl Data</strong>. (N. Calzolari et al., Eds.)Proceedings of the Twelfth Language Resources and Evaluation Conference. <strong>Anais</strong>...Marseille, France: European Language Resources Association, 2020. Disponível em: &lt;<a href="https://aclanthology.org/2020.lrec-1.494/">https://aclanthology.org/2020.lrec-1.494/</a>&gt;
+</div>
+<div id="ref-WOLFRAM2006" class="csl-entry" role="listitem">
+WOLFRAM, W. <a href="https://doi.org/10.1016/B0-08-044854-2/04256-5">Variation and Language: Overview</a>. Em: BROWN, K. (Ed.). <strong>Encyclopedia of Language &amp; Linguistics (Second Edition)</strong>. Second Edition ed. Oxford: Elsevier, 2006. p. 333–341.
+</div>
+<div id="ref-xuDetoxifyingLanguageModels2021" class="csl-entry" role="listitem">
+XU, A. et al. <strong>Detoxifying Language Models Risks Marginalizing Minority Voices</strong>. (K. Toutanova et al., Eds.)Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies. <strong>Anais</strong>...Online: Association for Computational Linguistics, jun. 2021. Disponível em: &lt;<a href="https://aclanthology.org/2021.naacl-main.190/">https://aclanthology.org/2021.naacl-main.190/</a>&gt;
+</div>
+<div id="ref-yaoNLPScratchLargeScale2022" class="csl-entry" role="listitem">
+YAO, X. et al. <strong>NLP From Scratch Without Large-Scale Pretraining: A Simple and Efficient Framework</strong>., 2022. Disponível em: &lt;<a href="https://arxiv.org/abs/2111.04130">https://arxiv.org/abs/2111.04130</a>&gt;
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>Tratamos com mais detalhes a respeito de proveniência, direitos autorais e métodos de extração de textos da web em <span class="citation" data-cites="crespo2023carolina">(<a href="../../shared/referencias/referencias.html#ref-crespo2023carolina" role="doc-biblioref">Crespo et al., 2023</a>)</span>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>O texto da lei pode ser conferido em: <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" class="uri">https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Para uma discussão mais ampla a respeito da LGPD e a Inteligência Artificial cf. <span class="citation" data-cites="LazzariniMoretti_MalteseZuffo_2025">(<a href="../../shared/referencias/referencias.html#ref-LazzariniMoretti_MalteseZuffo_2025" role="doc-biblioref">Lazzarini Moretti; Maltese Zuffo, 2025</a>)</span>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>O nome do <em>corpus</em> é uma homenagem a Carolina Michaelis de Vasconcelos (1851-1925), filóloga e linguista alemã, radicada em Portugal, e primeira mulher a atuar como docente na Faculdade de Letras da Universidade de Lisboa, em 1911.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p><a href="https://dev-c4ai.webhostusp.sti.usp.br/?page_id=6120&amp;lang=pt" class="uri">https://dev-c4ai.webhostusp.sti.usp.br/?page_id=6120&amp;lang=pt</a><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p><a href="https://sites.google.com/icmc.usp.br/nlp2" class="uri">https://sites.google.com/icmc.usp.br/nlp2</a><a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Para mais informações sobre a metodologia de extração e anotação dos dados do <em>corpus</em> Carolina cf. <span class="citation" data-cites="sturzeneker2022carolina">(<a href="../../shared/referencias/referencias.html#ref-sturzeneker2022carolina" role="doc-biblioref">Sturzeneker et al., 2022</a>)</span>.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>A lista completa de metadados que anotamos encontra-se em <span class="citation" data-cites="crespo2023carolina">(<a href="../../shared/referencias/referencias.html#ref-crespo2023carolina" role="doc-biblioref">Crespo et al., 2023, p. 13–14</a>)</span>.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html" class="pagination-link" aria-label="Modelos de linguagem">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Modelos de linguagem</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" class="pagination-link" aria-label="Treinamento de Grandes Modelos de Linguagem na prática">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://brasileiraspln.com/">
+<p>Brasileiras em PLN, 2026. Todos os direitos reservados</p>
+</a>
+  </li>  
+</ul>
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

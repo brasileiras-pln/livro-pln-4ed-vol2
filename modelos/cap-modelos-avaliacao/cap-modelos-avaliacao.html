@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Livy Real">
+<meta name="author" content="André Carvalho">
+<meta name="author" content="Altigran Soares da Silva">
+
+<title>4&nbsp; Avaliação de Grandes Modelos de Linguagem – Processamento de Linguagem Natural</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 1em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../modelos/cap-rag/cap-rag.html" rel="next">
+<link href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-8676d8d0f01772f2903466dda9733bcf.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Sem resultados",
+    "search-matching-documents-text": "Resultados encontrados",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<!-- Google tag (gtag.js) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-111J572WMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-111J572WMR');
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../shared/bpln.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../../index.html" class="sidebar-logo-link">
+      <img src="../../shared/logos/bpln.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Processamento de Linguagem Natural</a> 
+        <div class="sidebar-tools-main">
+    <a href="../../Livro_PLN_BPLN_4ed_vol2.pdf" title="Baixar PDF" class="quarto-navigation-tool px-1" aria-label="Baixar PDF"><i class="bi bi-file-pdf"></i></a>
+    <div class="dropdown">
+      <a href="" title="Compartilhar" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Compartilhar"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sobre o Volume 2</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Modelos de Linguagem</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Modelos de linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-dados/cap-modelos-dados.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-rag/cap-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-modelos-etica/cap-modelos-etica.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../modelos/cap-agentes-conversacionais/cap-agentes-conversacionais.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ChatGPT, MariTalk e outros agentes de conversação</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../shared/referencias/referencias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Referências</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../autores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><strong>Sobre as/os autoras/es</strong></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Conteúdo</h2>
+   
+  <ul>
+  <li><a href="#sec-cap-modelos-avaliacao-intro" id="toc-sec-cap-modelos-avaliacao-intro" class="nav-link active" data-scroll-target="#sec-cap-modelos-avaliacao-intro"><span class="header-section-number">4.1</span> A importância e os desafios intrínsecos da avaliação de LLMs</a>
+  <ul class="collapse">
+  <li><a href="#tipos-de-avaliação" id="toc-tipos-de-avaliação" class="nav-link" data-scroll-target="#tipos-de-avaliação"><span class="header-section-number">4.1.1</span> Tipos de avaliação</a></li>
+  </ul></li>
+  <li><a href="#avaliações-tradicionais" id="toc-avaliações-tradicionais" class="nav-link" data-scroll-target="#avaliações-tradicionais"><span class="header-section-number">4.2</span> Avaliações tradicionais</a>
+  <ul class="collapse">
+  <li><a href="#descompasso-com-a-percepção-humana" id="toc-descompasso-com-a-percepção-humana" class="nav-link" data-scroll-target="#descompasso-com-a-percepção-humana"><span class="header-section-number">4.2.1</span> Descompasso com a percepção humana</a></li>
+  <li><a href="#dificuldade-em-avaliar-aspectos-complexos" id="toc-dificuldade-em-avaliar-aspectos-complexos" class="nav-link" data-scroll-target="#dificuldade-em-avaliar-aspectos-complexos"><span class="header-section-number">4.2.2</span> Dificuldade em avaliar aspectos complexos</a></li>
+  <li><a href="#exemplos-práticos" id="toc-exemplos-práticos" class="nav-link" data-scroll-target="#exemplos-práticos"><span class="header-section-number">4.2.3</span> Exemplos práticos</a></li>
+  <li><a href="#avaliação-humana-o-padrão-ouro" id="toc-avaliação-humana-o-padrão-ouro" class="nav-link" data-scroll-target="#avaliação-humana-o-padrão-ouro"><span class="header-section-number">4.2.4</span> Avaliação humana: O padrão ouro?</a></li>
+  <li><a href="#importância-e-metodologias-comuns" id="toc-importância-e-metodologias-comuns" class="nav-link" data-scroll-target="#importância-e-metodologias-comuns"><span class="header-section-number">4.2.5</span> Importância e metodologias comuns</a></li>
+  <li><a href="#desafios-da-avaliação-humana" id="toc-desafios-da-avaliação-humana" class="nav-link" data-scroll-target="#desafios-da-avaliação-humana"><span class="header-section-number">4.2.6</span> Desafios da avaliação humana</a></li>
+  </ul></li>
+  <li><a href="#benchmarks-e-datasets-de-avaliação" id="toc-benchmarks-e-datasets-de-avaliação" class="nav-link" data-scroll-target="#benchmarks-e-datasets-de-avaliação"><span class="header-section-number">4.3</span> <em>Benchmarks</em> e <em>datasets</em> de avaliação</a>
+  <ul class="collapse">
+  <li><a href="#benchmarks-genéricos-general-purpose" id="toc-benchmarks-genéricos-general-purpose" class="nav-link" data-scroll-target="#benchmarks-genéricos-general-purpose"><span class="header-section-number">4.3.1</span> <em>Benchmarks</em> genéricos (General-Purpose)</a></li>
+  <li><a href="#benchmarks-para-tarefas-específicas" id="toc-benchmarks-para-tarefas-específicas" class="nav-link" data-scroll-target="#benchmarks-para-tarefas-específicas"><span class="header-section-number">4.3.2</span> <em>Benchmarks</em> para tarefas específicas</a></li>
+  <li><a href="#benchmarks-para-segurança-e-confiabilidade" id="toc-benchmarks-para-segurança-e-confiabilidade" class="nav-link" data-scroll-target="#benchmarks-para-segurança-e-confiabilidade"><span class="header-section-number">4.3.3</span> <em>Benchmarks</em> para segurança e confiabilidade</a></li>
+  <li><a href="#a-importância-de-ir-além-do-placar" id="toc-a-importância-de-ir-além-do-placar" class="nav-link" data-scroll-target="#a-importância-de-ir-além-do-placar"><span class="header-section-number">4.3.4</span> A importância de ir além do placar</a></li>
+  </ul></li>
+  <li><a href="#avaliação-baseada-em-modelos-model-based-evaluation" id="toc-avaliação-baseada-em-modelos-model-based-evaluation" class="nav-link" data-scroll-target="#avaliação-baseada-em-modelos-model-based-evaluation"><span class="header-section-number">4.4</span> Avaliação baseada em modelos (<em>Model-based evaluation</em>)</a>
+  <ul class="collapse">
+  <li><a href="#vantagens" id="toc-vantagens" class="nav-link" data-scroll-target="#vantagens"><span class="header-section-number">4.4.1</span> Vantagens</a></li>
+  <li><a href="#abordagens" id="toc-abordagens" class="nav-link" data-scroll-target="#abordagens"><span class="header-section-number">4.4.2</span> Abordagens</a></li>
+  <li><a href="#desafios-e-limitações" id="toc-desafios-e-limitações" class="nav-link" data-scroll-target="#desafios-e-limitações"><span class="header-section-number">4.4.3</span> Desafios e Limitações</a></li>
+  <li><a href="#exemplos-de-frameworks-de-llm-as-a-judge" id="toc-exemplos-de-frameworks-de-llm-as-a-judge" class="nav-link" data-scroll-target="#exemplos-de-frameworks-de-llm-as-a-judge"><span class="header-section-number">4.4.4</span> Exemplos de <em>frameworks</em> de <em>LLM as a Judge</em></a></li>
+  </ul></li>
+  <li><a href="#aspectos-emergentes-e-avançados-da-avaliação" id="toc-aspectos-emergentes-e-avançados-da-avaliação" class="nav-link" data-scroll-target="#aspectos-emergentes-e-avançados-da-avaliação"><span class="header-section-number">4.5</span> Aspectos emergentes e avançados da avaliação</a>
+  <ul class="collapse">
+  <li><a href="#robustez-e-ataques-adversariais" id="toc-robustez-e-ataques-adversariais" class="nav-link" data-scroll-target="#robustez-e-ataques-adversariais"><span class="header-section-number">4.5.1</span> Robustez e Ataques adversariais</a></li>
+  <li><a href="#avaliação-de-justiça-viés-e-toxicidade" id="toc-avaliação-de-justiça-viés-e-toxicidade" class="nav-link" data-scroll-target="#avaliação-de-justiça-viés-e-toxicidade"><span class="header-section-number">4.5.2</span> Avaliação de justiça, viés e toxicidade</a></li>
+  <li><a href="#factualidade-alucinações-e-citabilidade" id="toc-factualidade-alucinações-e-citabilidade" class="nav-link" data-scroll-target="#factualidade-alucinações-e-citabilidade"><span class="header-section-number">4.5.3</span> Factualidade, alucinações e citabilidade</a></li>
+  <li><a href="#eficiência-computacional-e-custos" id="toc-eficiência-computacional-e-custos" class="nav-link" data-scroll-target="#eficiência-computacional-e-custos"><span class="header-section-number">4.5.4</span> Eficiência computacional e custos</a></li>
+  </ul></li>
+  <li><a href="#considerações-éticas-e-o-futuro-da-avaliação-de-llms" id="toc-considerações-éticas-e-o-futuro-da-avaliação-de-llms" class="nav-link" data-scroll-target="#considerações-éticas-e-o-futuro-da-avaliação-de-llms"><span class="header-section-number">4.6</span> Considerações éticas e o Futuro da avaliação de LLMs</a>
+  <ul class="collapse">
+  <li><a href="#responsabilidade-na-avaliação" id="toc-responsabilidade-na-avaliação" class="nav-link" data-scroll-target="#responsabilidade-na-avaliação"><span class="header-section-number">4.6.1</span> Responsabilidade na avaliação</a></li>
+  <li><a href="#transparência-e-interpretabilidade" id="toc-transparência-e-interpretabilidade" class="nav-link" data-scroll-target="#transparência-e-interpretabilidade"><span class="header-section-number">4.6.2</span> Transparência e Interpretabilidade</a></li>
+  <li><a href="#dualidade-do-uso" id="toc-dualidade-do-uso" class="nav-link" data-scroll-target="#dualidade-do-uso"><span class="header-section-number">4.6.3</span> Dualidade do uso</a></li>
+  <li><a href="#o-papel-da-regulação-e-de-padrões-na-avaliação" id="toc-o-papel-da-regulação-e-de-padrões-na-avaliação" class="nav-link" data-scroll-target="#o-papel-da-regulação-e-de-padrões-na-avaliação"><span class="header-section-number">4.6.4</span> O papel da regulação e de padrões na avaliação</a></li>
+  <li><a href="#direções-futuras" id="toc-direções-futuras" class="nav-link" data-scroll-target="#direções-futuras"><span class="header-section-number">4.6.5</span> Direções futuras</a></li>
+  </ul></li>
+  <li><a href="#considerações-finais" id="toc-considerações-finais" class="nav-link" data-scroll-target="#considerações-finais"><span class="header-section-number">4.7</span> Considerações finais</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-linguagem/cap-modelos-linguagem.html"><strong>Modelos de Linguagem</strong></a></li><li class="breadcrumb-item"><a href="../../modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-cap-modelos-avaliacao" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Avaliação de Grandes Modelos de Linguagem</span></span></h1>
+<p class="subtitle lead">Fundamentos, métodos tradicionais e desafios atuais</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading"></div>
+    <div class="quarto-title-meta-contents">
+             <p>Livy Real </p>
+             <p>André Carvalho </p>
+             <p>Altigran Soares da Silva </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Publicado em:</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">13/04/2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+
+</div>
+<div>
+<div class="callout-body-container callout-body">
+<p>Este capítulo também está disponível em <a href="cap-modelos-avaliacao.pdf">PDF</a>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" aria-controls="callout-cite" data-bs-toggle="collapse" aria-label="Toggle callout" data-bs-target=".callout-cite-contents" aria-expanded="false">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Como citar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end">
+<i class="callout-toggle"></i>
+</div>
+</div>
+<div class="callout-cite-contents callout-collapse collapse" id="callout-cite">
+<div class="callout-body-container callout-body">
+<div class="sourceCode" id="cb1"><pre class="sourceCode latex code-with-copy"><code class="sourceCode latex"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>@InCollection{BPLN_livro_cap-modelos-avaliacao:2026,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    author    = {Real, Livy and Carvalho, André and Silva, Altigran Soares da},</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    title     = {Avaliação de Grandes Modelos de Linguagem: Fundamentos, métodos tradicionais e desafios atuais},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    booktitle = {Processamento de Linguagem Natural: Conceitos, Técnicas e Aplicações em Português},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    publisher = {BPLN},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    year      = {2026},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    editor    = {Caseli, H. M. and Nunes, M. G. V.},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    type      = {Book Chapter},</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    chapter   = {4},</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    edition   = {4},</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    volume    = {2},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    isbn      = {XXXXXXXXXXXXXXXX},</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    url       = {https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-avaliacao/cap-modelos-avaliacao.html},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<section id="sec-cap-modelos-avaliacao-intro" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="sec-cap-modelos-avaliacao-intro"><span class="header-section-number">4.1</span> A importância e os desafios intrínsecos da avaliação de LLMs</h2>
+<p>Talvez você já tenha ouvido falar do caso em que uma LLM (Large Language Model, Grande Modelo de Linguagem) vendeu um carro por 1 dólar<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Ou de quando um advogado estado-unidense, ex-advogado do próprio presidente, foi processado por inventar precedentes jurídicos<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Se não ouviu, certamente você já ficou preso em conversas intermináveis e inúteis de <em>chatbots</em> de diversas empresas. Todos esses casos aconteceram e acontecem todos os dias porque os responsáveis por tais sistemas, mesmo que inadvertidamente, desconsideram a necessidade de uma avaliação robusta de seus sistemas baseados em LLMs. A ampla divulgação comercial desses sistemas pode levar à percepção equivocada de que já atingimos a era da Inteligência Artificial Geral (AGI), o tão esperado momento em que as IAs terão ‘inteligência’ semelhante à humana e serão autodidatas. Isso ainda não corresponde à realidade. Hoje, em 2025, é possível afirmar que as saídas das LLMs sempre parecem boas, parecem verossímeis e factuais, mas com frequência não o são. Esse capítulo aborda a necessidade da avaliação de LLMs, considerando técnicas tradicionais e técnicas mais recentes, e vai defender a integração da avaliação das LLMs dentro do próprio ciclo de desenvolvimento de um sistema ou produto.</p>
+<p>A avaliação de LLMs constitui uma questão fundamental no ciclo de vida de pesquisa e desenvolvimento desses modelos e de aplicações construídas com base neles, incluindo aí os agentes inteligentes. A sua importância transcende a mera verificação de desempenho, sendo crucial para o avanço da área a comparação entre diferentes arquiteturas, a identificação e mitigação de riscos e a garantia de aplicações práticas robustas e seguras&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>. A complexidade inerente à linguagem natural, combinada com a natureza gerativa e as capacidades emergentes dos LLMs, introduz desafios avaliativos que superam as abordagens tradicionais de Processamento de Linguagem Natural (PLN)&nbsp;<span class="citation" data-cites="minaee">(<a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>. A falta de interpretabilidade destes modelos ainda contribui à longa lista de novos desafios enfrentados na área atualmente.</p>
+<p>LLMs, como modelos de linguagem estatísticos pré-treinados em larga escala, exibem “habilidades” interessantes que vão além da mera previsão de palavras. Incluem-se o aprendizado em contexto (in-context learning), em que os modelos assimilam novas tarefas a partir de poucos exemplos fornecidos no <em>prompt</em> , e o seguimento de instruções (<em>instruction following</em>), que permite que os modelos executem tarefas sem exemplos explícitos após o <em>instruction tuning</em><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>&nbsp;<span class="citation" data-cites="minaee">(<a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>. Estas capacidades, embora revolucionárias, trazem novos desafios à avaliação, pois as métricas clássicas usadas para mensurar sistemas de PLN frequentemente não conseguem capturar a profundidade semântica, a criatividade ou a factualidade das respostas geradas. Como as LLMs são treinadas para a simples tarefa de predizer a próxima palavra de uma sequência, mas, a partir desse treinamento, surgem capacidades emergentes (habilidades dos modelos que não foram explicitamente treinadas), não sabemos de antemão quais habilidades devemos avaliar.</p>
+<p>A avaliação do raciocínio passo a passo, por exemplo, é fundamental para compreender e aprimorar a capacidade dos LLMs em problemas complexos, exigindo critérios que vão além da simples precisão da resposta final, como factualidade, validade, coerência e utilidade. A necessidade de <em>frameworks</em> de avaliação mais sofisticados é cada vez mais evidente, especialmente à medida que os LLMs são integrados em domínios de alta criticidade, como a saúde, na qual segurança e eficácia são imperativas. A avaliação deve, portanto, ser multifacetada, abrangendo não apenas o desempenho técnico, mas também a segurança, a eficiência e o impacto social dos modelos&nbsp;<span class="citation" data-cites="Gebru:2021rohtua">(<a href="../../shared/referencias/referencias.html#ref-Gebru:2021rohtua" role="doc-biblioref">Bender et al., 2021</a>)</span>.</p>
+<p>A evolução do paradigma de avaliação é uma resposta direta à forma como os LLMs operam. Sistemas de PLN anteriores frequentemente se propunham a tarefas mais simples e as métricas tradicionais projetadas para tais tarefas frequentemente assumem a existência de uma única resposta correta&nbsp;<span class="citation" data-cites="minaee">(<a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>. <em>Benchmarks</em> estáticos e métricas rígidas guiaram por décadas o avanço das técnicas de PLN, mesmo que as limitações dessas metodologias fossem conhecidas e frequentemente apontadas&nbsp;<span class="citation" data-cites="bowman2021fixbenchmarkingnaturallanguage ribeiro-etal-2020-beyond kalouli-etal-2023-curing">(<a href="../../shared/referencias/referencias.html#ref-bowman2021fixbenchmarkingnaturallanguage" role="doc-biblioref">Bowman; Dahl, 2021</a>; <a href="../../shared/referencias/referencias.html#ref-kalouli-etal-2023-curing" role="doc-biblioref">Kalouli et al., 2023</a>; <a href="../../shared/referencias/referencias.html#ref-ribeiro-etal-2020-beyond" role="doc-biblioref">Ribeiro et al., 2020</a>)</span>. No entanto, a natureza gerativa dos LLMs, que podem produzir diversas saídas válidas para a mesma entrada, torna o problema da avaliação mais evidente, na medida em que a própria definição de uma resposta “boa” ou “correta” se torna uma definição fluida e multidimensional&nbsp;<span class="citation" data-cites="minaee d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>; <a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>. Esta observação implica uma transição: saímos de métricas puramente objetivas e baseadas em correspondência de strings e vamos em direção a abordagens de avaliação mais diversificadas, buscando diferentes relações semânticas e alinhadas com a percepção humana. O desafio não é apenas medir a correção, mas sim a qualidade em um espaço subjetivo, criativo e dependente do contexto, o que demanda uma evolução contínua dos <em>frameworks</em> de avaliação.</p>
+<p>Adicionalmente, a avaliação não é um processo <em>post-hoc</em>, mas uma parte integral do ciclo de desenvolvimento dos LLMs. O aprendizado por reforço (Reinforcement Learning, RL) utiliza pontuações de avaliadores humanos para aprimorar o treinamento de um LLM. Isso estabelece um vínculo causal: métricas de avaliação falhas ou incompletas, especialmente aquelas que não se alinham com os valores humanos ou com as capacidades emergentes dos modelos, podem levar à otimização dos sistemas para a métrica em si, em vez de levá-los a novas versões realmente úteis e seguras. Assim, a qualidade e o alinhamento das pontuações de avaliação impactam diretamente a trajetória de aprendizado do modelo e seu desempenho subsequente, especialmente em esforços de alinhamento como o RLHF (Reinforcement Learning from Human Feedback).</p>
+<section id="tipos-de-avaliação" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="tipos-de-avaliação"><span class="header-section-number">4.1.1</span> Tipos de avaliação</h3>
+<p>A avaliação de LLMs pode ser categorizada de diversas maneiras para abordar os múltiplos aspectos de seu desempenho. Uma distinção fundamental é entre avaliação <em>intrínseca</em> e <em>extrínseca</em><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. A avaliação intrínseca foca na qualidade inerente do modelo, frequentemente medida por métricas que avaliam a probabilidade de sequências de texto, como a perplexidade, ou a sobreposição lexical com textos de referência. A avaliação extrínseca, por outro lado, mede o desempenho do LLM em uma tarefa finalística ou <em>downstream</em><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> ou em um cenário de aplicação real, como a capacidade de um LLM de melhorar a experiência do usuário em um <em>chatbot</em> ou sua eficácia em tarefas de sumarização de notícias.</p>
+<p>Outra categorização crucial diferencia a <em>avaliação humana</em> da <em>automática</em>. A avaliação automática tradicional emprega algoritmos e métricas computacionais para comparar a saída do modelo com referências ou para inferir a qualidade com base em características textuais. Este tipo inclui métricas estatísticas tradicionais (como BLEU e ROUGE). Atualmente, também há a avaliação automática baseada em modelos de linguagem, como a utilização do BERTScore e o paradigma LLM-as-a-Judge)&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. Vamos visitá-las nas próximas páginas.</p>
+<p>Já a avaliação humana é amplamente considerada o “padrão ouro” especialmente para tarefas de Geração de Linguagem Natural (NLG) devido à sua capacidade de capturar nuances e critérios de qualidade subjetivos que as métricas automáticas não conseguem capturar&nbsp;<span class="citation" data-cites="gao2024 dierk2025 wangLAAJ25">(<a href="../../shared/referencias/referencias.html#ref-dierk2025" role="doc-biblioref">Dierk et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-wangLAAJ25" role="doc-biblioref">Wang et al., 2025</a>)</span>.</p>
+<p>Há uma complementaridade e compromissos (<em>trade-offs</em>) inerentes entre a avaliação humana e a automática. Embora a avaliação humana seja o “padrão ouro”, ela apresenta desafios significativos em termos de custo e escalabilidade, sendo um processo caro e demorado&nbsp;<span class="citation" data-cites="dierk2025 gao2024">(<a href="../../shared/referencias/referencias.html#ref-dierk2025" role="doc-biblioref">Dierk et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. Em contraste, as métricas automáticas são eficientes e rápidas de calcular, mas muitas vezes carecem da capacidade de capturar a profundidade semântica e a coerência contextual que os humanos podem discernir&nbsp;<span class="citation" data-cites="minaee">(<a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>. Esta observação implica que um <em>framework</em> de avaliação holístico deve alavancar os pontos fortes de ambas as abordagens, em vez de depender exclusivamente de uma.</p>
+<p>A combinação de verificações automáticas rápidas para qualidade básica e consistência com revisões humanas direcionadas para aspectos subjetivos, segurança e raciocínio complexo sugere um futuro no qual as abordagens de avaliação híbridas se tornarão o padrão. O trade-off entre custo/velocidade e profundidade/nuance possivelmente impulsionará as escolhas metodológicas na implantação prática de LLMs. A avaliação humana é essencial para validar textos gerados por máquinas e garantir o alinhamento com requisitos específicos do domínio e expectativas do usuário. A dificuldade intrínseca da avaliação de tarefas gerativas significa que a avaliação humana é sempre necessária. Além de não existir uma “resposta única correta” para muitas tarefas de geração de linguagem&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>, é apenas a avaliação humana que garante o alinhamento de LLMs ou de qualquer outro tipo de avaliação (meta-avaliação) a valores humanos. Por valores humanos, entende-se não apenas ética e responsabilidade social, mas justamente a qualidade da máquina em agir exatamente como um humano agiria (e não apenas ‘parecido’).</p>
+</section>
+</section>
+<section id="avaliações-tradicionais" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="avaliações-tradicionais"><span class="header-section-number">4.2</span> Avaliações tradicionais</h2>
+<p>Em PLN, as tarefas podem ser divididas, de maneira geral, em dois grandes grupos: classificação e geração. Tradicionalmente, cada um desses tipos de tarefas é avaliado com uma abordagem específica, utilizando métricas distintas.</p>
+<p>Nas tarefas de classificação, o sistema atribui rótulos (classes) a entradas de texto, como na análise de sentimentos ou na categorização de um documento. A avaliação costuma ser feita por métricas como acurácia, precisão, revocação e F1-score, que medem o quanto as previsões do modelo coincidem com as respostas esperadas. Tais métricas têm mais relação com classes, distribuição de instâncias nas classes do que com linguagem propriamente dita.</p>
+<p>Já nas tarefas de geração, o modelo produz novas sequências de texto, como em tradução automática, sumarização ou resposta a perguntas. Nesse caso, a avaliação é mais complexa, pois envolve tanto a fluência quanto a adequação do texto, recorrendo a métricas automáticas como BLEU, ROUGE e METEOR, além de julgamentos humanos de qualidade. A maioria das métricas automáticas de geração tende a avaliar a corretude sintática e/ou semântica do texto gerado em relação a um texto de referência.</p>
+<p>Neste capítulo, não revisitaremos em detalhe o funcionamento de cada uma dessas métricas, já discutidas com maior profundidade na <span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/avaliacao/cap-avaliacao/cap-avaliacao.html#sec-cap-avaliacao-metricas" target="_blank" title="Volume 1">Métricas: Medindo a performance</a></span>. Para ver mais sobre tarefas de geração de linguagem, você também pode consultar o <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/geracao-e-interacao/cap-geracao-ln/cap-geracao-ln.html#sec-cap-geracao-ln" target="_blank" title="Volume 1">Geração de linguagem natural</a></span>.</p>
+<p>Cabe destacar, no entanto, que as métricas tradicionais de PLN, embora adequadas para modelos anteriores e tarefas específicas, mostram-se insuficientes diante das capacidades emergentes dos LLMs. Em estágios iniciais da tecnologia, a avaliação costumava concentrar-se em camadas superficiais do texto, como correção lexical ou gramaticalidade. Com os LLMs, que já atingem alta precisão nesses aspectos, torna-se necessário avaliar dimensões mais complexas da linguagem, como consistência factual, completude e utilidade em contextos específicos. Assim, o próprio objeto de avaliação se transforma, exigindo métricas novas e mais abrangentes, capazes de capturar a natureza multifacetada da geração de linguagem em larga escala.</p>
+<section id="descompasso-com-a-percepção-humana" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="descompasso-com-a-percepção-humana"><span class="header-section-number">4.2.1</span> Descompasso com a percepção humana</h3>
+<p>Um dos principais desafios das métricas tradicionais é o seu descompasso com a percepção humana de qualidade. Métricas baseadas em sobreposição de palavras, como BLEU e ROUGE, penalizam severamente paráfrases e sinônimos, mesmo que semanticamente equivalentes à referência&nbsp;<span class="citation" data-cites="mathur2020 peyrard2019">(<a href="../../shared/referencias/referencias.html#ref-mathur2020" role="doc-biblioref">Mathur et al., 2020</a>; <a href="../../shared/referencias/referencias.html#ref-peyrard2019" role="doc-biblioref">Peyrard, 2019</a>)</span>. Por exemplo, um texto gerado por um LLM que utiliza um vocabulário diferente, mas que transmite o mesmo significado que o texto de referência, pode receber uma pontuação artificialmente baixa nessas métricas, apesar de ser considerado de alta qualidade por um avaliador humano&nbsp;<span class="citation" data-cites="mathur2020 minaee">(<a href="../../shared/referencias/referencias.html#ref-mathur2020" role="doc-biblioref">Mathur et al., 2020</a>; <a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>. O BLEU, por exemplo, ignora a sequência de palavras, resultando na mesma pontuação para frases com as mesmas palavras, mas com significados diferentes devido à ordem&nbsp;<span class="citation" data-cites="mathur2020">(<a href="../../shared/referencias/referencias.html#ref-mathur2020" role="doc-biblioref">Mathur et al., 2020</a>)</span>. Ainda que esses sejam problemas que a área de geração de linguagem sempre tenha enfrentado&nbsp;<span class="citation" data-cites="gatt2017">(<a href="../../shared/referencias/referencias.html#ref-gatt2017" role="doc-biblioref">Gatt; Krahmer, 2018</a>)</span>, eles se acentuam com o advento das LLMs.</p>
+<p>As métricas tradicionais também não foram desenhadas para capturar aspectos complexos da linguagem, como fluência ou criatividade&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. Elas são sensíveis a pequenas variações lexicais que não afetam a qualidade percebida pelo ser humano&nbsp;<span class="citation" data-cites="mathur2020">(<a href="../../shared/referencias/referencias.html#ref-mathur2020" role="doc-biblioref">Mathur et al., 2020</a>)</span>. A otimização exclusiva para essas métricas pode levar a modelos que “enganam” a métrica em vez de realmente melhorar a qualidade da geração de texto&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. Isso demonstra que as métricas tradicionais, ao focar na estrutura de superfície (<em>surface structure</em>&nbsp;<span class="citation" data-cites="aspects">(<a href="../../shared/referencias/referencias.html#ref-aspects" role="doc-biblioref">Chomsky, 1965</a>)</span>), falham em capturar a equivalência semântica e podem levar a conclusões enganosas sobre o desempenho real do sistema&nbsp;<span class="citation" data-cites="mathur2020 minaee">(<a href="../../shared/referencias/referencias.html#ref-mathur2020" role="doc-biblioref">Mathur et al., 2020</a>; <a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>.</p>
+</section>
+<section id="dificuldade-em-avaliar-aspectos-complexos" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="dificuldade-em-avaliar-aspectos-complexos"><span class="header-section-number">4.2.2</span> Dificuldade em avaliar aspectos complexos</h3>
+<p>Além do descompasso com a percepção humana, as métricas tradicionais demonstram uma dificuldade intrínseca em avaliar aspectos mais complexos e emergentes dos LLMs.</p>
+<section id="factualidade-e-alucinações" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="factualidade-e-alucinações">Factualidade e Alucinações</h4>
+<p>LLMs são propensas a “alucinações”, elas geram informações plausíveis, textos estatisticamente possíveis, mas factualmente incorretos, irrelevantes ou sem sentido&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>. Por exemplo, um LLM pode afirmar que “Thomas Edison inventou a internet” ou fornecer detalhes clínicos incorretos sobre um paciente específico. Tais erros não são detectados por métricas tradicionais, pois o texto pode ser gramaticalmente correto e fluente&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. A factualidade, especialmente em cenários de raciocínio passo a passo, exige que a informação possa ser fundamentada em fontes confiáveis ou que utilize corretamente números e restrições fornecidos na consulta. Verificar o conhecimento factual e o conhecimento de senso comum parametrizados, isto é, o conhecimento real e factual que a LLM adquiriu através de seu treinamento, permanece um desafio em aberto.</p>
+</section>
+<section id="raciocínio-e-senso-comum" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="raciocínio-e-senso-comum">Raciocínio e Senso Comum</h4>
+<p>Tanto o processamento da informação de forma que pareça um raciocínio passo-a-passo quanto a capacidade de armazenar o chamado ‘senso comum’ são das mais relevantes e impressionantes capacidades emergentes que as LLMs apresentam. Por serem ‘novidade’, as métricas clássicas são incapazes de medir a capacidade de inferência, raciocínio complexo ou compreensão profunda dos LLMs&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>. A avaliação do raciocínio passo a passo é crucial para entender e melhorar o desempenho dos LLMs em problemas complexos como lógica, matemática e ciência. As métricas tradicionais não foram desenhadas para medir esses aspectos cruciais do processo de raciocínio. LLMs podem gerar saídas que soam plausíveis, mas carecem de coerência lógica, especialmente quando se baseiam em correlações estatísticas em vez de raciocínio causal&nbsp;<span class="citation" data-cites="xiong-etal-2025-com2">(<a href="../../shared/referencias/referencias.html#ref-xiong-etal-2025-com2" role="doc-biblioref">Xiong et al., 2025</a>)</span>.</p>
+</section>
+<section id="segurança-e-viés-bias" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="segurança-e-viés-bias">Segurança e Viés (<em>Bias</em>)</h4>
+<p>As métricas tradicionais também não foram projetadas para detectar conteúdo tóxico, preconceituoso ou prejudicial, a menos que sejam explicitamente treinadas para isso&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>. A avaliação da segurança e do viés requer abordagens específicas que analisem a imparcialidade, a inofensividade e a recusa de respostas inadequadas&nbsp;<span class="citation" data-cites="jiao">(<a href="../../shared/referencias/referencias.html#ref-jiao" role="doc-biblioref">Jiao et al., 2024</a>)</span>. A otimização para métricas de sobreposição lexical não garante que o modelo não produzirá conteúdo problemático.</p>
+</section>
+<section id="seguimento-de-instruções" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="seguimento-de-instruções">Seguimento de instruções</h4>
+<p>A capacidade de um LLM de seguir instruções complexas ou com múltiplas restrições é um aspecto crucial para sua utilidade&nbsp;<span class="citation" data-cites="minaee">(<a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>. Por esta ser uma nova capacidade da tecnologia, métricas tradicionais não a avaliam. É especialmente difícil avaliar o quão bem o modelo adere a essas instruções quando estas envolvem nuances ou múltiplos passos&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. LLMs podem falhar em compreender contextos longos ou instruções em conversas multiturno, quando as instruções são inconsistentes ou contêm informações incorretas. Métricas recentes que avaliam sistemas de diálogo podem avaliar a adequação de uma resposta ao contexto do turno anterior ou ainda a progressão do diálogo&nbsp;<span class="citation" data-cites="yeh2021comprehensiveassessmentdialogevaluation">(<a href="../../shared/referencias/referencias.html#ref-yeh2021comprehensiveassessmentdialogevaluation" role="doc-biblioref">Yeh et al., 2021</a>)</span>, características que se assemelham ao <em>instruction following</em>, porém, tais métricas são também mensuradas através de modelos treinados para isso, assemelhando-se ao novo paradigma de avaliação que vamos discutir ao longo do capítulo, o <em>LLM as a Judge</em>.</p>
+</section>
+</section>
+<section id="exemplos-práticos" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="exemplos-práticos"><span class="header-section-number">4.2.3</span> Exemplos práticos</h3>
+<p>Para ilustrar as limitações das métricas tradicionais, vamos visitar o trabalho de <span class="citation" data-cites="li2025casegenbenchmarkmultistagelegal">(<a href="../../shared/referencias/referencias.html#ref-li2025casegenbenchmarkmultistagelegal" role="doc-biblioref">Li et al., 2025</a>)</span> que compara diferentes tipos de avaliação em uma tarefa específica do domínio do direito.</p>
+<p>Os autores propõem o CaseGen, um conjunto de dados para avaliação de geração de documentos de casos jurídicos na área penal chinesa. O <em>benchmark</em> tem 500 casos reais, anotados por especialistas do direito. Os autores avaliam 9 diferentes LLMs para gerar parte desses casos. Para avaliar como essas LLMs foram, especialistas em direito avaliaram detidamente 50 casos. Esses 50 casos anotados foram comparados com diferentes métricas, como ROUGE-L, BertScore e o paradigma LLM-as-a-Judge (uma LLM avaliando outra LLM). Esse modelo dá notas de 0 a 10 para cada documento gerado considerando critérios como precisão dos fatos, lógica e correção legal.</p>
+<p>Veja na Tabela abaixo a comparação entre a anotação humana e três métricas de avaliação usando diferentes medidas de calcular a correlação entre anotação. As correlações de Kendall, Pearson e Spearman são métricas de correlação entre avaliações automáticas e avaliações humanas frequentemente usadas quando precisamos medir a proximidade das avaliações&nbsp;<span class="citation" data-cites="alligment">(<a href="../../shared/referencias/referencias.html#ref-alligment" role="doc-biblioref">Shaqiri et al., 2023</a>)</span>.</p>
+<div id="tbl-cap-modelos-avaliacao-metrics_correlation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-modelos-avaliacao-metrics_correlation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Tabela&nbsp;4.1: Comparação entre correlações das métricas automáticas e avaliações humanas.
+</figcaption>
+<div aria-describedby="tbl-cap-modelos-avaliacao-metrics_correlation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<caption>Comparação entre correlações das métricas automáticas e avaliações humanas.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Metrics</strong></th>
+<th style="text-align: center;"><strong>LLM Score</strong></th>
+<th style="text-align: center;"><strong>Rouge-L</strong></th>
+<th style="text-align: center;"><strong>BERTScore</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Kendall</td>
+<td style="text-align: center;"><strong>0.667</strong></td>
+<td style="text-align: center;">0.333</td>
+<td style="text-align: center;">0.166</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Pearson</td>
+<td style="text-align: center;"><strong>0.726</strong></td>
+<td style="text-align: center;">0.264</td>
+<td style="text-align: center;">0.239</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Spearman</td>
+<td style="text-align: center;"><strong>0.750</strong></td>
+<td style="text-align: center;">0.375</td>
+<td style="text-align: center;">0.250</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>O interessante para a gente é que as notas automáticas se aproximam bastante das avaliações de juristas humanos (correlação de até 0,75 quando compara-se a anotação humana à anotação do LLM juíz), muito melhor do que as métricas tradicionais, que ficaram abaixo de 0,4.</p>
+<p>Esse exemplo demonstra que, embora as métricas tradicionais sejam fáceis de computar e úteis para certas comparações de superfície, elas não são necessariamente alinhadas às anotações humanas, exigindo a complementação com abordagens mais robustas e, muitas vezes, híbridas. É ainda relevante notar que a avaliação com LLM chega a 0.75 de correlação, mas não chega a 0.8 nem a 1. Por isso, a avaliação humana ainda é <strong>tecnicamente</strong> a mais confiável.</p>
+</section>
+<section id="avaliação-humana-o-padrão-ouro" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="avaliação-humana-o-padrão-ouro"><span class="header-section-number">4.2.4</span> Avaliação humana: O padrão ouro?</h3>
+<p>Como vimos, a avaliação humana é amplamente reconhecida como o “padrão ouro” para a avaliação de LLMs, especialmente para tarefas de Geração de Linguagem Natural (NLG), onde a subjetividade e a nuance são inerentes&nbsp;<span class="citation" data-cites="gao2024 dierk2025">(<a href="../../shared/referencias/referencias.html#ref-dierk2025" role="doc-biblioref">Dierk et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>.</p>
+</section>
+<section id="importância-e-metodologias-comuns" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="importância-e-metodologias-comuns"><span class="header-section-number">4.2.5</span> Importância e metodologias comuns</h3>
+<p>A avaliação humana é crucial porque é capaz de capturar aspectos de qualidade que as métricas automáticas não conseguem. Isso inclui a fluência, coerência, relevância semântica profunda, criatividade, factualidade e o seguimento de instruções complexas&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. A capacidade dos avaliadores humanos de compreender o contexto, interpretar significados implícitos e julgar a adequação de uma resposta para um determinado propósito a torna indispensável&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>.</p>
+<p>Metodologias comuns de avaliação humana incluem:</p>
+<ul>
+<li><p><strong>Escalas Likert</strong> – Utilizadas para avaliar a qualidade em diversas dimensões, como fluência, relevância, coerência e adequação. Os avaliadores atribuem uma pontuação em uma escala graduada (e.g., de 1 a 5 ou 1 a 100) para cada critério. Esta abordagem permite quantificar julgamentos subjetivos e pode ser aprimorada com a coleta de explicações em linguagem natural dos avaliadores para capturar nuances e calibrar as pontuações.</p></li>
+<li><p><strong><em>Ranking</em></strong> – Envolve a comparação direta entre diferentes saídas de modelos para uma mesma entrada. Os avaliadores classificam as respostas em ordem de preferência, indicando qual é superior ou se há um empate&nbsp;<span class="citation" data-cites="confident2025">(<a href="../../shared/referencias/referencias.html#ref-confident2025" role="doc-biblioref">Vongthongsri, 2025</a>)</span>. Essa metodologia pode ser mais estável do que a pontuação absoluta, pois foca na comparação relativa&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>, porém ela nem sempre é reutilizável. Se, em um primeiro momento, analistas comparam dois modelos e, finalmente, temos um terceiro modelo em jogo, a primeira avaliação dificilmente será útil para decidirmos algo sobre este novo modelo.</p></li>
+<li><p><strong>Testes A/B</strong> – Uma forma de ranking em que os avaliadores escolhem a preferência entre duas opções (A ou B)&nbsp;<span class="citation" data-cites="flowai2024abandtesting">(<a href="../../shared/referencias/referencias.html#ref-flowai2024abandtesting" role="doc-biblioref">Río; Vaahtio, 2024</a>)</span>. É útil para comparar o desempenho de dois modelos ou variações de um mesmo modelo, como diferentes <em>prompts</em> , por exemplo. Geralmente testes A/B são feitos com grupos diferentes de usuários que não sabem que estão participando de um teste. Quando uma avaliação é feita através de teste A/B é importante considerar tanto a relevância estatística das amostras quanto como coletar o <em>feedback</em> dos grupos antes de implementar o teste. Rodar um teste sem ter uma hipótese, sem saber coletar e interpretar o <em>feedback</em> pode ser inócuo.</p></li>
+<li><p><strong>Análise de erros</strong> – Consiste em classificar os tipos de erros presentes nas saídas dos LLMs (e.g., erros gramaticais, factuais, de coerência, alucinações, omissões). Esta metodologia fornece avaliação detalhada que pode ser usada para depurar e melhorar os modelos. A coleta de anotações de erros em respostas de LLMs é desafiadora devido à natureza subjetiva de muitas tarefas de PLN e à dificuldade em obter anotações objetivas para erros complexos. Veja a <span>Subseção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/avaliacao/cap-avaliacao/cap-avaliacao.html#sec-cap-avaliacao-analise-de-erro" target="_blank" title="Volume 1">Análise de Erro</a></span> deste livro para saber mais sobre análise de erro.</p></li>
+</ul>
+</section>
+<section id="desafios-da-avaliação-humana" class="level3" data-number="4.2.6">
+<h3 data-number="4.2.6" class="anchored" data-anchor-id="desafios-da-avaliação-humana"><span class="header-section-number">4.2.6</span> Desafios da avaliação humana</h3>
+<p>Apesar de ser o “padrão ouro”, a avaliação humana apresenta uma série de desafios que limitam sua escalabilidade e consistência.</p>
+<section id="custo-e-tempo" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="custo-e-tempo">Custo e Tempo</h4>
+<p>O processo de avaliação humana é notoriamente caro e demorado&nbsp;<span class="citation" data-cites="dierk2025">(<a href="../../shared/referencias/referencias.html#ref-dierk2025" role="doc-biblioref">Dierk et al., 2025</a>)</span>. A obtenção de anotações de qualidade pode levar dias ou semanas, o que introduz latência no ciclo de <em>feedback</em> de desenvolvimento do modelo. Isso torna impraticável realizar uma avaliação humana completa para cada ajuste ou iteração do modelo&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>.</p>
+</section>
+<section id="subjetividade-e-variabilidade" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="subjetividade-e-variabilidade">Subjetividade e Variabilidade</h4>
+<p>Diferentes avaliadores podem ter opiniões distintas sobre a qualidade de uma mesma saída, levando a variabilidade nos julgamentos&nbsp;<span class="citation" data-cites="dierk2025 jiao LiuYHZHWD0024">(<a href="../../shared/referencias/referencias.html#ref-dierk2025" role="doc-biblioref">Dierk et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-jiao" role="doc-biblioref">Jiao et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-LiuYHZHWD0024" role="doc-biblioref">Liu et al., 2024</a>)</span>. Para algumas tarefas, como a avaliação da “criatividade” de uma história, até mesmo humanos podem discordar sobre o que é “melhor”&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. A subjetividade pode ser mitigada com diretrizes claras e perguntas mais objetivas.</p>
+</section>
+<section id="viés-do-avaliador" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="viés-do-avaliador">Viés do avaliador</h4>
+<p>As experiências, expectativas e origens culturais dos avaliadores podem influenciar seus julgamentos, introduzindo vieses&nbsp;<span class="citation" data-cites="jiao">(<a href="../../shared/referencias/referencias.html#ref-jiao" role="doc-biblioref">Jiao et al., 2024</a>)</span>. Por exemplo, um avaliador de uma cultura específica pode ter uma percepção diferente do que é “polido” em comparação com outro. É crucial ter um grupo de avaliadores diversificado para mitigar esses vieses. Além disso, a forma como a tarefa é apresentada aos avaliadores pode influenciar os resultados (e.g., “Modelo A foi ajustado para ser mais conciso. Qual é melhor?” pode induzir a um viés em favor da concisão)&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. Um viés conhecido é o viés da concordância (“acquiescence bias”)&nbsp;<span class="citation" data-cites="cronbach1942acquiescence">(<a href="../../shared/referencias/referencias.html#ref-cronbach1942acquiescence" role="doc-biblioref">Cronbach, 1942</a>)</span>, que caracteriza a tendência do avaliador em concordar com afirmações ou responder de forma afirmativa, por exemplo, concordar com as etiquetas e as saídas dos sistemas automáticos quando exposto a eles.</p>
+</section>
+<section id="escalabilidade" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="escalabilidade">Escalabilidade</h4>
+<p>É difícil aplicar a avaliação humana em larga escala e de forma contínua, especialmente com o rápido avanço e o grande volume de saídas dos LLMs&nbsp;<span class="citation" data-cites="dierk2025">(<a href="../../shared/referencias/referencias.html#ref-dierk2025" role="doc-biblioref">Dierk et al., 2025</a>)</span>. A avaliação humana é frequentemente reservada para comparações finais ou verificações periódicas, enquanto métricas automáticas são frequentemente usadas durante o desenvolvimento dos sistemas&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>.</p>
+</section>
+<section id="treinamento-e-calibração-de-avaliadores" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="treinamento-e-calibração-de-avaliadores">Treinamento e Calibração de avaliadores</h4>
+<p>Para garantir consistência e alta qualidade nas anotações, os avaliadores precisam de diretrizes claras e treinamento rigoroso&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. A calibração é essencial para garantir que diferentes avaliadores apliquem os critérios de forma consistente&nbsp;<span class="citation" data-cites="LiuYHZHWD0024">(<a href="../../shared/referencias/referencias.html#ref-LiuYHZHWD0024" role="doc-biblioref">Liu et al., 2024</a>)</span>. A falta de controle de qualidade pode levar a anotações de baixa qualidade, exigindo a inclusão de perguntas de teste para filtrar trabalhos de baixa qualidade&nbsp;<span class="citation" data-cites="gao2024">(<a href="../../shared/referencias/referencias.html#ref-gao2024" role="doc-biblioref">Gao et al., 2024</a>)</span>. Veja as Seções <span> <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/dados/cap-dataset-corpus/cap-dataset-corpus.html#sec-cap-dataset-corpus-procedRevisao" target="_blank" title="Volume 1">Procedimentos e estratégias de anotação e revisão</a></span> e <span> <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/dados/cap-dataset-corpus/cap-dataset-corpus.html#sec-cap-dataset-corpus-CIA" target="_blank" title="Volume 1">Concordância entre-anotadores</a></span> deste livro para mais sobre estratégias de anotação e concordância entre anotadores.</p>
+<p>Em suma, embora a avaliação humana seja insubstituível para capturar a qualidade genuína dos LLMs em tarefas complexas, seus desafios inerentes impulsionam a pesquisa em métodos de avaliação automática mais sofisticados e em abordagens híbridas que combinam o melhor dos dois mundos. Além disso, a maioria das avaliações por humano tem sido feita com <em>crowdworkers</em>&nbsp;<span class="citation" data-cites="Hedderich07022025">(<a href="../../shared/referencias/referencias.html#ref-Hedderich07022025" role="doc-biblioref">Hedderich; Oulasvirta, 2025</a>)</span>, trabalhadores terceirizados, geralmente leigos e (mal) pagos por quantidade de anotação feita. Essa prática impacta diretamente a qualidade da avaliação, além de levantar questões éticas preocupantes&nbsp;<span class="citation" data-cites="10.1145/3613904.3642601 GONZALEZCABELLO2025645">(<a href="../../shared/referencias/referencias.html#ref-GONZALEZCABELLO2025645" role="doc-biblioref">Gonzalez-Cabello et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-10.1145/3613904.3642601" role="doc-biblioref">Jiang; Wagner, 2024</a>)</span> tanto socialmente quanto tecnicamente.</p>
+</section>
+</section>
+</section>
+<section id="benchmarks-e-datasets-de-avaliação" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="benchmarks-e-datasets-de-avaliação"><span class="header-section-number">4.3</span> <em>Benchmarks</em> e <em>datasets</em> de avaliação</h2>
+<p><em>Benchmarks</em>, no contexto da avaliação de LLMs, são conjuntos de dados e tarefas padronizadas que servem como referência para comparar o desempenho de diferentes modelos. Eles são cruciais para o avanço da pesquisa, permitindo uma avaliação sistemática e reprodutível das capacidades dos LLMs&nbsp;<span class="citation" data-cites="minaee aisera2025">(<a href="../../shared/referencias/referencias.html#ref-aisera2025" role="doc-biblioref">Aisera, 2024</a>; <a href="../../shared/referencias/referencias.html#ref-minaee" role="doc-biblioref">Minaee et al., 2025</a>)</span>. Atualmente, temos muitos <em>benchmarks</em> disponíveis, especialmente para o inglês. Visitaremos apenas alguns para familiarizar o leitor com esses recursos.</p>
+<section id="benchmarks-genéricos-general-purpose" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="benchmarks-genéricos-general-purpose"><span class="header-section-number">4.3.1</span> <em>Benchmarks</em> genéricos (General-Purpose)</h3>
+<section id="glue-e-superglue" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="glue-e-superglue">GLUE e SuperGLUE</h4>
+<p>GLUE (General Language Understanding Evaluation) e SuperGLUE (Super General Language Understanding Evaluation) são <em>benchmarks</em> históricos que impulsionaram a pesquisa em PLN. Enquanto GLUE focava em tarefas de compreensão de linguagem mais básicas, como inferência em linguagem natural (NLI), SuperGLUE foi desenvolvido para introduzir desafios mais complexos, exigindo raciocínio linguístico avançado, compreensão contextual, recuperação de conhecimento e aprendizado multi-tarefa&nbsp;<span class="citation" data-cites="wang-etal-2018-glue">(<a href="../../shared/referencias/referencias.html#ref-wang-etal-2018-glue" role="doc-biblioref">Wang et al., 2018</a>)</span>. SuperGLUE inclui tarefas como resolução de correferência e question answering, refletindo problemas mais próximos do raciocínio humano&nbsp;<span class="citation" data-cites="wang2019">(<a href="../../shared/referencias/referencias.html#ref-wang2019" role="doc-biblioref">Wang et al., 2019</a>)</span>. No entanto, o GLUE original enfrentou o problema de saturação, onde o desempenho dos modelos se aproximava do nível humano, limitando sua capacidade de diferenciar modelos de ponta&nbsp;<span class="citation" data-cites="wang2019">(<a href="../../shared/referencias/referencias.html#ref-wang2019" role="doc-biblioref">Wang et al., 2019</a>)</span>. SuperGLUE buscou superar essa limitação, oferecendo um desafio mais rigoroso e com maior “espaço” para melhorias dos modelos.</p>
+</section>
+<section id="helm" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="helm">HELM</h4>
+<p>HELM (Holistic Evaluation of Language Models) representa uma abordagem mais abrangente para a avaliação de LLMs. Diferente de <em>benchmarks</em> que se concentram apenas na acurácia, HELM avalia múltiplos aspectos do desempenho do modelo, incluindo acurácia, calibração, robustez, justiça (fairness) e eficiência&nbsp;<span class="citation" data-cites="aisera2025">(<a href="../../shared/referencias/referencias.html#ref-aisera2025" role="doc-biblioref">Aisera, 2024</a>)</span>. Essa perspectiva multifacetada é essencial para compreender o comportamento dos LLMs em cenários diversos e complexos, especialmente em aplicações de alto risco&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p>
+</section>
+<section id="mmlu" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="mmlu">MMLU</h4>
+<p>MMLU (Massive Multitask Language Understanding) é um <em>benchmark</em> projetado para avaliar o conhecimento de LLMs em uma vasta gama de domínios. Ele abrange 57 áreas diversas, incluindo matemática, humanidades, ciências sociais e STEM (Ciência, Tecnologia, Engenharia e Matemática)&nbsp;<span class="citation" data-cites="d.2025 aisera2025">(<a href="../../shared/referencias/referencias.html#ref-aisera2025" role="doc-biblioref">Aisera, 2024</a>; <a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p>
+</section>
+</section>
+<section id="benchmarks-para-tarefas-específicas" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="benchmarks-para-tarefas-específicas"><span class="header-section-number">4.3.2</span> <em>Benchmarks</em> para tarefas específicas</h3>
+<section id="question-answering-qa" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="question-answering-qa">Question Answering (QA)</h4>
+<p>Aqui trataremos de <em>benchmarks</em> para avaliação de QA em larga escala. O <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/geracao-e-interacao/cap-qa/cap-qa.html#sec-cap-qa" target="_blank" title="Volume 1">Perguntas e Respostas</a></span> trata com bastante atenção a tarefa.</p>
+<p>Para tarefas de Question Answering, <em>benchmarks</em> como SQuAD (Stanford Question Answering Dataset), <em>Natural Questions</em> e TriviaQA são amplamente utilizados&nbsp;<span class="citation" data-cites="houamegni2025">(<a href="../../shared/referencias/referencias.html#ref-houamegni2025" role="doc-biblioref">Houamegni; Gedikli, 2025</a>)</span>.</p>
+<p>O SQuAD é um <em>benchmark</em> fundamental, composto por mais de 100.000 pares de perguntas e respostas, onde as respostas são trechos de passagens fornecidas. SQuAD 2.0 introduziu perguntas sem resposta, exigindo que os modelos identificassem quando uma pergunta não podia ser respondida com o contexto dado&nbsp;<span class="citation" data-cites="rajpurkar-etal-2016-squad">(<a href="../../shared/referencias/referencias.html#ref-rajpurkar-etal-2016-squad" role="doc-biblioref">Rajpurkar et al., 2016</a>)</span>.</p>
+<p>Já o <em>Natural Questions</em> contém consultas geradas por usuários reais do Google Search, espelhando cenários de busca do mundo real onde as respostas podem não estar explicitamente em um único parágrafo&nbsp;<span class="citation" data-cites="natural">(<a href="../../shared/referencias/referencias.html#ref-natural" role="doc-biblioref">Kwiatkowski et al., 2019</a>)</span>.</p>
+<p>Por fim, o TriviaQA é um <em>dataset</em> mais desafiador que SQuAD, com 950.000 pares de perguntas e respostas de documentos da Wikipedia e da web, frequentemente exigindo raciocínio multi-hop e recuperação de informações entre documentos&nbsp;<span class="citation" data-cites="JoshiCWZ17">(<a href="../../shared/referencias/referencias.html#ref-JoshiCWZ17" role="doc-biblioref">Joshi et al., 2017</a>)</span>.</p>
+<p>Para atender à necessidade de avaliação de modelos em múltiplos idiomas, foram criadas extensões específicas para os principais <em>benchmarks</em> de Q&amp;A. Essas versões mantêm o formato do <em>dataset</em> original, mas utilizam textos e perguntas em outras línguas.</p>
+<ul>
+<li><p>Para o SQuAD: Existem <em>datasets</em> como o XQuAD, que é uma tradução humana profissional do SQuAD v1.1 para 10 idiomas, incluindo árabe, grego, tailandês e turco. Outro exemplo é o MLQA (Multilingual Question Answering), que oferece um <em>benchmark</em> de extração de respostas em 7 idiomas, como espanhol, hindi e chinês.</p></li>
+<li><p>Para o <em>Natural Questions</em>: A principal extensão é o MKQA (Multilingual Knowledge Questions and Answers). Ele utiliza as perguntas do Natural Questions e as apresenta em 26 idiomas. As respostas devem ser encontradas nas versões da Wikipedia correspondentes a cada um desses idiomas.</p></li>
+<li><p>Para o TriviaQA: Foi desenvolvido o Mling-TriviaQA, que adapta o formato desafiador do original para 10 idiomas diferentes. As perguntas e os documentos de evidência foram coletados ou traduzidos para cada uma das línguas incluídas no <em>benchmark</em>.</p></li>
+</ul>
+</section>
+<section id="sumarização" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="sumarização">Sumarização</h4>
+<p>Para a sumarização de texto, <em>datasets</em> como CNN/DailyMail<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> e XSum&nbsp;<span class="citation" data-cites="xsum-emnlp">(<a href="../../shared/referencias/referencias.html#ref-xsum-emnlp" role="doc-biblioref">Narayan et al., 2018</a>)</span> são referências relevantes. Aqui exploraremos apenas esses <em>datasets</em>, mas você pode consultar o <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol3/aplicacoes-e-dominios/cap-as/cap-as.html#sec-cap-as" target="_blank" title="Volume 3">Sumarização Automática</a></span> para se aprofundar sobre a tarefa.</p>
+<p>O CNN/DailyMail é um <em>corpus</em> amplamente utilizado para sumarização de notícias, contendo aproximadamente 300 mil notícias escritas em inglês, acompanhadas dos destaques de cada uma.</p>
+<p>O XSum (Extreme Summarization Dataset) é focado em sumarização abstrativa, com resumos mais concisos e frequentemente reescritos, em vez de apenas extraídos do texto original.</p>
+</section>
+<section id="raciocínio" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="raciocínio">Raciocínio</h4>
+<p>A avaliação das capacidades de raciocínio<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> de uma LLM também pode ser o foco de um <em>benchmark</em>.</p>
+</section>
+<section id="gsm8k-grade-school-math-8k" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="gsm8k-grade-school-math-8k">GSM8K (Grade School Math 8K)</h4>
+<p>Um <em>dataset</em> de 8.500 problemas matemáticos de nível fundamental, linguisticamente diversos, que exigem raciocínio multi-passos e operações aritméticas básicas&nbsp;<span class="citation" data-cites="openai2024 arize2024">(<a href="../../shared/referencias/referencias.html#ref-openai2024" role="doc-biblioref">II, 2025</a>; <a href="../../shared/referencias/referencias.html#ref-arize2024" role="doc-biblioref">Said, 2025</a>)</span>.</p>
+</section>
+<section id="big-bench-hard-bbh" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="big-bench-hard-bbh">Big-Bench Hard (BBH)</h4>
+<p>Um subconjunto de tarefas desafiadoras do BIG-bench, projetado para testar as aptidões do modelo além dos <em>benchmarks</em> convencionais de PLN, incluindo raciocínio de alto nível&nbsp;<span class="citation" data-cites="d.2025 arize2024">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>; <a href="../../shared/referencias/referencias.html#ref-arize2024" role="doc-biblioref">Said, 2025</a>)</span>.</p>
+</section>
+</section>
+<section id="benchmarks-para-segurança-e-confiabilidade" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="benchmarks-para-segurança-e-confiabilidade"><span class="header-section-number">4.3.3</span> <em>Benchmarks</em> para segurança e confiabilidade</h3>
+<p>A segurança e a confiabilidade emergem como dimensões centrais na avaliação contemporânea de LLMs, especialmente em aplicações de alto impacto social, como os domínios jurídico ou médico. Diferentemente dos <em>benchmarks</em> voltados apenas à performance ou ao ‘raciocínio’, esses conjuntos de avaliação buscam medir a robustez ética e factual dos modelos, isto é, sua capacidade de evitar a produção de conteúdo falso, enviesado ou potencialmente nocivo.</p>
+<p>Esses <em>benchmarks</em> abordam desafios que extrapolam a precisão técnica, como a tendência dos modelos a reproduzirem vieses presentes nos dados de treinamento, a gerarem informações incorretas com aparência de verdade ou a responderem de forma inadequada a <em>prompts</em> sensíveis. Assim, a avaliação de segurança e confiabilidade opera em um duplo eixo: veracidade factual e responsabilidade social.</p>
+<p>Nos últimos anos, a literatura tem consolidado uma série de <em>benchmarks</em> voltados especificamente para essas dimensões, que hoje se tornaram indispensáveis para aferir se um LLM é apto a operar de forma segura e ética. Entre os principais, destacam-se o TruthfulQA, voltado à verificação da veracidade das respostas; o BBQ (<em>Bias Benchmark for Question Answering</em>), que mede o grau de viés social reproduzido por modelos; e o ToxiGen e o RealToxicityPrompts, que avaliam a propensão de um sistema a gerar conteúdo tóxico, ofensivo ou discriminatório.</p>
+<section id="truthfulqa" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="truthfulqa">TruthfulQA</h4>
+<p>Avalia a veracidade das respostas dos modelos, medindo sua resistência à geração de informações falsas ou equívocos comuns&nbsp;<span class="citation" data-cites="lin2022 aisera2025">(<a href="../../shared/referencias/referencias.html#ref-aisera2025" role="doc-biblioref">Aisera, 2024</a>; <a href="../../shared/referencias/referencias.html#ref-lin2022" role="doc-biblioref">Lin et al., 2022</a>)</span>.</p>
+</section>
+<section id="bbq-bias-benchmark-for-question-answering" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="bbq-bias-benchmark-for-question-answering">BBQ (<em>Bias Benchmark for Question Answering</em>)</h4>
+<p>Mede o viés social em modelos de Question Answering, ajudando a identificar e mitigar preconceitos&nbsp;<span class="citation" data-cites="jan2025 neptune2024">(<a href="../../shared/referencias/referencias.html#ref-jan2025" role="doc-biblioref">Jan et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-neptune2024" role="doc-biblioref">Sánchez, 2024</a>)</span>.</p>
+</section>
+<section id="toxigenrealtoxicityprompts" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="toxigenrealtoxicityprompts">ToxiGen/RealToxicityPrompts</h4>
+<p>Avaliam a propensão dos modelos a gerar texto tóxico ou prejudicial, sendo fundamentais para garantir a segurança do conteúdo gerado&nbsp;<span class="citation" data-cites="jan2025 gehman2020">(<a href="../../shared/referencias/referencias.html#ref-gehman2020" role="doc-biblioref">Gehman et al., 2020</a>; <a href="../../shared/referencias/referencias.html#ref-jan2025" role="doc-biblioref">Jan et al., 2025</a>)</span>.</p>
+</section>
+</section>
+<section id="a-importância-de-ir-além-do-placar" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="a-importância-de-ir-além-do-placar"><span class="header-section-number">4.3.4</span> A importância de ir além do placar</h3>
+<p>Embora os <em>benchmarks</em> e os placares (leaderboards) forneçam uma maneira padronizada de comparar modelos, é crucial ir além da simples pontuação. A saturação de <em>benchmarks</em>, nos quais os modelos atingem ou superam o desempenho humano, pode mascarar limitações reais e a falta de generalização da aplicação dos modelos em cenários do mundo real&nbsp;<span class="citation" data-cites="wang2019 d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>; <a href="../../shared/referencias/referencias.html#ref-wang2019" role="doc-biblioref">Wang et al., 2019</a>)</span>. Desafios como a sensibilidade a pequenas mudanças nos <em>prompts</em> (<em>prompt</em> sensitivity) e a estocasticidade na geração de texto introduzem variabilidade nos resultados, o que torna a reprodutibilidade dos resultados de placares e <em>benchmarks</em> para modelos baseados em LLMs um problema mais complexo do que na avaliação de sistemas clássicos&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>. Além disso, a contaminação de dados (<em>benchmark leakage</em>), em que dados de avaliação são inadvertidamente incluídos no treinamento, pode inflar artificialmente as métricas de desempenho&nbsp;<span class="citation" data-cites="wang2019">(<a href="../../shared/referencias/referencias.html#ref-wang2019" role="doc-biblioref">Wang et al., 2019</a>)</span>. Portanto, uma análise qualitativa aprofundada e a consideração de múltiplos <em>benchmarks</em> são essenciais para uma avaliação holística e precisa.</p>
+</section>
+</section>
+<section id="avaliação-baseada-em-modelos-model-based-evaluation" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="avaliação-baseada-em-modelos-model-based-evaluation"><span class="header-section-number">4.4</span> Avaliação baseada em modelos (<em>Model-based evaluation</em>)</h2>
+<p>Nessa seção, trataremos do novo paradigma LLM-as-a-Judge, das vantagens, de possíveis abordagens para utilizar esse paradigma, bem como de suas desvantagens e pontos de atenção a serem considerados.</p>
+<p>A ideia de utilizar um LLM para avaliar as saídas de outro LLM, conhecida como “LLM-as-a-Judge”, emergiu como uma alternativa promissora à avaliação humana, especialmente para textos abertos e complexos&nbsp;<span class="citation" data-cites="LAAJ24 confident2025">(<a href="../../shared/referencias/referencias.html#ref-LAAJ24" role="doc-biblioref">Li et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-confident2025" role="doc-biblioref">Vongthongsri, 2025</a>)</span>. Essa abordagem envolve instruir um LLM (geralmente mais potente ou especificamente treinado para a tarefa de avaliação) a pontuar ou criticar a saída de outro modelo com base em critérios definidos&nbsp;<span class="citation" data-cites="LAAJ24">(<a href="../../shared/referencias/referencias.html#ref-LAAJ24" role="doc-biblioref">Li et al., 2024</a>)</span>.</p>
+<section id="vantagens" class="level3" data-number="4.4.1">
+<h3 data-number="4.4.1" class="anchored" data-anchor-id="vantagens"><span class="header-section-number">4.4.1</span> Vantagens</h3>
+<section id="escalabilidade-e-custo-potencialmente-menor" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="escalabilidade-e-custo-potencialmente-menor">Escalabilidade e custo potencialmente menor</h4>
+<p>A avaliação humana é um processo notoriamente caro e demorado, o que a torna impraticável para avaliações contínuas ou em larga escala. LLMs como avaliadores oferecem uma solução mais escalável e potencialmente mais econômica para essa limitação&nbsp;<span class="citation" data-cites="LAAJ24 confident2025">(<a href="../../shared/referencias/referencias.html#ref-LAAJ24" role="doc-biblioref">Li et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-confident2025" role="doc-biblioref">Vongthongsri, 2025</a>)</span>.</p>
+</section>
+<section id="capacidade-de-fornecer-feedback-em-linguagem-natural" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="capacidade-de-fornecer-feedback-em-linguagem-natural">Capacidade de fornecer <em>feedback</em> em linguagem natural</h4>
+<p>Diferente das métricas automáticas tradicionais que fornecem apenas pontuações numéricas, os LLMs avaliadores podem gerar <em>feedback</em> detalhado em linguagem natural, explicando o porquê de uma determinada pontuação ou crítica. Isso pode ser útil para depurar e melhorar os modelos, se utilizado dentro de um fluxo híbrido, no qual esses <em>feedbacks</em> sejam realmente consumidos, porém o simples fato de uma LLM gerar um feedback, uma explicação sobre sua resposta, não garante que a resposta esteja correta.</p>
+</section>
+<section id="potencial-para-avaliar-aspectos-mais-abstratos" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="potencial-para-avaliar-aspectos-mais-abstratos">Potencial para avaliar aspectos mais abstratos</h4>
+<p>LLMs avaliadores têm o potencial de avaliar aspectos mais abstratos da qualidade do texto, como coerência, relevância, tom e criatividade, que são difíceis de capturar com métricas clássicas&nbsp;<span class="citation" data-cites="confident2025">(<a href="../../shared/referencias/referencias.html#ref-confident2025" role="doc-biblioref">Vongthongsri, 2025</a>)</span>.</p>
+</section>
+<section id="avaliação-de-interações-dinâmicas-e-contextuais" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="avaliação-de-interações-dinâmicas-e-contextuais">Avaliação de interações dinâmicas e contextuais</h4>
+<p>Uma vantagem crucial é a capacidade de avaliar sistemas de IA da mesma forma que são utilizados. Por exemplo, em vez de depender de <em>datasets</em> estáticos, que são inadequados para medir a qualidade de um diálogo, um LLM avaliador pode analisar uma conversa em tempo real. Ele pode avaliar a interação passo a passo ou o diálogo completo, proporcionando uma avaliação muito mais fiel à experiência real do usuário em um <em>chatbot</em> ou assistente virtual<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</p>
+</section>
+</section>
+<section id="abordagens" class="level3" data-number="4.4.2">
+<h3 data-number="4.4.2" class="anchored" data-anchor-id="abordagens"><span class="header-section-number">4.4.2</span> Abordagens</h3>
+<section id="avaliação-baseada-em-referência-vs.-sem-referência" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="avaliação-baseada-em-referência-vs.-sem-referência">Avaliação baseada em referência vs.&nbsp;sem referência</h4>
+<p>Algumas abordagens de LLM-as-a-Judge podem operar com ou sem textos de referência. Métricas baseadas em <em>embeddings</em> de LLMs, por exemplo, frequentemente não exigem referências, calculando a similaridade semântica diretamente entre a saída do modelo e a consulta do usuário ou o contexto de uso. No entanto, a avaliação sem referência pode ser mais suscetível a falhas e vieses.</p>
+</section>
+<section id="prompting-para-avaliação" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="prompting-para-avaliação"><em>Prompting</em> para avaliação</h4>
+<p>A criação de <em>prompts</em> eficazes é fundamental. Esses <em>prompts</em> instruem o LLM avaliador sobre os critérios de avaliação, o formato da saída (e.g., escalas Likert, comparações binárias, análise de erros) e o texto a ser avaliado&nbsp;<span class="citation" data-cites="LAAJ24">(<a href="../../shared/referencias/referencias.html#ref-LAAJ24" role="doc-biblioref">Li et al., 2024</a>)</span>. A qualidade do <em>prompt</em> pode influenciar drasticamente a avaliação.</p>
+</section>
+<section id="fine-tuning-de-llms-para-tarefas-de-avaliação" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="fine-tuning-de-llms-para-tarefas-de-avaliação"><em>Fine-tuning</em> de LLMs para tarefas de avaliação</h4>
+<p>Além do <em>prompting</em>, LLMs podem ser especializados (fine-tuned) especificamente para tarefas de avaliação, treinando-os para prever pontuações humanas ou para identificar tipos específicos de erros.</p>
+</section>
+<section id="llm-as-a-jury-llm-como-um-júri" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="llm-as-a-jury-llm-como-um-júri">LLM-as-a-Jury (LLM como um júri)</h4>
+<p>Para aumentar a robustez e mitigar os vieses de um único avaliador, esta abordagem utiliza um painel de múltiplos LLMs para julgar uma mesma saída. A tarefa é enviada a vários “LLMs juízes”, que podem ser modelos diferentes ou instâncias do mesmo modelo com configurações distintas. As avaliações individuais são então agregadas (por exemplo, através de uma votação majoritária ou pela média das pontuações) para chegar a um veredito de consenso. Essa técnica visa replicar a dinâmica de um painel de especialistas humanos, resultando em uma avaliação final mais estável e confiável.</p>
+</section>
+<section id="avaliação-por-decomposição-de-tarefas" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="avaliação-por-decomposição-de-tarefas">Avaliação por decomposição de tarefas</h4>
+<p>Esta abordagem quebra a avaliação de uma tarefa complexa em subtarefas mais simples e verificáveis. Por exemplo, para avaliar a qualidade de um resumo, em vez de julgá-lo diretamente, o processo poderis ser: 1) Gerar um conjunto de perguntas e respostas com base no documento original (fonte). 2) Pedir a um LLM que responda às mesmas perguntas usando apenas o resumo gerado. 3) A avaliação final, comparar as respostas obtidas a partir do resumo com as respostas obtidas a partir do documento original, medindo assim a fidelidade e a retenção de informação do resumo.</p>
+</section>
+</section>
+<section id="desafios-e-limitações" class="level3" data-number="4.4.3">
+<h3 data-number="4.4.3" class="anchored" data-anchor-id="desafios-e-limitações"><span class="header-section-number">4.4.3</span> Desafios e Limitações</h3>
+<p>Apesar das vantagens, a avaliação baseada em modelos apresenta desafios significativos.</p>
+<section id="viés-do-modelo-avaliador" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="viés-do-modelo-avaliador">Viés do modelo avaliador</h4>
+<p>O LLM avaliador pode herdar ou amplificar vieses presentes em seus dados de treinamento, ou até mesmo exibir um “viés narcisista”, favorecendo respostas geradas por si mesmo&nbsp;<span class="citation" data-cites="panickssery2024">(<a href="../../shared/referencias/referencias.html#ref-panickssery2024" role="doc-biblioref">Panickssery et al., 2024</a>)</span> ou por modelos da mesma família&nbsp;<span class="citation" data-cites="confident2025">(<a href="../../shared/referencias/referencias.html#ref-confident2025" role="doc-biblioref">Vongthongsri, 2025</a>)</span>. Estudos mostram que avaliadores generativos tendem a atribuir pontuações mais altas ao conteúdo gerado pelo mesmo modelo subjacente.</p>
+</section>
+<section id="sensibilidade-ao-prompt" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="sensibilidade-ao-prompt">Sensibilidade ao <em>prompt</em></h4>
+<p>Pequenas alterações na formulação do <em>prompt</em> de avaliação podem levar a diferenças substanciais nos resultados, tornando a avaliação inconsistente e não robusta&nbsp;<span class="citation" data-cites="zhao2025tokenfoolllmasajudge">(<a href="../../shared/referencias/referencias.html#ref-zhao2025tokenfoolllmasajudge" role="doc-biblioref">Zhao et al., 2025</a>)</span>. Para lidar com essa questão, um método chamado PromptEval&nbsp;<span class="citation" data-cites="polo2024">(<a href="../../shared/referencias/referencias.html#ref-polo2024" role="doc-biblioref">Polo et al., 2024</a>)</span> foi proposto. A abordagem reconhece que avaliações baseadas em um número limitado de <em>prompts</em> podem não capturar as reais habilidades dos LLMs, levando a classificações inconsistentes. Em vez de depender de um único “<em>prompt</em>”, o PromptEval estima a distribuição de desempenho do modelo através de um grande conjunto de variações de “<em>prompts</em>”. Isso permite a criação de métricas de avaliação mais robustas, como a performance mediana ou em quantis específicos (por exemplo, o desempenho nos 5% piores <em>prompts</em> ou nos 5% melhores), fornecendo um panorama mais completo e confiável da capacidade do modelo, que é menos suscetível a alterações em um “<em>prompt</em>” individual.</p>
+</section>
+<section id="concordância-com-humanos" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="concordância-com-humanos">Concordância com humanos</h4>
+<p>Embora alguns estudos sugiram que LLMs podem atingir alta concordância com julgamentos humanos (até 85% para GPT-4, por exemplo)&nbsp;<span class="citation" data-cites="sbbd confident2025 KimAKH25">(<a href="../../shared/referencias/referencias.html#ref-sbbd" role="doc-biblioref">Bencke et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-KimAKH25" role="doc-biblioref">Kim et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-confident2025" role="doc-biblioref">Vongthongsri, 2025</a>)</span>, outros indicam que a acurácia da avaliação por LLMs não é garantida em todos os cenários&nbsp;<span class="citation" data-cites="Wang24 pombal">(<a href="../../shared/referencias/referencias.html#ref-pombal" role="doc-biblioref">Pombal et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-Wang24" role="doc-biblioref">Wang et al., 2024</a>)</span>. A correlação pode variar dependendo da tarefa e do modelo avaliador. No entanto, a discussão é mais complexa, pois replicar o julgamento humano pode significar replicar também seus vieses. Um estudo sobre o tema ilustra essa questão, mostrando que, embora juízes humanos demonstrem menos viés de gênero que os LLMs, ambos são igualmente vulneráveis ao viés de autoridade (favorecendo respostas com referências falsas), ao “viés de beleza” (preferindo textos mais bem formatados) e à dificuldade em detectar desinformação&nbsp;<span class="citation" data-cites="chen2024">(<a href="../../shared/referencias/referencias.html#ref-chen2024" role="doc-biblioref">Chen et al., 2024</a>)</span>. Isso demonstra que o verdadeiro desafio não é apenas alcançar a concordância, mas desenvolver métodos de avaliação que superem as falhas inerentes tanto a humanos quanto a máquinas.</p>
+</section>
+<section id="custo-computacional" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="custo-computacional">Custo computacional</h4>
+<p>Embora potencialmente mais barato que a avaliação humana em larga escala, o uso de LLMs potentes como juízes ainda pode incorrer em custos computacionais significativos, especialmente para avaliações contínuas&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>, avaliações em que uma única instância é avaliada usando diferentes critérios ou no uso de LLM-as-a-Jury, o uso de diferentes modelos para avaliar o mesmo sistema.</p>
+</section>
+<section id="janela-de-contexto-finita" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="janela-de-contexto-finita">Janela de contexto finita</h4>
+<p>Os modelos de linguagem possuem um limite na quantidade de texto (contexto) que conseguem processar de uma só vez. Essa restrição se torna um grande obstáculo ao avaliar tarefas que envolvem textos longos, como a sumarização de documentos extensos ou a análise de um histórico de diálogo completo. A necessidade de truncar ou dividir o texto para que ele caiba na janela de contexto pode levar à perda de informações e prejudicar a capacidade do LLM de realizar uma avaliação holística e precisa.</p>
+</section>
+<section id="não-determinismo" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="não-determinismo">Não determinismo</h4>
+<p>As pontuações de LLMs juízes podem ser não determinísticas, ou seja, a mesma saída pode receber pontuações diferentes em avaliações repetidas, a menos que sejam aplicadas técnicas para garantir (algum) determinismo&nbsp;<span class="citation" data-cites="confident2025">(<a href="../../shared/referencias/referencias.html#ref-confident2025" role="doc-biblioref">Vongthongsri, 2025</a>)</span>.</p>
+</section>
+<section id="viés-de-posição-e-verbosidade" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="viés-de-posição-e-verbosidade">Viés de posição e verbosidade</h4>
+<p>LLMs avaliadores frequentemente exibem um “viés de posição”, preferindo a primeira saída, ou eventualmente a segunda saída, em comparações pareadas, e um “viés de verbosidade”, preferindo textos mais longos, mesmo que não sejam necessariamente de maior qualidade&nbsp;<span class="citation" data-cites="chen2024">(<a href="../../shared/referencias/referencias.html#ref-chen2024" role="doc-biblioref">Chen et al., 2024</a>)</span>.</p>
+</section>
+<section id="viés-de-leniência-leniency-bias" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="viés-de-leniência-leniency-bias">Viés de leniência (<em>Leniency bias</em>)</h4>
+<p>Este fenômeno é caracterizado pela propensão dos modelos em avaliar respostas como “corretas” em situações de incerteza, ou quando seus critérios de avaliação não estão perfeitamente alinhados com as instruções fornecidas. Um estudo de 2024 quantifica essa tendência ao estimar a probabilidade de um juiz marcar uma resposta como correta quando, na verdade, ele não está aplicando os critérios de avaliação corretamente&nbsp;<span class="citation" data-cites="thakur2024">(<a href="../../shared/referencias/referencias.html#ref-thakur2024" role="doc-biblioref">Thakur et al., 2025</a>)</span>. Os resultados demonstram que a maioria dos modelos juízes exibe um viés de leniência consideravelmente alto, indicando que, na dúvida, eles tendem a julgar positivamente. Essa propensão é mais pronunciada em modelos menores.</p>
+</section>
+<section id="outros-vieses" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="outros-vieses">Outros vieses</h4>
+<p>Vários outros tipos de vieses relacionados foram identificados mais recentemente&nbsp;<span class="citation" data-cites="kamruzzaman2024 park2024offsetbias">(<a href="../../shared/referencias/referencias.html#ref-kamruzzaman2024" role="doc-biblioref">Kamruzzaman et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-park2024offsetbias" role="doc-biblioref">Park et al., 2024</a>)</span> como <em>Length Bias</em> (viés de extensão), <em>Concreteness Bias</em> (a tendência de atribuir maior credibilidade a respostas que contêm detalhes específicos, como citações, números e terminologias complexas), <em>Empty Reference Bias</em> (o modelo prefere conteúdo alucinado que apenas parece estar associado à instrução original), o Content Continuation Bias (o modelo favorece respostas que continuam o texto de entrada em vez de seguir a instrução principal) e o <em>Nested Instruction Bias</em> (tendência a responder a perguntas aninhadas dentro do texto, ignorando a instrução principal).</p>
+</section>
+</section>
+<section id="exemplos-de-frameworks-de-llm-as-a-judge" class="level3" data-number="4.4.4">
+<h3 data-number="4.4.4" class="anchored" data-anchor-id="exemplos-de-frameworks-de-llm-as-a-judge"><span class="header-section-number">4.4.4</span> Exemplos de <em>frameworks</em> de <em>LLM as a Judge</em></h3>
+<section id="g-eval" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="g-eval">G-Eval</h4>
+<p>Um método que gera uma série de passos de avaliação a partir de critérios definidos, utilizando um LLM para preencher um formulário e determinar a pontuação final&nbsp;<span class="citation" data-cites="confident2025">(<a href="../../shared/referencias/referencias.html#ref-confident2025" role="doc-biblioref">Vongthongsri, 2025</a>)</span>.</p>
+</section>
+<section id="prometheus" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="prometheus">Prometheus</h4>
+<p>Uma suíte de LLMs avaliadores de código aberto, otimizados para avaliação multilíngue, que podem fornecer avaliação direta e comparação pareada&nbsp;<span class="citation" data-cites="kim2023prometheus">(<a href="../../shared/referencias/referencias.html#ref-kim2023prometheus" role="doc-biblioref">Kim et al., 2023</a>)</span>.</p>
+</section>
+<section id="autoeval" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="autoeval">AutoEval</h4>
+<p>Abordagens que visam automatizar a avaliação, como a investigação do uso de LLMs como juízes para questões abertas legais, mostrando alta correlação com pontuações humanas em exames padronizados&nbsp;<span class="citation" data-cites="samuylova2025llmjudge">(<a href="../../shared/referencias/referencias.html#ref-samuylova2025llmjudge" role="doc-biblioref">Samuylova, 2025</a>)</span>.</p>
+</section>
+<section id="avaliação-jurídica-baseada-em-qa" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="avaliação-jurídica-baseada-em-qa">Avaliação jurídica baseada em QA</h4>
+<p>Este método avalia resumos jurídicos usando um LLM em um processo de Pergunta e Resposta (QA). O LLM primeiro cria perguntas com base em um resumo de referência e depois usa o resumo candidato para respondê-las. Finalmente, o modelo compara as duas respostas para gerar uma pontuação, focando na qualidade da argumentação legal em vez de apenas na sobreposição de palavras&nbsp;<span class="citation" data-cites="xu2023">(<a href="../../shared/referencias/referencias.html#ref-xu2023" role="doc-biblioref">Xu; Ashley, 2023</a>)</span>.</p>
+</section>
+<section id="deepeval" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="deepeval">DeepEval</h4>
+<p>É um <em>framework</em> de código aberto para avaliação de LLMs<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>, frequentemente descrito como o “Pytest para LLMs”, por aplicar uma abordagem de testes unitários à avaliação de saídas de modelos de linguagem. Ele oferece uma suíte com mais de 14 métricas, como G-Eval, RAGAS, relevância da resposta e detecção de alucinações. O DeepEval se integra a outras ferramentas do ecossistema, como LangChain e LlamaIndex, e é complementado pela plataforma em nuvem Confident AI<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>, que adiciona funcionalidades de gerenciamento de <em>datasets</em> e detecção de regressão nos testes.</p>
+</section>
+</section>
+</section>
+<section id="aspectos-emergentes-e-avançados-da-avaliação" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="aspectos-emergentes-e-avançados-da-avaliação"><span class="header-section-number">4.5</span> Aspectos emergentes e avançados da avaliação</h2>
+<p>Como já comentado, com as LLMs, surgem também novos desafios para entender como eles realmente funcionam e se comportam. Já não basta medir apenas a precisão ou a fluência das respostas, avaliar se os modelos são robustos, justos, confiáveis e eficientes também torna-se necessário. Nesta seção, exploramos essas novas dimensões da avaliação, trazendo, brevemente, exemplos de possíveis formas de detecção e mensuração desses desafios.</p>
+<section id="robustez-e-ataques-adversariais" class="level3" data-number="4.5.1">
+<h3 data-number="4.5.1" class="anchored" data-anchor-id="robustez-e-ataques-adversariais"><span class="header-section-number">4.5.1</span> Robustez e Ataques adversariais</h3>
+<p>A robustez de um LLM refere-se à sua capacidade de manter o desempenho e a segurança diante de entradas ruidosas, com erros ortográficos, ou maliciosamente construídas (ataques adversariais). A avaliação da robustez é crucial para a implantação segura e responsável de LLMs em domínios de alto risco, onde erros podem ter consequências graves. Ataques adversariais podem incluir:</p>
+<ul>
+<li><p>Perturbações em nível de caractere: Alterações sutis nos <em>prompts</em> que podem induzir o modelo a comportamentos indesejados&nbsp;<span class="citation" data-cites="zhao2025tokenfoolllmasajudge">(<a href="../../shared/referencias/referencias.html#ref-zhao2025tokenfoolllmasajudge" role="doc-biblioref">Zhao et al., 2025</a>)</span>.</p></li>
+<li><p><em>Jailbreak prompts</em>: <em>Prompts</em> deliberadamente elaborados para contornar os mecanismos de segurança dos LLMs e induzi-los a gerar conteúdo prejudicial. Novos <em>frameworks</em> estão sendo desenvolvidos para avaliar autonomamente a robustez dos LLMs, utilizando <em>prompts</em> adversariais refinados e diretrizes de conhecimento restritas ao domínio, muitas vezes na forma de grafos de conhecimento.</p></li>
+</ul>
+</section>
+<section id="avaliação-de-justiça-viés-e-toxicidade" class="level3" data-number="4.5.2">
+<h3 data-number="4.5.2" class="anchored" data-anchor-id="avaliação-de-justiça-viés-e-toxicidade"><span class="header-section-number">4.5.2</span> Avaliação de justiça, viés e toxicidade</h3>
+<p>A avaliação de justiça (fairness), viés (bias) e toxicidade é um campo em crescimento, impulsionado pela necessidade de garantir que os LLMs não perpetuem ou amplifiquem preconceitos presentes em seus dados de treinamento&nbsp;<span class="citation" data-cites="japkowicz2024 jiao">(<a href="../../shared/referencias/referencias.html#ref-japkowicz2024" role="doc-biblioref">Japkowicz; Boukouvalas, 2024</a>; <a href="../../shared/referencias/referencias.html#ref-jiao" role="doc-biblioref">Jiao et al., 2024</a>)</span>.</p>
+<p>A identificação e a quantificação de vieses em LLMs têm-se tornado uma frente essencial da pesquisa contemporânea. Diversas ferramentas e técnicas vêm sendo desenvolvidas para identificar e mensurar diferentes tipos de vieses, como de gênero, raça ou culturais, presentes nas saídas desses modelos&nbsp;<span class="citation" data-cites="kamruzzaman2024 japkowicz2024 jan2025">(<a href="../../shared/referencias/referencias.html#ref-jan2025" role="doc-biblioref">Jan et al., 2025</a>; <a href="../../shared/referencias/referencias.html#ref-japkowicz2024" role="doc-biblioref">Japkowicz; Boukouvalas, 2024</a>; <a href="../../shared/referencias/referencias.html#ref-kamruzzaman2024" role="doc-biblioref">Kamruzzaman et al., 2024</a>)</span>. <em>Benchmarks</em> específicos, como o BBQ (<em>Bias Benchmark for Question Answering</em>) e o ToxiGen, têm sido utilizados para avaliar tanto a reprodução de estereótipos sociais quanto a propensão dos modelos a gerar discurso de ódio&nbsp;<span class="citation" data-cites="jan2025 gehman2020">(<a href="../../shared/referencias/referencias.html#ref-gehman2020" role="doc-biblioref">Gehman et al., 2020</a>; <a href="../../shared/referencias/referencias.html#ref-jan2025" role="doc-biblioref">Jan et al., 2025</a>)</span>.</p>
+<p>A própria definição de viés é um desafio. Ela varia conforme o contexto cultural e exige cuidado para distinguir entre padrões legítimos do mundo real e estereótipos prejudiciais&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>. Para enfrentar essa complexidade, novas abordagens vêm sendo propostas, como o <em>framework de auto-coerência</em>, no qual os próprios modelos analisam seus padrões de saída em busca de inconsistências e vieses implícitos&nbsp;<span class="citation" data-cites="japkowicz2024">(<a href="../../shared/referencias/referencias.html#ref-japkowicz2024" role="doc-biblioref">Japkowicz; Boukouvalas, 2024</a>)</span>. Ainda assim, a mitigação efetiva desses problemas requer monitoramento contínuo e o uso de técnicas de debiasing, voltadas à correção progressiva das distorções detectadas&nbsp;<span class="citation" data-cites="neptune2024">(<a href="../../shared/referencias/referencias.html#ref-neptune2024" role="doc-biblioref">Sánchez, 2024</a>)</span>.</p>
+<p>Uma estratégia frequentemente explorada é o uso de <em>datasets</em> sintéticos para tentar corrigir vieses complexos. No entanto, essa solução pode introduzir novos riscos metodológicos: em vez de eliminar o viés original, o modelo avaliador pode aprender a reproduzir os mesmos padrões ou artefatos (artifacts) gerados pelo modelo que criou o <em>dataset</em> sintético. O resultado é a introdução de um novo tipo de viés, que compromete a validade da avaliação e revela uma limitação importante das atuais estratégias de mitigação baseadas em dados sintéticos&nbsp;<span class="citation" data-cites="chen2024">(<a href="../../shared/referencias/referencias.html#ref-chen2024" role="doc-biblioref">Chen et al., 2024</a>)</span>.</p>
+</section>
+<section id="factualidade-alucinações-e-citabilidade" class="level3" data-number="4.5.3">
+<h3 data-number="4.5.3" class="anchored" data-anchor-id="factualidade-alucinações-e-citabilidade"><span class="header-section-number">4.5.3</span> Factualidade, alucinações e citabilidade</h3>
+<p>A factualidade e a prevenção de “alucinações” são desafios críticos para os LLMs&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>. Métodos para verificar a veracidade da informação gerada incluem:</p>
+<section id="detecção-de-alucinações" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="detecção-de-alucinações">Detecção de alucinações</h4>
+<p>Técnicas como FactSelfCheck permitem a detecção de alucinações em nível de fato, analisando a consistência factual entre múltiplas respostas do LLM&nbsp;<span class="citation" data-cites="sawczyn2025">(<a href="../../shared/referencias/referencias.html#ref-sawczyn2025" role="doc-biblioref">Sawczyn et al., 2025</a>)</span>.</p>
+</section>
+<section id="citabilidade-e-atribuição-de-fontes" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="citabilidade-e-atribuição-de-fontes">Citabilidade e Atribuição de fontes</h4>
+<p>A capacidade de um LLM de citar corretamente suas fontes é fundamental para a confiabilidade. Métodos como LLM-Cite exploram a capacidade do LLM de gerar URLs de citação potenciais para uma determinada afirmação, que são então verificadas em tempo real&nbsp;<span class="citation" data-cites="joshi2025llmcite">(<a href="../../shared/referencias/referencias.html#ref-joshi2025llmcite" role="doc-biblioref">Joshi et al., 2025</a>)</span>. No entanto, a atribuição de fontes ainda enfrenta desafios, especialmente em domínios específicos, como o jurídico&nbsp;<span class="citation" data-cites="zhang-etal-2025-citalaw">(<a href="../../shared/referencias/referencias.html#ref-zhang-etal-2025-citalaw" role="doc-biblioref">Zhang et al., 2025a</a>)</span>.</p>
+</section>
+<section id="avaliação-de-fundamentação-groundedness-via-nli" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="avaliação-de-fundamentação-groundedness-via-nli">Avaliação de fundamentação (<em>Groundedness</em>) via NLI</h4>
+<p>Essa abordagem avalia se uma afirmação gerada por um LLM é factualmente suportada por uma fonte específica, usando a Inferência de Linguagem Natural (NLI) para classificar a relação como corroboração (acarretamento) ou contradição. O trabalho de <span class="citation" data-cites="trautmann2024groundedness">(<a href="../../shared/referencias/referencias.html#ref-trautmann2024groundedness" role="doc-biblioref">Trautmann et al., 2024</a>)</span> mostra que, embora métodos híbridos complexos (como combinar o uso de LLM-as-a-Judge com métodos de NLI) sejam os mais precisos, são também muito caros e lentos. O trabalho destaca que uma abordagem mais simples e eficiente, como perguntar diretamente a um LLM potente (e.g.&nbsp;GPT-4) se a fonte suporta a afirmação, já oferece uma performance robusta, servindo como um forte <em>baseline</em>.</p>
+</section>
+</section>
+<section id="eficiência-computacional-e-custos" class="level3" data-number="4.5.4">
+<h3 data-number="4.5.4" class="anchored" data-anchor-id="eficiência-computacional-e-custos"><span class="header-section-number">4.5.4</span> Eficiência computacional e custos</h3>
+<p>A eficiência computacional é uma dimensão cada vez mais importante na avaliação de LLMs, dada a sua crescente escala e os custos associados à inferência e implantação&nbsp;<span class="citation" data-cites="galileoai2024insights d.2025">(<a href="../../shared/referencias/referencias.html#ref-galileoai2024insights" role="doc-biblioref">Galileo AI, 2024</a>; <a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p>
+<section id="métricas" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="métricas">Métricas</h4>
+<p>As métricas de eficiência incluem:</p>
+<ol type="1">
+<li><p>Latência: O tempo entre a submissão de um <em>prompt</em> e o recebimento da resposta completa&nbsp;<span class="citation" data-cites="googlecloud2024llm">(<a href="../../shared/referencias/referencias.html#ref-googlecloud2024llm" role="doc-biblioref">Google Cloud, 2025</a>)</span>.</p></li>
+<li><p>Throughput: O volume de requisições ou <em>tokens</em> que o sistema pode processar por unidade de tempo&nbsp;<span class="citation" data-cites="googlecloud2024llm">(<a href="../../shared/referencias/referencias.html#ref-googlecloud2024llm" role="doc-biblioref">Google Cloud, 2025</a>)</span>.</p></li>
+<li><p>Consumo de Energia: A energia gasta durante a inferência, um fator crucial para a sustentabilidade&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>;</p></li>
+<li><p>Custo de Inferência: O custo monetário associado à execução do modelo&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p></li>
+</ol>
+<p>A otimização dessas métricas é vital para a viabilidade de aplicações práticas, especialmente aquelas que exigem respostas em tempo real ou operam em larga escala&nbsp;<span class="citation" data-cites="galileoai2024insights googlecloud2024llm">(<a href="../../shared/referencias/referencias.html#ref-galileoai2024insights" role="doc-biblioref">Galileo AI, 2024</a>; <a href="../../shared/referencias/referencias.html#ref-googlecloud2024llm" role="doc-biblioref">Google Cloud, 2025</a>)</span>. Técnicas como test-time compute (TTC) e otimizações de arquitetura visam melhorar a eficiência sem comprometer a acurácia&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p>
+</section>
+</section>
+</section>
+<section id="considerações-éticas-e-o-futuro-da-avaliação-de-llms" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="considerações-éticas-e-o-futuro-da-avaliação-de-llms"><span class="header-section-number">4.6</span> Considerações éticas e o Futuro da avaliação de LLMs</h2>
+<p>À medida que os LLMs passam a ocupar papéis centrais em produtos, pesquisas e até decisões governamentais, a avaliação deixa de ser apenas uma questão técnica e se torna também uma questão ética e social. Avaliar modelos implica também em discutir responsabilidade, transparência e possíveis impactos negativos de seu uso. Nesta seção, exploramos como a avaliação deve incorporar princípios de responsabilidade, interpretabilidade e regulação, preparando o caminho para práticas mais seguras e sustentáveis no futuro da inteligência artificial.</p>
+<p>Aqui trataremos especificamente da questão de uso de LLMs para a avaliação, porém você pode ver a <span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/avaliacao/cap-avaliacao/cap-avaliacao.html#sec-cap-avaliacao-etica" target="_blank" title="Volume 1">Uso Responsável e Boas Práticas</a></span> e o <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/desafios-e-perspectivas/cap-etica/cap-etica.html#sec-cap-etica" target="_blank" title="Volume 1">Questões éticas em IA e PLN</a></span> deste livro para mais discussões sobre o uso responsável de IA.</p>
+<section id="responsabilidade-na-avaliação" class="level3" data-number="4.6.1">
+<h3 data-number="4.6.1" class="anchored" data-anchor-id="responsabilidade-na-avaliação"><span class="header-section-number">4.6.1</span> Responsabilidade na avaliação</h3>
+<p>A implantação generalizada de LLMs levanta questões críticas sobre a responsabilidade quando esses modelos falham ou causam danos. Robustos <em>frameworks</em> de avaliação são essenciais para verificar se um LLM atende a padrões de confiabilidade, ética e desempenho em aplicações reais. A avaliação deve, portanto, ser uma parte integral do ciclo de vida do desenvolvimento do LLM, e não apenas uma análise <em>post-hoc</em>&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p>
+</section>
+<section id="transparência-e-interpretabilidade" class="level3" data-number="4.6.2">
+<h3 data-number="4.6.2" class="anchored" data-anchor-id="transparência-e-interpretabilidade"><span class="header-section-number">4.6.2</span> Transparência e Interpretabilidade</h3>
+<p>A “caixa preta” dos LLMs, em que as decisões e as saídas são difíceis de interpretar, é um desafio significativo. A necessidade de entender por que um modelo toma certas decisões ou gera certas saídas é fundamental para a confiança e a responsabilidade social&nbsp;<span class="citation" data-cites="neptune2024">(<a href="../../shared/referencias/referencias.html#ref-neptune2024" role="doc-biblioref">Sánchez, 2024</a>)</span>. A transparência contextual, por exemplo, pode envolver a inclusão de disclaimers sobre a natureza probabilística das respostas ou a indicação das fontes utilizadas.</p>
+</section>
+<section id="dualidade-do-uso" class="level3" data-number="4.6.3">
+<h3 data-number="4.6.3" class="anchored" data-anchor-id="dualidade-do-uso"><span class="header-section-number">4.6.3</span> Dualidade do uso</h3>
+<p>A capacidade dos LLMs de gerar conteúdo complexo e convincente também levanta preocupações sobre seu uso malicioso. A “dualidade do uso” refere-se ao potencial de modelos, originalmente projetados para fins benéficos, serem manipulados para gerar conteúdo prejudicial, como discurso de ódio, golpes ou até mesmo código malicioso para ataques cibernéticos. A avaliação deve, portanto, incluir a análise da suscetibilidade dos modelos a tais manipulações e o desenvolvimento de estratégias de mitigação de seu uso malicioso.</p>
+</section>
+<section id="o-papel-da-regulação-e-de-padrões-na-avaliação" class="level3" data-number="4.6.4">
+<h3 data-number="4.6.4" class="anchored" data-anchor-id="o-papel-da-regulação-e-de-padrões-na-avaliação"><span class="header-section-number">4.6.4</span> O papel da regulação e de padrões na avaliação</h3>
+<p>A rápida evolução dos LLMs exige o desenvolvimento de padrões e regulamentações para guiar sua avaliação e implantação responsáveis. Há uma necessidade crescente de protocolos de avaliação mais padronizados e transparentes para permitir comparações significativas e rastrear o progresso ao longo do tempo&nbsp;<span class="citation" data-cites="nist2023aistandards d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>; <a href="../../shared/referencias/referencias.html#ref-nist2023aistandards" role="doc-biblioref">National Institute of Standards and Technology, 2024</a>)</span>. A privacidade dos dados, a reprodutibilidade dos resultados e a capacidade de realizar avaliações sem utilizar recursos de terceiros (<em>on-premise</em>) são considerações importantes em contextos industriais ou governamentais&nbsp;<span class="citation" data-cites="nist2023aistandards">(<a href="../../shared/referencias/referencias.html#ref-nist2023aistandards" role="doc-biblioref">National Institute of Standards and Technology, 2024</a>)</span>.</p>
+</section>
+<section id="direções-futuras" class="level3" data-number="4.6.5">
+<h3 data-number="4.6.5" class="anchored" data-anchor-id="direções-futuras"><span class="header-section-number">4.6.5</span> Direções futuras</h3>
+<p>O futuro da avaliação de LLMs é definido tanto por oportunidades de avanço quanto por desafios fundamentais que permanecem não resolvidos. As direções prioritárias incluem:</p>
+<section id="estabelecimento-de-meta-avaliação" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="estabelecimento-de-meta-avaliação">Estabelecimento de meta-avaliação</h4>
+<p>(Evaluating the Evaluators) Talvez a direção mais crítica seja a investigação sobre a própria validade das métricas e dos <em>frameworks</em> de avaliação. A questão de “quando uma avaliação é boa o suficiente?” ainda carece de uma resposta definitiva. A pesquisa futura deve se concentrar no desenvolvimento de métodos rigorosos para validar os próprios sistemas de avaliação, garantindo que suas conclusões sejam robustas, replicáveis e verdadeiramente indicativas do desempenho do modelo.</p>
+</section>
+<section id="avaliação-contínua-e-em-tempo-real" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="avaliação-contínua-e-em-tempo-real">Avaliação contínua e em tempo real</h4>
+<p>Existe uma lacuna significativa entre a avaliação em ambientes de pesquisa e as necessidades da indústria&nbsp;<span class="citation" data-cites="heller2024">(<a href="../../shared/referencias/referencias.html#ref-heller2024" role="doc-biblioref">Heller, 2024</a>)</span>. A implementação de <em>frameworks</em> que permitam a avaliação contínua e em tempo real é uma necessidade urgente para monitorar o desempenho de modelos em produção, detectar degradações (<em>drifts</em>) e garantir a segurança. Superar os obstáculos técnicos e de custo para viabilizar essa monitorização é um dos principais focos para a aplicação prática e responsável de LLMs&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p>
+</section>
+<section id="avaliação-adaptativa-e-personalizada" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="avaliação-adaptativa-e-personalizada">Avaliação adaptativa e personalizada</h4>
+<p>Métricas e abordagens que se adaptam a diferentes domínios, casos de uso e preferências do usuário&nbsp;<span class="citation" data-cites="d.2025 prototypejam2025lakemerritt">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>; <a href="../../shared/referencias/referencias.html#ref-prototypejam2025lakemerritt" role="doc-biblioref">PrototypeJam, 2025</a>)</span>.</p>
+</section>
+<section id="desenvolvimento-de-métricas-alinhadas-com-valores-humanos" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="desenvolvimento-de-métricas-alinhadas-com-valores-humanos">Desenvolvimento de métricas alinhadas com valores humanos</h4>
+<p>O objetivo de alinhar LLMs com “valores humanos” é mais complexo do que simplesmente buscar concordância com avaliadores humanos. A pesquisa deve abordar a distinção filosófica entre mimetizar as preferências e os vieses de um grupo de anotadores e alinhar-se a princípios éticos mais amplos e universais. Isso envolve não apenas o desenvolvimento de métricas mais sofisticadas, mas também uma reflexão sobre quais valores devem ser codificados e como&nbsp;<span class="citation" data-cites="d.2025">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p>
+</section>
+<section id="avaliação-de-impacto-social-a-longo-prazo" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="avaliação-de-impacto-social-a-longo-prazo">Avaliação de impacto social a longo prazo</h4>
+<p>Uma avaliação ampla, especialmente tratando-se do uso de IA em ambientes governamentais, deve considerar o impacto social e ético dos LLMs em um horizonte de tempo mais longo&nbsp;<span class="citation" data-cites="d.2025 nist2023aistandards">(<a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>; <a href="../../shared/referencias/referencias.html#ref-nist2023aistandards" role="doc-biblioref">National Institute of Standards and Technology, 2024</a>)</span>.</p>
+</section>
+<section id="abordagem-multidisciplinar" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="abordagem-multidisciplinar">Abordagem multidisciplinar</h4>
+<p>A complexidade dos LLMs exige uma abordagem que transcende a ciência da computação. A avaliação deve ser inerentemente multidisciplinar, integrando insights da linguística, psicologia, ética e ciências sociais para criar uma compreensão holística do desempenho técnico dos modelos e do seu impacto social a longo prazo. Isso inclui o desenvolvimento de avaliações adaptativas, que se ajustem a diferentes contextos culturais, domínios de aplicação e casos de uso específicos&nbsp;<span class="citation" data-cites="d.2025 jiao">(<a href="../../shared/referencias/referencias.html#ref-jiao" role="doc-biblioref">Jiao et al., 2024</a>; <a href="../../shared/referencias/referencias.html#ref-d.2025" role="doc-biblioref">Meva; Kukadiya, 2025</a>)</span>.</p>
+</section>
+</section>
+</section>
+<section id="considerações-finais" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="considerações-finais"><span class="header-section-number">4.7</span> Considerações finais</h2>
+<p>Neste capítulo, abordamos a avaliação de Grandes Modelos de Linguagem (Large Language Models), um campo dinâmico e multifacetado, que exige ir além das abordagens convencionais da linguística computacional e do processamento de linguagem natural. O avanço desses modelos trouxe novos desafios metodológicos, éticos e epistemológicos, forçando a revisão de pressupostos sobre o que significa avaliar o desempenho em sistemas que produzem linguagem de forma aberta e contextual.</p>
+<p>As métricas automáticas tradicionais continuam a oferecer um ponto de partida valioso, sobretudo pela rapidez e pela comparabilidade que proporcionam. No entanto, sua limitação em capturar aspectos semânticos e, especialmente, pragmáticos torna indispensável a incorporação de camadas adicionais de análise. A avaliação humana, ainda que cara e limitada em escala, permanece o padrão-ouro por sua capacidade de julgar nuances, contextos e valores universais e éticos.</p>
+<p>Nesse novo cenário, o uso de modelos como avaliadores, o paradigma LLM-as-a-Judge, representa uma via promissora. Ao unir a eficiência da automação com a profundidade interpretativa dos julgamentos humanos, essas abordagens híbridas apontam para um futuro de avaliações mais contínuas, contextualizadas e adaptativas. No entanto, desenvolver um LLM-juiz justo e eficiente demanda tempo, meta-avaliação e supervisão humana constante. Além disso, o LLM-juiz não é garantia de alinhamento da avaliação a valores humanos, ele é apenas um método ‘mais alinhado’ do que métodos tradicionais.</p>
+<p>O desafio atual é consolidar <em>frameworks</em> eficientes, robustos e rápidos capazes de equilibrar essas três dimensões: automação, julgamento humano e meta-avaliação por modelos, de forma ética, transparente e alinhada a valores humanos. Somente assim será possível garantir que a avaliação de LLMs cumpra não apenas sua função técnica, mas também seu papel social: orientar o desenvolvimento de sistemas de linguagem que sejam realmente úteis, justos e responsáveis. O assunto parece muito complexo e é: a avaliação de sistemas de inteligência artificial precisa ser factível, confiável, tecnicamente viável e socialmente responsável. Da mesma forma que o estado da arte da arquitetura de modelos evolui e continua evoluindo, o estado da arte de como avaliá-los está em constante evolução.</p>
+
+
+<div id="refs" class="references csl-bib-body" data-entry-spacing="1" role="list" style="display: none">
+<div id="ref-aisera2025" class="csl-entry" role="listitem">
+AISERA. <strong><span>LLM E</span>valuation: Key Metrics and <span>F</span>rameworks</strong>. <a href="https://aisera.com/blog/llm-evaluation/" class="uri">https://aisera.com/blog/llm-evaluation/</a>, 2024.
+</div>
+<div id="ref-sbbd" class="csl-entry" role="listitem">
+BENCKE, L. et al. <strong>Can we trust <span>LLM</span>s as relevance judges?</strong> Anais do XXXIX Simpósio Brasileiro de Bancos de Dados. <strong>Anais</strong>...Porto Alegre, RS, Brasil: SBC, 2024. Disponível em: &lt;<a href="https://sol.sbc.org.br/index.php/sbbd/article/view/30724">https://sol.sbc.org.br/index.php/sbbd/article/view/30724</a>&gt;
+</div>
+<div id="ref-Gebru:2021rohtua" class="csl-entry" role="listitem">
+BENDER, E. M. et al. <strong>On the Dangers of Stochastic Parrots: Can Language Models Be Too Big? 🦜</strong>. Proceedings of the 2021 ACM Conference on Fairness, Accountability, and Transparency. <strong>Anais</strong>...: FAccT ’21.New York, NY, USA: Association for Computing Machinery, 2021. Disponível em: &lt;<a href="https://doi.org/10.1145/3442188.3445922">https://doi.org/10.1145/3442188.3445922</a>&gt;
+</div>
+<div id="ref-bowman2021fixbenchmarkingnaturallanguage" class="csl-entry" role="listitem">
+BOWMAN, S. R.; DAHL, G. <strong>What Will it Take to Fix Benchmarking in Natural Language Understanding?</strong> (K. Toutanova et al., Eds.)Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies. <strong>Anais</strong>...Online: Association for Computational Linguistics, jun. 2021. Disponível em: &lt;<a href="https://aclanthology.org/2021.naacl-main.385/">https://aclanthology.org/2021.naacl-main.385/</a>&gt;
+</div>
+<div id="ref-chalamalasetti-etal-2023-clembench" class="csl-entry" role="listitem">
+CHALAMALASETTI, K. et al. <strong>clembench: Using Game Play to Evaluate Chat-Optimized Language Models as Conversational Agents</strong>. (H. Bouamor, J. Pino, K. Bali, Eds.)Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing. <strong>Anais</strong>...Singapore: Association for Computational Linguistics, dez. 2023. Disponível em: &lt;<a href="https://aclanthology.org/2023.emnlp-main.689">https://aclanthology.org/2023.emnlp-main.689</a>&gt;
+</div>
+<div id="ref-chen2024" class="csl-entry" role="listitem">
+CHEN, G. H. et al. <a href="https://arxiv.org/abs/2402.10669">Humans or <span>LLM</span>s as the Judge? <span>A</span> Study on Judgement Bias</a>. <strong>Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing</strong>, 2024.
+</div>
+<div id="ref-aspects" class="csl-entry" role="listitem">
+CHOMSKY, N. <strong>Aspects of the Theory of Syntax</strong>. Cambridge, MA: MIT Press, 1965.
+</div>
+<div id="ref-cronbach1942acquiescence" class="csl-entry" role="listitem">
+CRONBACH, L. J. <a href="https://doi.org/10.1037/h0054677">Studies of acquiescence as a factor in the true–false test</a>. <strong>Journal of Educational Psychology</strong>, v. 33, p. 401–415, 1942.
+</div>
+<div id="ref-dierk2025" class="csl-entry" role="listitem">
+DIERK, C.; HEALEY, J.; DOGAN, M. D. <strong>Evaluating LLMs in Experiential Context: Insights from a Survey of Recent CHI Publications</strong>. Human-centered Evaluation and Auditing of Language Models Workshop (HEAL), CHI ’25. <strong>Anais</strong>...Yokohama, Japan: ACM, 2025. Disponível em: &lt;<a href="https://heal-workshop.github.io/chi2025_papers/43_Evaluating_LLMs_in_Experien.pdf">https://heal-workshop.github.io/chi2025_papers/43_Evaluating_LLMs_in_Experien.pdf</a>&gt;
+</div>
+<div id="ref-galileoai2024insights" class="csl-entry" role="listitem">
+GALILEO AI. <strong>Generative <span>AI</span> and <span>LLM</span> Insights</strong>. <a href="https://galileo.ai/blog/" class="uri">https://galileo.ai/blog/</a>, 2024.
+</div>
+<div id="ref-gao2024" class="csl-entry" role="listitem">
+GAO, M. et al. <strong><span>LLM</span>-based <span>NLG</span> Evaluation: Current Status and Challenges</strong>. ArXiv, 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2402.01383">https://arxiv.org/abs/2402.01383</a>&gt;
+</div>
+<div id="ref-gatt2017" class="csl-entry" role="listitem">
+GATT, A.; KRAHMER, E. <a href="https://doi.org/10.1613/jair.5477">Survey of the State of the Art in Natural Language Generation: Core tasks, applications and evaluation</a>. <strong>Journal of Artificial Intelligence Research</strong>, v. 61, n. 1, p. 65–170, 2018.
+</div>
+<div id="ref-gehman2020" class="csl-entry" role="listitem">
+GEHMAN, S. et al. <strong><span>R</span>eal<span>T</span>oxicity<span>P</span>rompts: Evaluating Neural Toxic Degeneration in Language Models</strong>. (T. Cohn, Y. He, Y. Liu, Eds.)Findings of the Association for Computational Linguistics: EMNLP 2020. <strong>Anais</strong>...Online: Association for Computational Linguistics, nov. 2020. Disponível em: &lt;<a href="https://aclanthology.org/2020.findings-emnlp.301/">https://aclanthology.org/2020.findings-emnlp.301/</a>&gt;
+</div>
+<div id="ref-GONZALEZCABELLO2025645" class="csl-entry" role="listitem">
+GONZALEZ-CABELLO, M. et al. <a href="https://doi.org/10.1016/j.bushor.2024.09.003">Fairness in crowdwork: Making the human AI supply chain more humane</a>. <strong>Business Horizons</strong>, v. 68, n. 5, p. 645–657, 2025.
+</div>
+<div id="ref-googlecloud2024llm" class="csl-entry" role="listitem">
+GOOGLE CLOUD. <strong>Best Practices with Large Language Models</strong>. <a href="https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompt-best-practices?hl=en" class="uri">https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompt-best-practices?hl=en</a>, 2025.
+</div>
+<div id="ref-Hedderich07022025" class="csl-entry" role="listitem">
+HEDDERICH, M. A.; OULASVIRTA, A. <a href="https://doi.org/10.1080/0144929X.2024.2329616">Explaining crowdworker behaviour through computational rationality</a>. <strong>Behaviour &amp; Information Technology</strong>, v. 44, n. 3, p. 552–573, 2025.
+</div>
+<div id="ref-heller2024" class="csl-entry" role="listitem">
+HELLER, J. <strong>Legal <span>AI</span> benchmarking: <span>CoCounsel</span> – from code to courtroom: The meticulous testing of <span>CoCounsel</span>’s professional-grade <span>AI</span></strong>., 23 out. 2024. Disponível em: &lt;<a href="https://www.thomsonreuters.com/en-us/posts/innovation/legal-ai-benchmarking-cocounsel/">https://www.thomsonreuters.com/en-us/posts/innovation/legal-ai-benchmarking-cocounsel/</a>&gt;. Acesso em: 20 ago. 2025
+</div>
+<div id="ref-houamegni2025" class="csl-entry" role="listitem">
+HOUAMEGNI, L. R. P.; GEDIKLI, F. <strong>Evaluating the Effectiveness of Large Language Models in Automated News Article Summarization</strong>., 2025. Disponível em: &lt;<a href="https://arxiv.org/abs/2502.17136">https://arxiv.org/abs/2502.17136</a>&gt;
+</div>
+<div id="ref-openai2024" class="csl-entry" role="listitem">
+II, S. M. W. <strong>GSM8K Benchmark</strong>. Klu; <a href="https://klu.ai/glossary/GSM8K-eval" class="uri">https://klu.ai/glossary/GSM8K-eval</a>, 2025.
+</div>
+<div id="ref-jan2025" class="csl-entry" role="listitem">
+JAN, E. et al. <strong>Multitask-Bench: Unveiling and Mitigating Safety Gaps in <span>LLM</span>s Fine-tuning</strong>. (O. Rambow et al., Eds.)Proceedings of the 31st International Conference on Computational Linguistics. <strong>Anais</strong>...Abu Dhabi, UAE: Association for Computational Linguistics, jan. 2025. Disponível em: &lt;<a href="https://aclanthology.org/2025.coling-main.606/">https://aclanthology.org/2025.coling-main.606/</a>&gt;
+</div>
+<div id="ref-japkowicz2024" class="csl-entry" role="listitem">
+JAPKOWICZ, N.; BOUKOUVALAS, Z. <strong>Machine Learning Evaluation: Towards Reliable and Responsible AI</strong>. [s.l.] Cambridge University Press, 2024.
+</div>
+<div id="ref-10.1145/3613904.3642601" class="csl-entry" role="listitem">
+JIANG, L.; WAGNER, C. <strong>How Low is Low? Crowdworker Perceptions of Microtask Payments in Work versus Leisure Situations</strong>. Proceedings of the 2024 CHI Conference on Human Factors in Computing Systems. <strong>Anais</strong>...: CHI ’24.New York, NY, USA: Association for Computing Machinery, 2024. Disponível em: &lt;<a href="https://doi.org/10.1145/3613904.3642601">https://doi.org/10.1145/3613904.3642601</a>&gt;
+</div>
+<div id="ref-jiao" class="csl-entry" role="listitem">
+JIAO, J. et al. <a href="https://api.semanticscholar.org/CorpusID:270764497">Navigating LLM Ethics: Advancements, Challenges, and Future Directions</a>. <strong>ArXiv</strong>, v. abs/2406.18841, 2024.
+</div>
+<div id="ref-JoshiCWZ17" class="csl-entry" role="listitem">
+JOSHI, M. et al. <strong>TriviaQA: <span>A</span> Large Scale Distantly Supervised Challenge Dataset for Reading Comprehension</strong>. (R. Barzilay, M.-Y. Kan, Eds.)Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics, <span>ACL</span> 2017, Vancouver, Canada, July 30 - August 4, Volume 1: Long Papers. <strong>Anais</strong>...Association for Computational Linguistics, 2017. Disponível em: &lt;<a href="https://doi.org/10.18653/v1/P17-1147">https://doi.org/10.18653/v1/P17-1147</a>&gt;
+</div>
+<div id="ref-joshi2025llmcite" class="csl-entry" role="listitem">
+JOSHI, N.; TALY, A.; MUPPALLA, D. <strong><span>LLM</span>-Cite: Cheap Fact Verification with Attribution via <span>URL</span> Generation</strong>., 2025. Disponível em: &lt;<a href="https://openreview.net/forum?id=qb2QRoE4W3">https://openreview.net/forum?id=qb2QRoE4W3</a>&gt;
+</div>
+<div id="ref-kalouli-etal-2023-curing" class="csl-entry" role="listitem">
+KALOULI, A.-L. et al. <a href="https://doi.org/10.1162/coli_a_00465">Curing the <span>SICK</span> and Other <span>NLI</span> Maladies</a>. <strong>Computational Linguistics</strong>, v. 49, n. 1, p. 199–243, mar. 2023.
+</div>
+<div id="ref-kamruzzaman2024" class="csl-entry" role="listitem">
+KAMRUZZAMAN, M.; SHOVON, MD.; KIM, G. <strong>Investigating Subtler Biases in <span>LLM</span>s: Ageism, Beauty, Institutional, and Nationality Bias in Generative Models</strong>. (L.-W. Ku, A. Martins, V. Srikumar, Eds.)Findings of the Association for Computational Linguistics: ACL 2024. <strong>Anais</strong>...Bangkok, Thailand: Association for Computational Linguistics, ago. 2024. Disponível em: &lt;<a href="https://aclanthology.org/2024.findings-acl.530/">https://aclanthology.org/2024.findings-acl.530/</a>&gt;
+</div>
+<div id="ref-KimAKH25" class="csl-entry" role="listitem">
+KIM, D. K. et al. <strong>Analyzing Offensive Language Dataset Insights from Training Dynamics and Human Agreement Level</strong>. (O. Rambow et al., Eds.)Proceedings of the 31st International Conference on Computational Linguistics, <span>COLING</span> 2025, Abu Dhabi, UAE, January 19-24, 2025. <strong>Anais</strong>...Association for Computational Linguistics, 2025. Disponível em: &lt;<a href="https://aclanthology.org/2025.coling-main.653/">https://aclanthology.org/2025.coling-main.653/</a>&gt;
+</div>
+<div id="ref-kim2023prometheus" class="csl-entry" role="listitem">
+KIM, S. et al. Prometheus: Inducing Fine-grained Evaluation Capability in Language Models. <strong>arXiv preprint arXiv:2310.08491</strong>, 2023.
+</div>
+<div id="ref-natural" class="csl-entry" role="listitem">
+KWIATKOWSKI, T. et al. Natural Questions: a Benchmark for Question Answering Research. <strong>Transactions of the Association of Computational Linguistics</strong>, 2019.
+</div>
+<div id="ref-LAAJ24" class="csl-entry" role="listitem">
+LI, D. et al. <a href="https://doi.org/10.48550/ARXIV.2411.16594">From Generation to Judgment: Opportunities and Challenges of LLM-as-a-judge</a>. <strong>CoRR</strong>, v. abs/2411.16594, 2024.
+</div>
+<div id="ref-li2025casegenbenchmarkmultistagelegal" class="csl-entry" role="listitem">
+LI, H. et al. <strong><span>CaseGen</span>: A benchmark for multi-stage legal case documents generation</strong>., 2025. Disponível em: &lt;<a href="https://arxiv.org/abs/2502.17943">https://arxiv.org/abs/2502.17943</a>&gt;
+</div>
+<div id="ref-lin2022" class="csl-entry" role="listitem">
+LIN, S.; HILTON, J.; EVANS, O. <strong><span>T</span>ruthful<span>QA</span>: Measuring How Models Mimic Human Falsehoods</strong>. (S. Muresan, P. Nakov, A. Villavicencio, Eds.)Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). <strong>Anais</strong>...Dublin, Ireland: Association for Computational Linguistics, 2022. Disponível em: &lt;<a href="https://aclanthology.org/2022.acl-long.229/">https://aclanthology.org/2022.acl-long.229/</a>&gt;
+</div>
+<div id="ref-LiuYHZHWD0024" class="csl-entry" role="listitem">
+LIU, Y. et al. <strong>HD-Eval: Aligning Large Language Model Evaluators Through Hierarchical Criteria Decomposition</strong>. (L.-W. Ku, A. Martins, V. Srikumar, Eds.)Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), <span>ACL</span> 2024, Bangkok, Thailand, August 11-16, 2024. <strong>Anais</strong>...Association for Computational Linguistics, 2024. Disponível em: &lt;<a href="https://doi.org/10.18653/v1/2024.acl-long.413">https://doi.org/10.18653/v1/2024.acl-long.413</a>&gt;
+</div>
+<div id="ref-mathur2020" class="csl-entry" role="listitem">
+MATHUR, N.; BALDWIN, T.; COHN, T. <strong>Tangled up in <span>BLEU</span>: Reevaluating the Evaluation of Automatic Machine Translation Evaluation Metrics</strong>. Proceedings of the Conference on Empirical Methods in Natural Language Processing. <strong>Anais</strong>...Association for Computational Linguistics, 2020. Disponível em: &lt;<a href="https://aclanthology.org/2020.acl-main.448/">https://aclanthology.org/2020.acl-main.448/</a>&gt;
+</div>
+<div id="ref-d.2025" class="csl-entry" role="listitem">
+MEVA, DR. D.; KUKADIYA, H. <a href="https://doi.org/10.26562/irjcs.2025.v1203.03">Performance Evaluation of Large Language Models: A Comprehensive Review</a>. <strong>International Research Journal of Computer Science</strong>, v. 12, p. 109–114, mar. 2025.
+</div>
+<div id="ref-minaee" class="csl-entry" role="listitem">
+MINAEE, S. et al. <strong>Large Language Models: A Survey</strong>., 2025. Disponível em: &lt;<a href="https://arxiv.org/abs/2402.06196">https://arxiv.org/abs/2402.06196</a>&gt;
+</div>
+<div id="ref-xsum-emnlp" class="csl-entry" role="listitem">
+NARAYAN, S.; COHEN, S. B.; LAPATA, M. <strong>Don’t Give Me the Details, Just the Summary! <span>T</span>opic-Aware Convolutional Neural Networks for Extreme Summarization</strong>. Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing. <strong>Anais</strong>...Brussels, Belgium: 2018.
+</div>
+<div id="ref-nist2023aistandards" class="csl-entry" role="listitem">
+NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY. <strong>A Plan for Global Engagement on AI Standards</strong>. [s.l.] U.S. Department of Commerce, National Institute of Standards; Technology, jul. 2024. Disponível em: &lt;<a href="https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-5.pdf">https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-5.pdf</a>&gt;.
+</div>
+<div id="ref-panickssery2024" class="csl-entry" role="listitem">
+PANICKSSERY, A.; BOWMAN, S. R.; FENG, S. <a href="https://arxiv.org/abs/2404.13076"><span>LLM</span> Evaluators Recognize and Favor Their Own Generations</a>. <strong>Proceedings of the 38th International Conference on Neural Information Processing Systems</strong>, 2024.
+</div>
+<div id="ref-park2024offsetbias" class="csl-entry" role="listitem">
+PARK, K. et al. <strong>OffsetBias: Leveraging Debiased Data for Tuning Evaluators</strong>., 2024. Disponível em: &lt;<a href="https://arxiv.org/abs/2407.06551">https://arxiv.org/abs/2407.06551</a>&gt;
+</div>
+<div id="ref-peyrard2019" class="csl-entry" role="listitem">
+PEYRARD, M. <strong>Studying Summarization Evaluation Metrics in the Appropriate Scoring Range</strong>. Proceedings of the Conference on Empirical Methods in Natural Language Processing (EMNLP). <strong>Anais</strong>...Online: Association for Computational Linguistics, 2019. Disponível em: &lt;<a href="https://aclanthology.org/P19-1502/">https://aclanthology.org/P19-1502/</a>&gt;
+</div>
+<div id="ref-polo2024" class="csl-entry" role="listitem">
+POLO, F. M. et al. <a href="https://arxiv.org/pdf/2405.17202">Efficient Multi-Prompt Evaluation of <span>LLMs</span></a>. <strong>Proceedings of the 38th Conference on Neural Information Processing Systems (NeurIPS 2024)</strong>, 2024.
+</div>
+<div id="ref-pombal" class="csl-entry" role="listitem">
+POMBAL, J. et al. <a href="https://doi.org/10.48550/ARXIV.2504.04953">M-Prometheus: <span>A</span> Suite of Open Multilingual <span>LLM</span> Judges</a>. <strong>CoRR</strong>, v. abs/2504.04953, 2025.
+</div>
+<div id="ref-prototypejam2025lakemerritt" class="csl-entry" role="listitem">
+PROTOTYPEJAM. <strong>Lake Merritt: AI Evaluation Workbench</strong>. <a href="https://prototypejam.github.io/lake_merritt/" class="uri">https://prototypejam.github.io/lake_merritt/</a>, 2025.
+</div>
+<div id="ref-rajpurkar-etal-2016-squad" class="csl-entry" role="listitem">
+RAJPURKAR, P. et al. <strong><span>SQ</span>u<span>AD</span>: 100,000+ Questions for Machine Comprehension of Text</strong>. (J. Su, K. Duh, X. Carreras, Eds.)Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing. <strong>Anais</strong>...Austin, Texas: Association for Computational Linguistics, nov. 2016. Disponível em: &lt;<a href="https://aclanthology.org/D16-1264">https://aclanthology.org/D16-1264</a>&gt;
+</div>
+<div id="ref-ribeiro-etal-2020-beyond" class="csl-entry" role="listitem">
+RIBEIRO, M. T. et al. <strong>Beyond Accuracy: Behavioral Testing of <span>NLP</span> Models with <span>C</span>heck<span>L</span>ist</strong>. Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics. <strong>Anais</strong>...Online: Association for Computational Linguistics, jul. 2020. Disponível em: &lt;<a href="https://aclanthology.org/2020.acl-main.442">https://aclanthology.org/2020.acl-main.442</a>&gt;
+</div>
+<div id="ref-flowai2024abandtesting" class="csl-entry" role="listitem">
+RÍO, B. G. DEL; VAAHTIO, T. <strong>Improving LLM systems with A/B testing</strong>. <a href="https://www.flow-ai.com/blog/improving-llm-systems-with-a-b-testing" class="uri">https://www.flow-ai.com/blog/improving-llm-systems-with-a-b-testing</a>, 2024.
+</div>
+<div id="ref-arize2024" class="csl-entry" role="listitem">
+SAID, H. <strong>40 Large Language Model Benchmarks and The Future of LLMs</strong>. Arize AI; <a href="https://arize.com/blog/llm-benchmarks-mmlu-codexglue-gsm8k" class="uri">https://arize.com/blog/llm-benchmarks-mmlu-codexglue-gsm8k</a>, 2025.
+</div>
+<div id="ref-samuylova2025llmjudge" class="csl-entry" role="listitem">
+SAMUYLOVA, E. <strong><span>LLM‑as‑a‑Judge</span>: <span>A C</span>omplete Guide to Using <span>LLMs</span> for Evaluations</strong>. <a href="https://www.evidentlyai.com/llm-guide/llm-as-a-judge" class="uri">https://www.evidentlyai.com/llm-guide/llm-as-a-judge</a>, 2025.
+</div>
+<div id="ref-neptune2024" class="csl-entry" role="listitem">
+SÁNCHEZ, L. C. <strong>Ethical Considerations and Best Practices in LLM Development</strong>. <a href="https://neptune.ai/blog/llm-ethical-considerations" class="uri">https://neptune.ai/blog/llm-ethical-considerations</a>, 2024.
+</div>
+<div id="ref-sawczyn2025" class="csl-entry" role="listitem">
+SAWCZYN, A. et al. <a href="https://arxiv.org/abs/2503.17229"><span>FactSelfCheck</span>: <span>Fact-Level</span> Black-Box Hallucination Detection for <span>LLM</span>s</a>. <strong>arXiv</strong>, 2025.
+</div>
+<div id="ref-schnabel-etal-2015-evaluation" class="csl-entry" role="listitem">
+SCHNABEL, T. et al. <strong>Evaluation methods for unsupervised word embeddings</strong>. (L. Màrquez, C. Callison-Burch, J. Su, Eds.)Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing. <strong>Anais</strong>...Lisbon, Portugal: Association for Computational Linguistics, set. 2015. Disponível em: &lt;<a href="https://aclanthology.org/D15-1036/">https://aclanthology.org/D15-1036/</a>&gt;
+</div>
+<div id="ref-alligment" class="csl-entry" role="listitem">
+SHAQIRI, M. et al. Differences between the correlation coefficients <span>P</span>earson, <span>K</span>endall and <span>S</span>pearman. <strong>5th International Conference of Natural Science and Mathematics</strong>, nov. 2023.
+</div>
+<div id="ref-thakur2024" class="csl-entry" role="listitem">
+THAKUR, A. S. et al. <a href="https://arxiv.org/abs/2406.12624v5">JUDGING THE JUDGES: EVALUATING ALIGNMENT AND VULNERABILITIES IN <span>LLMs</span>-AS-JUDGES</a>. <strong>arXiv preprint arXiv:2406.12624v5</strong>, 2025.
+</div>
+<div id="ref-trautmann2024groundedness" class="csl-entry" role="listitem">
+TRAUTMANN, D. et al. <strong>Measuring the Groundedness of Legal Question-Answering Systems</strong>. Proceedings of the Natural Legal Language Processing Workshop 2024. <strong>Anais</strong>...Singapore: Association for Computational Linguistics, 2024. Disponível em: &lt;<a href="https://aclanthology.org/2024.nllp-1.14">https://aclanthology.org/2024.nllp-1.14</a>&gt;
+</div>
+<div id="ref-confident2025" class="csl-entry" role="listitem">
+VONGTHONGSRI, K. <strong><span>G-Eval</span> Simply Explained: <span>LLM</span>-as-a-<span>J</span>udge for <span>LLM E</span>valuation</strong>. Confident AI; <a href="https://www.confident-ai.com/blog/g-eval-the-definitive-guide" class="uri">https://www.confident-ai.com/blog/g-eval-the-definitive-guide</a>, 2025.
+</div>
+<div id="ref-wang-etal-2018-glue" class="csl-entry" role="listitem">
+WANG, A. et al. <strong><span>GLUE</span>: A Multi-Task Benchmark and Analysis Platform for Natural Language Understanding</strong>. Proceedings of the 2018 <span>EMNLP</span> Workshop <span>B</span>lackbox<span>NLP</span>: Analyzing and Interpreting Neural Networks for <span>NLP</span>. <strong>Anais</strong>...Brussels, Belgium: Association for Computational Linguistics, nov. 2018. Disponível em: &lt;<a href="https://aclanthology.org/W18-5446/">https://aclanthology.org/W18-5446/</a>&gt;
+</div>
+<div id="ref-wang2019" class="csl-entry" role="listitem">
+WANG, A. et al. SuperGLUE: a stickier benchmark for general-purpose language understanding systems. Em: <strong>Proceedings of the 33rd International Conference on Neural Information Processing Systems</strong>. Red Hook, NY, USA: Curran Associates Inc., 2019.
+</div>
+<div id="ref-wangLAAJ25" class="csl-entry" role="listitem">
+WANG, R. et al. <a href="https://doi.org/10.1145/3728963">Can <span>LLM</span>s Replace Human Evaluators? An Empirical Study of <span>LLM-as-a-Judge</span> in Software Engineering</a>. <strong>Proc. ACM Softw. Eng.</strong>, v. 2, n. ISSTA, jun. 2025.
+</div>
+<div id="ref-Wang24" class="csl-entry" role="listitem">
+WANG, Y. et al. <strong>PandaLM: An Automatic Evaluation Benchmark for <span>LLM</span> Instruction Tuning Optimization</strong>. The Twelfth International Conference on Learning Representations, <span>ICLR</span> 2024, Vienna, Austria, May 7-11, 2024. <strong>Anais</strong>...OpenReview.net, 2024. Disponível em: &lt;<a href="https://openreview.net/forum?id=5Nn2BLV7SB">https://openreview.net/forum?id=5Nn2BLV7SB</a>&gt;
+</div>
+<div id="ref-xiong-etal-2025-com2" class="csl-entry" role="listitem">
+XIONG, K. et al. <strong>Com<span class="math inline">\(^2\)</span> : A Causal-Guided Benchmark for Exploring Complex Commonsense Reasoning in <span>Large Language Models</span></strong>. (W. Che et al., Eds.)Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). <strong>Anais</strong>...Vienna, Austria: Association for Computational Linguistics, jul. 2025. Disponível em: &lt;<a href="https://aclanthology.org/2025.acl-long.785/">https://aclanthology.org/2025.acl-long.785/</a>&gt;
+</div>
+<div id="ref-xu2023" class="csl-entry" role="listitem">
+XU, H.; ASHLEY, K. <strong>A question-answering approach to evaluating legal summaries</strong>., 2023. Disponível em: &lt;<a href="https://arxiv.org/abs/2309.15016">https://arxiv.org/abs/2309.15016</a>&gt;
+</div>
+<div id="ref-yeh2021comprehensiveassessmentdialogevaluation" class="csl-entry" role="listitem">
+YEH, Y.-T.; ESKÉNAZI, M.; MEHRI, S. <a href="https://api.semanticscholar.org/CorpusID:235358130">A Comprehensive Assessment of Dialog Evaluation Metrics</a>. <strong>ArXiv</strong>, v. abs/2106.03706, 2021.
+</div>
+<div id="ref-zhang-etal-2025-citalaw" class="csl-entry" role="listitem">
+ZHANG, K. et al. <strong><span>C</span>ita<span>L</span>aw: Enhancing <span>LLM</span> with Citations in Legal Domain</strong>. (W. Che et al., Eds.)Findings of the Association for Computational Linguistics: ACL 2025. <strong>Anais</strong>...Vienna, Austria: Association for Computational Linguistics, jul. a2025. Disponível em: &lt;<a href="https://aclanthology.org/2025.findings-acl.583/">https://aclanthology.org/2025.findings-acl.583/</a>&gt;
+</div>
+<div id="ref-zhang2025instructiontuninglargelanguage" class="csl-entry" role="listitem">
+ZHANG, S. et al. <strong>Instruction Tuning for Large Language Models: A Survey</strong>., b2025. Disponível em: &lt;<a href="https://arxiv.org/abs/2308.10792">https://arxiv.org/abs/2308.10792</a>&gt;
+</div>
+<div id="ref-zhao2025tokenfoolllmasajudge" class="csl-entry" role="listitem">
+ZHAO, Y. et al. <strong>One Token to Fool <span>LLM</span>-as-a-Judge</strong>., 2025. Disponível em: &lt;<a href="https://arxiv.org/abs/2507.08794">https://arxiv.org/abs/2507.08794</a>&gt;
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p><a href="https://the-decoder.com/people-buy-brand-new-chevrolets-for-1-from-a-chatgpt-chatbot/" class="uri">https://the-decoder.com/people-buy-brand-new-chevrolets-for-1-from-a-chatgpt-chatbot/</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://www.npr.org/2023/12/30/1222273745/michael-cohen-ai-fake-legal-cases" class="uri">https://www.npr.org/2023/12/30/1222273745/michael-cohen-ai-fake-legal-cases</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p><em>Instruction tuning</em> é o processo de re-treinar um modelo de linguagem já pré-treinado usando pares (instrução, resposta) para alinhar o modelo a seguir instruções (instruction following)&nbsp;<span class="citation" data-cites="zhang2025instructiontuninglargelanguage">(<a href="../../shared/referencias/referencias.html#ref-zhang2025instructiontuninglargelanguage" role="doc-biblioref">Zhang et al., 2025b</a>)</span>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>A <span>Seção <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/avaliacao/cap-avaliacao/cap-avaliacao.html#sec-cap-avaliacao-paradigmas" target="_blank" title="Volume 1">Paradigmas: Tipos de avaliação</a></span> deste livro traz outras formas de categorizar possíveis avaliações de sistemas de PLN. Veja as Seções <span> <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/dados/cap-dataset-corpus/cap-dataset-corpus.html#sec-cap-dataset-corpus-intrinseca" target="_blank" title="Volume 1">Avaliação intrínseca</a></span> e <span> <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol1/dados/cap-dataset-corpus/cap-dataset-corpus.html#sec-cap-dataset-corpus-extrinseca" target="_blank" title="Volume 1">Avaliação extrínseca</a></span> para entender a aplicação de avaliação intrínseca e extrínseca a <em>datasets</em> específicos.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Uma tarefa <em>downstream</em> é uma tarefa ‘mais para o fim do fluxo’. Considere que um LLM é treinado para prever a próxima palavra (essa seria a <em>upstream task</em>, no início do fluxo). Os usos reais, análise de sentimento, classificação textual, agente conversacional, são as <em>downstream tasks</em>, as tarefas reais nas quais aquele modelo será empregado&nbsp;<span class="citation" data-cites="schnabel-etal-2015-evaluation">(<a href="../../shared/referencias/referencias.html#ref-schnabel-etal-2015-evaluation" role="doc-biblioref">Schnabel et al., 2015</a>)</span>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p><a href="https://huggingface.co/datasets/abisee/cnn_dailymail" class="uri">https://huggingface.co/datasets/abisee/cnn_dailymail</a><a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Usamos o termo raciocínio de forma operacional, em linha com a literatura recente sobre LLMs. Não se deve entender que tais modelos realizem processos cognitivos análogos ao raciocínio humano, o termo aqui refere-se à capacidade de manipular representações linguísticas e numéricas por meio de correlações estatísticas complexas aprendidas durante o treinamento dos LLMs.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Atualmente, também têm sido propostos <em>frameworks</em> dinâmicos para a análise de agentes baseados em LLMs, como o clembench&nbsp;<span class="citation" data-cites="chalamalasetti-etal-2023-clembench">(<a href="../../shared/referencias/referencias.html#ref-chalamalasetti-etal-2023-clembench" role="doc-biblioref">Chalamalasetti et al., 2023</a>)</span>, cujo diferencial é ser uma avaliação interativa diretamente motivada pela Teoria do Diálogo, para avaliar como fenômenos do diálogo humano são ou não reproduzidos pelos LLMs.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p><a href="https://github.com/confident-ai/deepeval" class="uri">https://github.com/confident-ai/deepeval</a><a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p><a href="https://www.confident-ai.com/" class="uri">https://www.confident-ai.com/</a><a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../modelos/cap-modelos-pratica/cap-modelos-pratica.html" class="pagination-link" aria-label="Treinamento de Grandes Modelos de Linguagem na prática">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Treinamento de Grandes Modelos de Linguagem na prática</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../modelos/cap-rag/cap-rag.html" class="pagination-link" aria-label="Geração Aumentada por Recuperação (RAG)">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Geração Aumentada por Recuperação (RAG)</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="https://brasileiraspln.com/">
+<p>Brasileiras em PLN, 2026. Todos os direitos reservados</p>
+</a>
+  </li>  
+</ul>
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
