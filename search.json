@@ -14,7 +14,7 @@
     "href": "index.html#como-citar",
     "title": "Processamento de Linguagem Natural",
     "section": "Como citar",
-    "text": "Como citar\nCaseli, H.M.; Nunes, M.G.V. (org.) Processamento de Linguagem Natural: Conceitos, Técnicas e Aplicações em Português. 4 ed. BPLN, 2026. v. 2. Disponível em: https://brasileiraspln.com/livro-pln/4a-edicao/volume1.\n\n\n\n\n\n\nNota 1: Bibref\n\n\n\n\n\n@Book{BPLN_livro_4ed_vol2:2026,\n   title     = {Processamento de Linguagem Natural: Conceitos,\n                Técnicas e Aplicações em Português},\n   editor    = {Caseli, H. M. and Nunes, M. G. V.},\n   year      = {2026},\n   publisher = {BPLN},   \n   edition   = {4},\n   volume    = {2},\n   isbn      = {XXX-XX-XX-XXXXX-X},\n   url       = {https://brasileiraspln.com/livro-pln/4a-edicao/volume1/}\n}",
+    "text": "Como citar\nCaseli, H.M.; Nunes, M.G.V. (org.) Processamento de Linguagem Natural: Conceitos, Técnicas e Aplicações em Português. 4 ed. BPLN, 2026. v. 2. Disponível em: https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2.\n\n\n\n\n\n\nNota 1: Bibref\n\n\n\n\n\n@Book{BPLN_livro_4ed_vol2:2026,\n   title     = {Processamento de Linguagem Natural: Conceitos,\n                Técnicas e Aplicações em Português},\n   editor    = {Caseli, H. M. and Nunes, M. G. V.},\n   year      = {2026},\n   publisher = {BPLN},   \n   edition   = {4},\n   volume    = {2},\n   isbn      = {XXX-XX-XX-XXXXX-X},\n   url       = {https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2}\n}",
     "crumbs": [
       "Sobre o Volume 2"
     ]

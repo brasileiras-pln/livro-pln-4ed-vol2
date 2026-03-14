@@ -392,7 +392,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout callout-style-default callout-note no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" aria-expanded="false" aria-controls="callout-cite" data-bs-toggle="collapse" data-bs-target=".callout-cite-contents" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" aria-label="Toggle callout" data-bs-target=".callout-cite-contents" aria-expanded="false" aria-controls="callout-cite">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -571,7 +571,7 @@ Figura&nbsp;5.2: Arquitetura Recuperador-Gerador em Sistemas RAG.
 </ul>
 <p>Na prática e na literatura, a abordagem mais usual é fazer a média dos vetores dos <em>tokens</em> (<em>Average pooling</em>).</p>
 <p>Uma vez que todos os <em>chunks</em> foram convertidos em <em>embeddings</em>, eles precisam ser armazenados em um local que permita uma busca rápida e eficiente. Em casos de <em>embeddings</em> semânticos, é usual utilizar, por exemplo, bancos de dados vetoriais, projetados para busca rápida e eficiente em bases com milhões de vetores.</p>
-<p>Você pode se aprofundar sobre <em>embeddings</em> no <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-linguagem/cap-modelos-linguagem.html#sec-cap-modelos-linguagem" target="_blank" title="Volume 2">Modelos de linguagem</a></span> deste livro.</p>
+<p>Você pode se aprofundar sobre <em>embeddings</em> no <span>Capítulo <a href="https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2/modelos/cap-modelos-linguagem/cap-modelos-linguagem.html#sec-cap-modelos-linguagem" target="_blank" title="Volume 2">Modelos de linguagem</a></span> deste livro.</p>
 </section>
 <section id="mecanismo-de-recuperação" class="level4" data-number="5.1.3.4">
 <h4 data-number="5.1.3.4" class="anchored" data-anchor-id="mecanismo-de-recuperação"><span class="header-section-number">5.1.3.4</span> Mecanismo de recuperação</h4>
@@ -581,7 +581,7 @@ Figura&nbsp;5.2: Arquitetura Recuperador-Gerador em Sistemas RAG.
 <li><p>Recuperadores Densos (<em>Dense Retrievers</em>): Estes são os recuperadores baseados nos <em>embeddings</em> semânticos discutidos anteriormente. Eles utilizam vetores densos (onde a maioria dos valores é não-zero) que, através da ocorrência em contextos similares, capturam significado conceitual dos termos que compõe o texto. Sua principal vantagem é a capacidade de encontrar documentos relevantes mesmo que não compartilhem nenhuma palavra-chave com a consulta, contanto que o significado seja semelhante. São robustos a sinônimos, paráfrases e variações de vocabulário.</p></li>
 <li><p>Busca Híbrida (<em>Hybrid Search</em>): A abordagem de estado da arte reconhece que os recuperadores esparsos e densos têm forças complementares. A busca híbrida executa ambos os tipos de busca em paralelo e, em seguida, combina os resultados. Essa combinação aproveita a precisão lexical da busca por palavras-chave e a robustez conceitual da busca semântica. Para mesclar as duas listas de resultados, que possuem pontuações em escalas diferentes, algoritmos de fusão de <em>ranking</em>, como o <em>Reciprocal Rank Fusion</em> (RRF)&nbsp;<span class="citation" data-cites="cormack2009reciprocal">(<a href="../../shared/referencias/referencias.html#ref-cormack2009reciprocal" role="doc-biblioref">Cormack et al., 2009</a>)</span>, são frequentemente utilizados para produzir uma única lista de resultados classificada de forma mais relevante.</p></li>
 </ul>
-<p>O <span>Capítulo <a href="https://https://brasileiraspln.ufscar.br/livro-pln-4ed-vol3/aplicacoes-e-dominios/cap-ir/cap-ir.html#sec-cap-ir" target="_blank" title="Volume 3">Recuperação de Informação</a></span> deste livro trata com atenção mecanismos de Recuperação de Informação.</p>
+<p>O <span>Capítulo <a href="https://brasileiraspln.ufscar.br/livro-pln-4ed-vol3/aplicacoes-e-dominios/cap-ir/cap-ir.html#sec-cap-ir" target="_blank" title="Volume 3">Recuperação de Informação</a></span> deste livro trata com atenção mecanismos de Recuperação de Informação.</p>
 </section>
 </section>
 <section id="sec-cap-rag-generator" class="level3" data-number="5.1.4">
