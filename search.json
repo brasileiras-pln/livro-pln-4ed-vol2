@@ -4,9 +4,19 @@
     "href": "index.html",
     "title": "Processamento de Linguagem Natural",
     "section": "",
+    "text": "Volume 2: Modelos de Linguagem",
+    "crumbs": [
+      "Volume 2: Modelos de Linguagem"
+    ]
+  },
+  {
+    "objectID": "index.html#sobre-o-volume-2",
+    "href": "index.html#sobre-o-volume-2",
+    "title": "Processamento de Linguagem Natural",
+    "section": "Sobre o Volume 2",
     "text": "Sobre o Volume 2\nDada a relevância atual do emprego de técnicas de aprendizado de máquina com redes neurais profundas, Transformers e Grandes Modelos de Linguagem (LLM) na área de Inteligência Artificial e, em particular, em PLN, reservamos este volume aos capítulos que tratam desses temas.\nNo Capítulo Modelos de linguagem são discutidas as redes neurais profundas e os Transformers, as técnicas de fine-tuning e prompt engineering. Essa leitura é essencial para o leitor ficar atualizado sobre o que tem sido usado para a criação das principais aplicações de PLN, assim como de toda inteligência artificial.\nOs Capítulos  O papel dos dados no pré-treinamento de Grandes Modelos de Linguagem e  Treinamento de Grandes Modelos de Linguagem na prática discorrem sobre o papel dos dados no pré-treinamento de modelos e sobre as principais técnicas de treinamento de grandes modelos de linguagem, respectivamente.\nO importante tema de avaliação dos LLMs é tratado no Capítulo Avaliação de Grandes Modelos de Linguagem, que introduz seus fundamentos, métricas, benchmarks e considerações de ordem ética.\nO desafio para mitigar o efeito de alucinação dos LLMs é discutido no Capítulo Geração Aumentada por Recuperação (RAG), onde é apresentada a técnica de geração aumentada de recuperação (Retrieval-Augmented Generation, RAG), que suporta acesso a fontes de dados externas para gerar respostas factuais e relevantes, reduzindo alucinações dos modelos.\nO Capítulo Responsabilidade no desenvolvimento e uso de tecnologias de linguagem baseadas em IA apresenta um amplo panorama das discussões envolvendo aspectos importantes do desenvolvimento responsável de tecnologias de linguagem baseadas em inteligência artificial.\nFinalmente, no Capítulo ChatGPT, MariTalk e outros agentes de conversação, o leitor terá oportunidade de conhecer o caminho percorrido pelo PLN até chegar aos agentes atuais, como ChatGPT e MariTalk, que são analisados em profundidade.",
     "crumbs": [
-      "Sobre o Volume 2"
+      "Volume 2: Modelos de Linguagem"
     ]
   },
   {
@@ -16,7 +26,7 @@
     "section": "Como citar",
     "text": "Como citar\nCaseli, H.M.; Nunes, M.G.V. (org.) Processamento de Linguagem Natural: Conceitos, Técnicas e Aplicações em Português. 4 ed. BPLN, 2026. v. 2. ISBN 978-65-02-00158-5. Disponível em: https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2.\n\n\n\n\n\n\nNota 1: Bibref\n\n\n\n\n\n@Book{BPLN_livro_4ed_vol2:2026,\n   title     = {Processamento de Linguagem Natural: Conceitos,\n                Técnicas e Aplicações em Português},\n   editor    = {Caseli, H. M. and Nunes, M. G. V.},\n   year      = {2026},\n   publisher = {BPLN},   \n   edition   = {4},\n   volume    = {2},\n   isbn      = {978-65-02-00158-5},\n   url       = {https://brasileiraspln.ufscar.br/livro-pln-4ed-vol2}\n}",
     "crumbs": [
-      "Sobre o Volume 2"
+      "Volume 2: Modelos de Linguagem"
     ]
   },
   {
